@@ -57,6 +57,7 @@ jobs:
               echo "$NEW_HASH" > .deploy-lock-hash
             fi
             pnpm --filter @microcity/web build
-            pm2 startOrRestart ecosystem.config.cjs --update-env && pm2 save
-            for i in 1 2 3 4 5; do sleep 3; S=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.DEPLOY_APP_PORT }}/api/health); echo "attempt $i: HTTP $S"; [ "$S" = "200" ] && break; done
+            # PM2 的输出会列出主机上的所有进程，公开仓库的运行日志里不要它
+            pm2 startOrRestart ecosystem.config.cjs --update-env >/dev/null && pm2 save >/dev/null
+            for i in 1 2 3 4 5; do sleep 3; S=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.DEPLOY_APP_PORT }}/api/health || true); echo "attempt $i: HTTP $S"; [ "$S" = "200" ] && break; done
             [ "$S" = "200" ] || { tail -30 logs/error.log 2>/dev/null || true; exit 1; }
