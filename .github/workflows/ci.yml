@@ -1,0 +1,22 @@
+# 每个 PR 与 main 上的推送：类型检查、lint、单元与接口测试（离线，不调用任何模型）
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+        env:
+          MICROCITY_OFFLINE: '1'

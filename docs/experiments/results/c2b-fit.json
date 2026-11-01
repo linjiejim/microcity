@@ -1,0 +1,358 @@
+{
+ "free": [
+  {
+   "path": "semantics.verifyBase",
+   "v1": 0.3,
+   "fitted": 0.123
+  },
+  {
+   "path": "semantics.moveBase",
+   "v1": 0.3,
+   "fitted": 0.01
+  },
+  {
+   "path": "semantics.adaptBase",
+   "v1": 0.35,
+   "fitted": 3
+  },
+  {
+   "path": "semantics.serviceBase",
+   "v1": 0.3,
+   "fitted": 0.392
+  },
+  {
+   "path": "semantics.prepareBase",
+   "v1": 0.2,
+   "fitted": 1.823
+  },
+  {
+   "path": "semantics.restoreBase",
+   "v1": 0.4,
+   "fitted": 0.01
+  },
+  {
+   "path": "semantics.concernBase",
+   "v1": 0.15,
+   "fitted": 0.091
+  },
+  {
+   "path": "semantics.concernAnx",
+   "v1": 0.45,
+   "fitted": 0.468
+  },
+  {
+   "path": "semantics.verifyVague",
+   "v1": 0.55,
+   "fitted": 0.706
+  },
+  {
+   "path": "semantics.verifyPrecise",
+   "v1": 0.1,
+   "fitted": 0.656
+  },
+  {
+   "path": "semantics.msgBase",
+   "v1": 0.2,
+   "fitted": 0.001
+  }
+ ],
+ "train": {
+  "n": 1234,
+  "before": {
+   "total": 0.434,
+   "kl": 0.391,
+   "msg": 0.044,
+   "top": 0.624
+  },
+  "after": {
+   "total": 0.158,
+   "kl": 0.146,
+   "msg": 0.012,
+   "top": 0.831
+  }
+ },
+ "test": {
+  "n": 1288,
+  "before": {
+   "total": 0.458,
+   "kl": 0.418,
+   "msg": 0.041,
+   "top": 0.62
+  },
+  "after": {
+   "total": 0.176,
+   "kl": 0.166,
+   "msg": 0.011,
+   "top": 0.819
+  }
+ },
+ "massByKind": {
+  "keep": {
+   "v1": 0.257,
+   "fitted": 0.217,
+   "jev": 0.223,
+   "n": 1115
+  },
+  "verify": {
+   "v1": 0.715,
+   "fitted": 0.882,
+   "jev": 0.872,
+   "n": 499
+  },
+  "move": {
+   "v1": 0.367,
+   "fitted": 0.18,
+   "jev": 0.139,
+   "n": 575
+  },
+  "adapt": {
+   "v1": 0.111,
+   "fitted": 0.28,
+   "jev": 0.273,
+   "n": 789
+  },
+  "prepare": {
+   "v1": 0.002,
+   "fitted": 0.005,
+   "jev": 0.013,
+   "n": 930
+  },
+  "service": {
+   "v1": 0.295,
+   "fitted": 0.245,
+   "jev": 0.267,
+   "n": 169
+  },
+  "restore": {
+   "v1": 0.568,
+   "fitted": 0.292,
+   "jev": 0.368,
+   "n": 213
+  }
+ },
+ "patch": {
+  "semantics": {
+   "verifyBase": 0.123,
+   "moveBase": 0.01,
+   "adaptBase": 3,
+   "serviceBase": 0.392,
+   "prepareBase": 1.823,
+   "restoreBase": 0.01,
+   "concernBase": 0.091,
+   "concernAnx": 0.468,
+   "verifyVague": 0.706,
+   "verifyPrecise": 0.656,
+   "msgBase": 0.001
+  }
+ },
+ "validate": {
+  "seeds": [
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48,
+   49,
+   50,
+   51
+  ],
+  "table": {
+   "A": {
+    "t50": {
+     "jev": 83820,
+     "v1": 82710,
+     "fitted": 83370,
+     "closer": 0.5
+    },
+    "intended": {
+     "jev": 10,
+     "v1": 9.5,
+     "fitted": 12.5,
+     "closer": 0.4
+    },
+    "surprisedPeople": {
+     "jev": 3,
+     "v1": 3.5,
+     "fitted": 3.5,
+     "closer": 0.8
+    },
+    "overreactMin": {
+     "jev": 369,
+     "v1": 521.5,
+     "fitted": 365,
+     "closer": 0.4
+    },
+    "verified": {
+     "jev": 16.5,
+     "v1": 13.5,
+     "fitted": 15,
+     "closer": 0.5
+    },
+    "exact": {
+     "jev": 14.5,
+     "v1": 13.5,
+     "fitted": 13.5,
+     "closer": 0.8
+    }
+   },
+   "B": {
+    "t50": {
+     "jev": 27484,
+     "v1": 16438,
+     "fitted": 14896,
+     "closer": 0.5
+    },
+    "intended": {
+     "jev": 12,
+     "v1": 11,
+     "fitted": 13,
+     "closer": 0.5
+    },
+    "surprisedPeople": {
+     "jev": 1,
+     "v1": 2,
+     "fitted": 1,
+     "closer": 0.5
+    },
+    "overreactMin": {
+     "jev": 481.5,
+     "v1": 603,
+     "fitted": 548,
+     "closer": 0.6
+    },
+    "verified": {
+     "jev": 17,
+     "v1": 13.5,
+     "fitted": 18,
+     "closer": 0.8
+    },
+    "exact": {
+     "jev": 15,
+     "v1": 16,
+     "fitted": 15,
+     "closer": 0.5
+    }
+   },
+   "C": {
+    "t50": {
+     "jev": 35970,
+     "v1": 17400,
+     "fitted": 14626,
+     "closer": 0.4
+    },
+    "intended": {
+     "jev": 13,
+     "v1": 11,
+     "fitted": 11,
+     "closer": 0.3
+    },
+    "surprisedPeople": {
+     "jev": 1,
+     "v1": 1.5,
+     "fitted": 2,
+     "closer": 0.3
+    },
+    "overreactMin": {
+     "jev": 383,
+     "v1": 629.5,
+     "fitted": 482.5,
+     "closer": 0.6
+    },
+    "verified": {
+     "jev": 15.5,
+     "v1": 12.5,
+     "fitted": 14,
+     "closer": 0.6
+    },
+    "exact": {
+     "jev": 15.5,
+     "v1": 15.5,
+     "fitted": 16,
+     "closer": 0.4
+    }
+   },
+   "D": {
+    "t50": {
+     "jev": 28500,
+     "v1": 17400,
+     "fitted": 14626,
+     "closer": 0.6
+    },
+    "intended": {
+     "jev": 13.5,
+     "v1": 11,
+     "fitted": 12,
+     "closer": 0.5
+    },
+    "surprisedPeople": {
+     "jev": 1.5,
+     "v1": 1,
+     "fitted": 1,
+     "closer": 0.1
+    },
+    "overreactMin": {
+     "jev": 321,
+     "v1": 417,
+     "fitted": 711.5,
+     "closer": 0.6
+    },
+    "verified": {
+     "jev": 15.5,
+     "v1": 12.5,
+     "fitted": 15.5,
+     "closer": 0.9
+    },
+    "exact": {
+     "jev": 17.5,
+     "v1": 17.5,
+     "fitted": 18,
+     "closer": 0.4
+    }
+   },
+   "E": {
+    "t50": {
+     "jev": 17700,
+     "v1": 13778,
+     "fitted": 25950,
+     "closer": 0.5
+    },
+    "intended": {
+     "jev": 12,
+     "v1": 11,
+     "fitted": 11.5,
+     "closer": 0.5
+    },
+    "surprisedPeople": {
+     "jev": 1,
+     "v1": 2,
+     "fitted": 2,
+     "closer": 0.4
+    },
+    "overreactMin": {
+     "jev": 375,
+     "v1": 649.5,
+     "fitted": 298,
+     "closer": 0.5
+    },
+    "verified": {
+     "jev": 15,
+     "v1": 11,
+     "fitted": 14,
+     "closer": 0.7
+    },
+    "exact": {
+     "jev": 17.5,
+     "v1": 15,
+     "fitted": 16,
+     "closer": 0.4
+    }
+   }
+  },
+  "meanRelGap": {
+   "v1": 0.292,
+   "fitted": 0.25
+  }
+ }
+}

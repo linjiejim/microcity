@@ -1,0 +1,408 @@
+{
+ "experiments": {
+  "jev": "exp_5b1cbcc4",
+  "rule": "exp_a2fb2013"
+ },
+ "seeds": [
+  42,
+  43,
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51
+ ],
+ "outcomes": {
+  "A": {
+   "E1.t50": {
+    "jev": 83820,
+    "rule": 82710,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.aware": {
+    "jev": 27.5,
+    "rule": 28,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.exact": {
+    "jev": 14.5,
+    "rule": 13.5,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.allDayEver": {
+    "jev": 0,
+    "rule": 0,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.intended": {
+    "jev": 10,
+    "rule": 9.5,
+    "jevLower": 3,
+    "n": 10
+   },
+   "E1.surprisedPeople": {
+    "jev": 3,
+    "rule": 3.5,
+    "jevLower": 6,
+    "n": 10
+   },
+   "E1.overreactMin": {
+    "jev": 369,
+    "rule": 521.5,
+    "jevLower": 7,
+    "n": 10
+   },
+   "E1.verified": {
+    "jev": 16.5,
+    "rule": 13.5,
+    "jevLower": 2,
+    "n": 10
+   },
+   "trust.govDelta": {
+    "jev": -0.002,
+    "rule": -0.006,
+    "jevLower": 4,
+    "n": 10
+   }
+  },
+  "B": {
+   "E1.t50": {
+    "jev": 27484,
+    "rule": 16438,
+    "jevLower": 3,
+    "n": 10
+   },
+   "E1.aware": {
+    "jev": 29,
+    "rule": 28.5,
+    "jevLower": 3,
+    "n": 10
+   },
+   "E1.exact": {
+    "jev": 15,
+    "rule": 16,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.allDayEver": {
+    "jev": 0,
+    "rule": 0,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.intended": {
+    "jev": 12,
+    "rule": 11,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.surprisedPeople": {
+    "jev": 1,
+    "rule": 2,
+    "jevLower": 6,
+    "n": 10
+   },
+   "E1.overreactMin": {
+    "jev": 481.5,
+    "rule": 603,
+    "jevLower": 6,
+    "n": 10
+   },
+   "E1.verified": {
+    "jev": 17,
+    "rule": 13.5,
+    "jevLower": 2,
+    "n": 10
+   },
+   "trust.govDelta": {
+    "jev": 0.01,
+    "rule": 0.008,
+    "jevLower": 3,
+    "n": 10
+   }
+  },
+  "C": {
+   "E1.t50": {
+    "jev": 35970,
+    "rule": 17400,
+    "jevLower": 3,
+    "n": 10
+   },
+   "E1.aware": {
+    "jev": 29.5,
+    "rule": 29,
+    "jevLower": 1,
+    "n": 10
+   },
+   "E1.exact": {
+    "jev": 15.5,
+    "rule": 15.5,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.allDayEver": {
+    "jev": 0,
+    "rule": 0,
+    "jevLower": 1,
+    "n": 10
+   },
+   "E1.intended": {
+    "jev": 13,
+    "rule": 11,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.surprisedPeople": {
+    "jev": 1,
+    "rule": 1.5,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.overreactMin": {
+    "jev": 383,
+    "rule": 629.5,
+    "jevLower": 8,
+    "n": 10
+   },
+   "E1.verified": {
+    "jev": 15.5,
+    "rule": 12.5,
+    "jevLower": 4,
+    "n": 10
+   },
+   "trust.govDelta": {
+    "jev": 0.009,
+    "rule": 0.008,
+    "jevLower": 4,
+    "n": 10
+   }
+  },
+  "D": {
+   "E1.t50": {
+    "jev": 28500,
+    "rule": 17400,
+    "jevLower": 5,
+    "n": 10
+   },
+   "E1.aware": {
+    "jev": 29.5,
+    "rule": 29,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.exact": {
+    "jev": 17.5,
+    "rule": 17.5,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.allDayEver": {
+    "jev": 0,
+    "rule": 0,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.intended": {
+    "jev": 13.5,
+    "rule": 11,
+    "jevLower": 1,
+    "n": 10
+   },
+   "E1.surprisedPeople": {
+    "jev": 1.5,
+    "rule": 1,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.overreactMin": {
+    "jev": 321,
+    "rule": 417,
+    "jevLower": 4,
+    "n": 10
+   },
+   "E1.verified": {
+    "jev": 15.5,
+    "rule": 12.5,
+    "jevLower": 1,
+    "n": 10
+   },
+   "trust.govDelta": {
+    "jev": 0.027,
+    "rule": 0.023,
+    "jevLower": 4,
+    "n": 10
+   }
+  },
+  "E": {
+   "E1.t50": {
+    "jev": 17700,
+    "rule": 13778,
+    "jevLower": 1,
+    "n": 10
+   },
+   "E1.aware": {
+    "jev": 29.5,
+    "rule": 29,
+    "jevLower": 1,
+    "n": 10
+   },
+   "E1.exact": {
+    "jev": 17.5,
+    "rule": 15,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.allDayEver": {
+    "jev": 0,
+    "rule": 0,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.intended": {
+    "jev": 12,
+    "rule": 11,
+    "jevLower": 2,
+    "n": 10
+   },
+   "E1.surprisedPeople": {
+    "jev": 1,
+    "rule": 2,
+    "jevLower": 6,
+    "n": 10
+   },
+   "E1.overreactMin": {
+    "jev": 375,
+    "rule": 649.5,
+    "jevLower": 6,
+    "n": 10
+   },
+   "E1.verified": {
+    "jev": 15,
+    "rule": 11,
+    "jevLower": 1,
+    "n": 10
+   },
+   "trust.govDelta": {
+    "jev": 0.012,
+    "rule": 0.005,
+    "jevLower": 2,
+    "n": 10
+   }
+  }
+ },
+ "contrasts": [
+  {
+   "id": "push_speed",
+   "a": "A",
+   "b": "C",
+   "k": "E1.t50",
+   "label": "加推送更快",
+   "jev": 1,
+   "rule": 1
+  },
+  {
+   "id": "push_surprise",
+   "a": "A",
+   "b": "C",
+   "k": "E1.surprisedPeople",
+   "label": "加推送少措手不及",
+   "jev": 0.8,
+   "rule": 0.7
+  },
+  {
+   "id": "headline_over",
+   "a": "C",
+   "b": "E",
+   "k": "E1.overreactMin",
+   "label": "精确标题少过度调整",
+   "jev": 0.4,
+   "rule": 0.4
+  },
+  {
+   "id": "clarify_over",
+   "a": "C",
+   "b": "D",
+   "k": "E1.overreactMin",
+   "label": "澄清少过度调整",
+   "jev": 0.5,
+   "rule": 0.7
+  }
+ ],
+ "decision": {
+  "reactions": 2168,
+  "notifies": 354,
+  "topAgree": 0.622,
+  "meanTV": 0.293,
+  "probMassByKind": {
+   "keep": {
+    "rule": 0.268,
+    "jev": 0.224,
+    "n": 2168
+   },
+   "verify": {
+    "rule": 0.71,
+    "jev": 0.874,
+    "n": 955
+   },
+   "adapt": {
+    "rule": 0.113,
+    "jev": 0.281,
+    "n": 1503
+   },
+   "prepare": {
+    "rule": 0.002,
+    "jev": 0.012,
+    "n": 1798
+   },
+   "move": {
+    "rule": 0.355,
+    "jev": 0.142,
+    "n": 1102
+   },
+   "restore": {
+    "rule": 0.583,
+    "jev": 0.382,
+    "n": 421
+   },
+   "service": {
+    "rule": 0.29,
+    "jev": 0.257,
+    "n": 338
+   }
+  },
+  "concern": {
+   "rule": 0.494,
+   "jev": 0.329,
+   "corr": 0.687
+  },
+  "verifyNeed": {
+   "rule": 0.521,
+   "jev": 0.711,
+   "corr": 0.143
+  },
+  "fitKeep": {
+   "rule": 0.272,
+   "jev": 0.168,
+   "corr": 0.685
+  },
+  "wouldMessage": {
+   "rule": 0.739,
+   "jev": 0.586,
+   "corr": 0.2,
+   "n": 397
+  }
+ },
+ "jev": {
+  "calls": 2523,
+  "cached": 917,
+  "fallbacks": 1,
+  "cost": 0.06735
+ }
+}

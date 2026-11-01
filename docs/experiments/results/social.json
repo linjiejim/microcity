@@ -1,0 +1,3017 @@
+{
+ "S1": {
+  "name": "S1 渠道×标题",
+  "branches": {
+   "A": "少推送·模糊标题",
+   "B": "少推送·精确标题",
+   "C": "多推送·模糊标题",
+   "D": "多推送·精确标题"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 13302,
+     "E1.aware": 58,
+     "E1.exact": 25,
+     "E1.allDayEver": 1,
+     "E1.intended": 22,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1247.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    },
+    "B": {
+     "E1.t50": 13652,
+     "E1.aware": 58,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1020,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "C": {
+     "E1.t50": 240,
+     "E1.aware": 60,
+     "E1.exact": 29,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 894,
+     "E1.disbelieved": 0,
+     "E1.verified": 26
+    },
+    "D": {
+     "E1.t50": 240,
+     "E1.aware": 60,
+     "E1.exact": 38.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 877,
+     "E1.disbelieved": 0,
+     "E1.verified": 24
+    }
+   },
+   "hypotheses": {
+    "H1a": {
+     "text": "推送多的镇信得更快",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "t50 A−C",
+       "key": "E1.t50",
+       "median": 12830,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      },
+      {
+       "label": "t50 B−D",
+       "key": "E1.t50",
+       "median": 13050,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H1b": {
+     "text": "精确标题减少过度调整",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−B",
+       "key": "E1.overreactMin",
+       "median": 112.5,
+       "pos": 0.58,
+       "neg": 0.42,
+       "n": 60
+      },
+      {
+       "label": "过度 C−D",
+       "key": "E1.overreactMin",
+       "median": -22.5,
+       "pos": 0.45,
+       "neg": 0.55,
+       "n": 60
+      }
+     ]
+    },
+    "H1c": {
+     "text": "标题模糊时推送越多过度调整越多；精确时不然（差中差 > 0）",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "(C−A)−(D−B)",
+       "key": "E1.overreactMin",
+       "median": 9,
+       "pos": 0.52,
+       "neg": 0.48,
+       "n": 60
+      }
+     ]
+    },
+    "H1d": {
+     "text": "推送多的镇措手不及略少，差距 < 2 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 A−C",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.65,
+       "neg": 0.08,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 12850,
+     "E1.aware": 58,
+     "E1.exact": 26,
+     "E1.allDayEver": 1,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 920,
+     "E1.disbelieved": 0,
+     "E1.verified": 24
+    },
+    "B": {
+     "E1.t50": 13132,
+     "E1.aware": 58,
+     "E1.exact": 30,
+     "E1.allDayEver": 0.5,
+     "E1.intended": 19,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 885.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 21.5
+    },
+    "C": {
+     "E1.t50": 240,
+     "E1.aware": 60,
+     "E1.exact": 29,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 851,
+     "E1.disbelieved": 0,
+     "E1.verified": 23
+    },
+    "D": {
+     "E1.t50": 240,
+     "E1.aware": 60,
+     "E1.exact": 39,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 613,
+     "E1.disbelieved": 0,
+     "E1.verified": 19.5
+    }
+   },
+   "hypotheses": {
+    "H1a": {
+     "text": "推送多的镇信得更快",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "t50 A−C",
+       "key": "E1.t50",
+       "median": 12544,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      },
+      {
+       "label": "t50 B−D",
+       "key": "E1.t50",
+       "median": 12828,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H1b": {
+     "text": "精确标题减少过度调整",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−B",
+       "key": "E1.overreactMin",
+       "median": -34.5,
+       "pos": 0.47,
+       "neg": 0.52,
+       "n": 60
+      },
+      {
+       "label": "过度 C−D",
+       "key": "E1.overreactMin",
+       "median": 228.5,
+       "pos": 0.68,
+       "neg": 0.3,
+       "n": 60
+      }
+     ]
+    },
+    "H1c": {
+     "text": "标题模糊时推送越多过度调整越多；精确时不然（差中差 > 0）",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "(C−A)−(D−B)",
+       "key": "E1.overreactMin",
+       "median": 235,
+       "pos": 0.67,
+       "neg": 0.33,
+       "n": 60
+      }
+     ]
+    },
+    "H1d": {
+     "text": "推送多的镇措手不及略少，差距 < 2 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 A−C",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.52,
+       "neg": 0.15,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_870a4dcf",
+   "levels": {
+    "A": {
+     "E1.t50": 14132,
+     "E1.aware": 57,
+     "E1.exact": 26.5,
+     "E1.allDayEver": 1.5,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1658.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5
+    },
+    "B": {
+     "E1.t50": 13924,
+     "E1.aware": 56,
+     "E1.exact": 32,
+     "E1.allDayEver": 0,
+     "E1.intended": 23,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1168,
+     "E1.disbelieved": 0,
+     "E1.verified": 27.5
+    },
+    "C": {
+     "E1.t50": 330,
+     "E1.aware": 60,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1470.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "D": {
+     "E1.t50": 270,
+     "E1.aware": 60,
+     "E1.exact": 38.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 24,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1215.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 26
+    }
+   },
+   "hypotheses": {
+    "H1a": {
+     "text": "推送多的镇信得更快",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "t50 A−C",
+       "key": "E1.t50",
+       "median": 13530,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "t50 B−D",
+       "key": "E1.t50",
+       "median": 13680,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H1b": {
+     "text": "精确标题减少过度调整",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−B",
+       "key": "E1.overreactMin",
+       "median": 475,
+       "pos": 0.8,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "过度 C−D",
+       "key": "E1.overreactMin",
+       "median": 103.5,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10
+      }
+     ]
+    },
+    "H1c": {
+     "text": "标题模糊时推送越多过度调整越多；精确时不然（差中差 > 0）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "(C−A)−(D−B)",
+       "key": "E1.overreactMin",
+       "median": -249,
+       "pos": 0.4,
+       "neg": 0.6,
+       "n": 10
+      }
+     ]
+    },
+    "H1d": {
+     "text": "推送多的镇措手不及略少，差距 < 2 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 A−C",
+       "key": "E1.surprisedPeople",
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.2,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_3efa4a14",
+   "jev": "exp_870a4dcf"
+  }
+ },
+ "S2": {
+  "name": "S2 信任文化×渠道",
+  "branches": {
+   "A": "高信任·无推送",
+   "B": "高信任·有推送",
+   "C": "低信任·无推送",
+   "D": "低信任·有推送"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 25050,
+     "E1.aware": 57,
+     "E1.exact": 24,
+     "E1.allDayEver": 0.5,
+     "E1.intended": 23,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1398.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    },
+    "B": {
+     "E1.t50": 5818,
+     "E1.aware": 59,
+     "E1.exact": 27,
+     "E1.allDayEver": 1,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1219,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "C": {
+     "E1.t50": 36174,
+     "E1.aware": 56.5,
+     "E1.exact": 21,
+     "E1.allDayEver": 2,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1165,
+     "E1.disbelieved": 0,
+     "E1.verified": 30.5
+    },
+    "D": {
+     "E1.t50": 8680,
+     "E1.aware": 59,
+     "E1.exact": 25.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1215,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5
+    }
+   },
+   "hypotheses": {
+    "H2a": {
+     "text": "低信任的镇信得更慢、不信与查证的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "t50 C−A",
+       "key": "E1.t50",
+       "median": 3348,
+       "pos": 0.85,
+       "neg": 0.13,
+       "n": 60
+      },
+      {
+       "label": "t50 D−B",
+       "key": "E1.t50",
+       "median": 2874,
+       "pos": 0.95,
+       "neg": 0.02,
+       "n": 60
+      },
+      {
+       "label": "不信 低−高",
+       "key": "E1.disbelieved",
+       "median": 0,
+       "pos": 0.02,
+       "neg": 0,
+       "n": 60
+      },
+      {
+       "label": "查证 低−高",
+       "key": "E1.verified",
+       "median": 2,
+       "pos": 0.67,
+       "neg": 0.27,
+       "n": 60
+      }
+     ]
+    },
+    "H2b": {
+     "text": "低信任的镇信过“全天”的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "全天 低−高",
+       "key": "E1.allDayEver",
+       "median": 1,
+       "pos": 0.55,
+       "neg": 0.32,
+       "n": 60
+      }
+     ]
+    },
+    "H2c": {
+     "text": "推送的提速在低信任的镇更小（差中差 > 0）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "(A−B)−(C−D)",
+       "key": "E1.t50",
+       "median": -16,
+       "pos": 0.5,
+       "neg": 0.5,
+       "n": 60
+      }
+     ]
+    },
+    "H2d": {
+     "text": "低信任的镇措手不及的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "措手不及 低−高",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.52,
+       "neg": 0.32,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 14680,
+     "E1.aware": 57,
+     "E1.exact": 24.5,
+     "E1.allDayEver": 1,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 919.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 24.5
+    },
+    "B": {
+     "E1.t50": 5568,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 845.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 21
+    },
+    "C": {
+     "E1.t50": 35378,
+     "E1.aware": 57,
+     "E1.exact": 20,
+     "E1.allDayEver": 1,
+     "E1.intended": 19,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 810.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "D": {
+     "E1.t50": 8230,
+     "E1.aware": 59,
+     "E1.exact": 24.5,
+     "E1.allDayEver": 1,
+     "E1.intended": 18,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 841.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 25
+    }
+   },
+   "hypotheses": {
+    "H2a": {
+     "text": "低信任的镇信得更慢、不信与查证的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "t50 C−A",
+       "key": "E1.t50",
+       "median": 2804,
+       "pos": 0.85,
+       "neg": 0.13,
+       "n": 60
+      },
+      {
+       "label": "t50 D−B",
+       "key": "E1.t50",
+       "median": 2816,
+       "pos": 0.97,
+       "neg": 0.03,
+       "n": 60
+      },
+      {
+       "label": "不信 低−高",
+       "key": "E1.disbelieved",
+       "median": 0,
+       "pos": 0.03,
+       "neg": 0,
+       "n": 60
+      },
+      {
+       "label": "查证 低−高",
+       "key": "E1.verified",
+       "median": 6,
+       "pos": 0.87,
+       "neg": 0.1,
+       "n": 60
+      }
+     ]
+    },
+    "H2b": {
+     "text": "低信任的镇信过“全天”的人更多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "全天 低−高",
+       "key": "E1.allDayEver",
+       "median": 0,
+       "pos": 0.47,
+       "neg": 0.37,
+       "n": 60
+      }
+     ]
+    },
+    "H2c": {
+     "text": "推送的提速在低信任的镇更小（差中差 > 0）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "(A−B)−(C−D)",
+       "key": "E1.t50",
+       "median": 28,
+       "pos": 0.5,
+       "neg": 0.5,
+       "n": 60
+      }
+     ]
+    },
+    "H2d": {
+     "text": "低信任的镇措手不及的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "措手不及 低−高",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.55,
+       "neg": 0.25,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_d3b7e474",
+   "levels": {
+    "A": {
+     "E1.t50": 26100,
+     "E1.aware": 56.5,
+     "E1.exact": 27,
+     "E1.allDayEver": 1,
+     "E1.intended": 23.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1908,
+     "E1.disbelieved": 0,
+     "E1.verified": 32
+    },
+    "B": {
+     "E1.t50": 6924,
+     "E1.aware": 59,
+     "E1.exact": 31,
+     "E1.allDayEver": 0,
+     "E1.intended": 23,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 848,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5
+    },
+    "C": {
+     "E1.t50": 37200,
+     "E1.aware": 56.5,
+     "E1.exact": 19,
+     "E1.allDayEver": 1,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1719,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    },
+    "D": {
+     "E1.t50": 8798,
+     "E1.aware": 59,
+     "E1.exact": 28.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 20.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1146.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 25
+    }
+   },
+   "hypotheses": {
+    "H2a": {
+     "text": "低信任的镇信得更慢、不信与查证的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "t50 C−A",
+       "key": "E1.t50",
+       "median": 10560,
+       "pos": 0.8,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "t50 D−B",
+       "key": "E1.t50",
+       "median": 2128,
+       "pos": 0.9,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "不信 低−高",
+       "key": "E1.disbelieved",
+       "median": 0,
+       "pos": 0.1,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "查证 低−高",
+       "key": "E1.verified",
+       "median": -6,
+       "pos": 0,
+       "neg": 1,
+       "n": 10
+      }
+     ]
+    },
+    "H2b": {
+     "text": "低信任的镇信过“全天”的人更多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "全天 低−高",
+       "key": "E1.allDayEver",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3,
+       "n": 10
+      }
+     ]
+    },
+    "H2c": {
+     "text": "推送的提速在低信任的镇更小（差中差 > 0）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "(A−B)−(C−D)",
+       "key": "E1.t50",
+       "median": -5574,
+       "pos": 0.3,
+       "neg": 0.7,
+       "n": 10
+      }
+     ]
+    },
+    "H2d": {
+     "text": "低信任的镇措手不及的人更多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "措手不及 低−高",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_0e2c3ec6",
+   "jev": "exp_d3b7e474"
+  }
+ },
+ "S3": {
+  "name": "S3 焦虑与谣言",
+  "branches": {
+   "A": "焦虑 0.25",
+   "B": "焦虑 0.45",
+   "C": "焦虑 0.65"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 7618,
+     "E1.aware": 58.5,
+     "E1.exact": 27,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 967.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "B": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1131,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "C": {
+     "E1.t50": 7492,
+     "E1.aware": 59,
+     "E1.exact": 27,
+     "E1.allDayEver": 3.5,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1290,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    }
+   },
+   "hypotheses": {
+    "H3a": {
+     "text": "信过“全天”的人随焦虑单调上升",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "全天 B−A",
+       "key": "E1.allDayEver",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.08,
+       "n": 60
+      },
+      {
+       "label": "全天 C−B",
+       "key": "E1.allDayEver",
+       "median": 2,
+       "pos": 0.7,
+       "neg": 0.08,
+       "n": 60
+      }
+     ]
+    },
+    "H3b": {
+     "text": "过度调整随焦虑上升",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 B−A",
+       "key": "E1.overreactMin",
+       "median": 150,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 60
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 233.5,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 60
+      }
+     ]
+    },
+    "H3c": {
+     "text": "措手不及随焦虑下降（谣言是保险）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "措手不及 A−B",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.28,
+       "neg": 0.33,
+       "n": 60
+      },
+      {
+       "label": "措手不及 B−C",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.42,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 6232,
+     "E1.aware": 59,
+     "E1.exact": 27,
+     "E1.allDayEver": 0,
+     "E1.intended": 18,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 682,
+     "E1.disbelieved": 0,
+     "E1.verified": 24
+    },
+    "B": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 847,
+     "E1.disbelieved": 0,
+     "E1.verified": 23.5
+    },
+    "C": {
+     "E1.t50": 6250,
+     "E1.aware": 59,
+     "E1.exact": 27,
+     "E1.allDayEver": 3,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1001.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 23
+    }
+   },
+   "hypotheses": {
+    "H3a": {
+     "text": "信过“全天”的人随焦虑单调上升",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "全天 B−A",
+       "key": "E1.allDayEver",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.03,
+       "n": 60
+      },
+      {
+       "label": "全天 C−B",
+       "key": "E1.allDayEver",
+       "median": 2,
+       "pos": 0.83,
+       "neg": 0.07,
+       "n": 60
+      }
+     ]
+    },
+    "H3b": {
+     "text": "过度调整随焦虑上升",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 B−A",
+       "key": "E1.overreactMin",
+       "median": 104,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 60
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 123,
+       "pos": 0.63,
+       "neg": 0.37,
+       "n": 60
+      }
+     ]
+    },
+    "H3c": {
+     "text": "措手不及随焦虑下降（谣言是保险）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "措手不及 A−B",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.33,
+       "neg": 0.3,
+       "n": 60
+      },
+      {
+       "label": "措手不及 B−C",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.33,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_0ce2e319",
+   "levels": {
+    "A": {
+     "E1.t50": 7102,
+     "E1.aware": 59.5,
+     "E1.exact": 30.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0.5,
+     "E1.overreactMin": 744,
+     "E1.disbelieved": 0,
+     "E1.verified": 27.5
+    },
+    "B": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1032,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5
+    },
+    "C": {
+     "E1.t50": 6368,
+     "E1.aware": 60,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 2,
+     "E1.intended": 25,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 0.5,
+     "E1.overreactMin": 1689.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27.5
+    }
+   },
+   "hypotheses": {
+    "H3a": {
+     "text": "信过“全天”的人随焦虑单调上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "全天 B−A",
+       "key": "E1.allDayEver",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "全天 C−B",
+       "key": "E1.allDayEver",
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H3b": {
+     "text": "过度调整随焦虑上升",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "过度 B−A",
+       "key": "E1.overreactMin",
+       "median": 307.5,
+       "pos": 0.8,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 321.5,
+       "pos": 0.7,
+       "neg": 0.3,
+       "n": 10
+      }
+     ]
+    },
+    "H3c": {
+     "text": "措手不及随焦虑下降（谣言是保险）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "措手不及 A−B",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.4,
+       "n": 10
+      },
+      {
+       "label": "措手不及 B−C",
+       "key": "E1.surprisedPeople",
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.2,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_fbe05868",
+   "jev": "exp_0ce2e319"
+  }
+ },
+ "S4": {
+  "name": "S4 跨区关系",
+  "branches": {
+   "A": "跨区关系 0.05",
+   "B": "跨区关系 0.3",
+   "C": "跨区关系 0.6"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 7716,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1109,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    },
+    "B": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1131,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "C": {
+     "E1.t50": 7286,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 1,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1091,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    }
+   },
+   "hypotheses": {
+    "H4a": {
+     "text": "跨区关系越多，停电时已知情的人越多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情 B−A",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.18,
+       "n": 60
+      },
+      {
+       "label": "知情 C−B",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.27,
+       "n": 60
+      }
+     ]
+    },
+    "H4b": {
+     "text": "停电区外改了安排的人随跨区关系上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "外溢 B−A",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.1,
+       "neg": 0.18,
+       "n": 60
+      },
+      {
+       "label": "外溢 C−B",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.23,
+       "neg": 0.25,
+       "n": 60
+      }
+     ]
+    },
+    "H4c": {
+     "text": "措手不及基本不受影响（|中位差| < 1）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 C−A",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 6942,
+     "E1.aware": 59,
+     "E1.exact": 26,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 799.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 22.5
+    },
+    "B": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 847,
+     "E1.disbelieved": 0,
+     "E1.verified": 23.5
+    },
+    "C": {
+     "E1.t50": 7012,
+     "E1.aware": 59,
+     "E1.exact": 26,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 876.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 24
+    }
+   },
+   "hypotheses": {
+    "H4a": {
+     "text": "跨区关系越多，停电时已知情的人越多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情 B−A",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.32,
+       "neg": 0.17,
+       "n": 60
+      },
+      {
+       "label": "知情 C−B",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.35,
+       "n": 60
+      }
+     ]
+    },
+    "H4b": {
+     "text": "停电区外改了安排的人随跨区关系上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "外溢 B−A",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.15,
+       "neg": 0.2,
+       "n": 60
+      },
+      {
+       "label": "外溢 C−B",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.23,
+       "neg": 0.28,
+       "n": 60
+      }
+     ]
+    },
+    "H4c": {
+     "text": "措手不及基本不受影响（|中位差| < 1）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 C−A",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.37,
+       "neg": 0.35,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_6350ca13",
+   "levels": {
+    "A": {
+     "E1.t50": 7366,
+     "E1.aware": 58.5,
+     "E1.exact": 28.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 23,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 919,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    },
+    "B": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1032,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5
+    },
+    "C": {
+     "E1.t50": 7504,
+     "E1.aware": 58,
+     "E1.exact": 26.5,
+     "E1.allDayEver": 1.5,
+     "E1.intended": 23.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1008,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    }
+   },
+   "hypotheses": {
+    "H4a": {
+     "text": "跨区关系越多，停电时已知情的人越多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情 B−A",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.4,
+       "n": 10
+      },
+      {
+       "label": "知情 C−B",
+       "key": "E1.aware",
+       "median": -1,
+       "pos": 0.3,
+       "neg": 0.6,
+       "n": 10
+      }
+     ]
+    },
+    "H4b": {
+     "text": "停电区外改了安排的人随跨区关系上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "外溢 B−A",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "外溢 C−B",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.2,
+       "n": 10
+      }
+     ]
+    },
+    "H4c": {
+     "text": "措手不及基本不受影响（|中位差| < 1）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 C−A",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.3,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_375d940e",
+   "jev": "exp_6350ca13"
+  }
+ },
+ "S4b": {
+  "name": "S4b 跨区关系（只发网站）",
+  "exploratory": "S4 在三渠道发布下触顶（60 人里 59 人停电前已知情），关系网没有发挥作用的余地；改成只在网站发布，让口耳相传成为主要通路。",
+  "branches": {
+   "A": "跨区关系 0.05",
+   "B": "跨区关系 0.3",
+   "C": "跨区关系 0.6"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 83910,
+     "E1.aware": 50,
+     "E1.exact": 21,
+     "E1.allDayEver": 1,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 3,
+     "E1.overreactMin": 1199.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5
+    },
+    "B": {
+     "E1.t50": 84840,
+     "E1.aware": 50,
+     "E1.exact": 21,
+     "E1.allDayEver": 1,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 3,
+     "E1.overreactMin": 1175.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    },
+    "C": {
+     "E1.t50": 84720,
+     "E1.aware": 50.5,
+     "E1.exact": 22.5,
+     "E1.allDayEver": 1,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 3,
+     "E1.overreactMin": 1127.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    }
+   },
+   "hypotheses": {
+    "H4a": {
+     "text": "跨区关系越多，停电时已知情的人越多",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情 B−A",
+       "key": "E1.aware",
+       "median": 0,
+       "pos": 0.23,
+       "neg": 0.3,
+       "n": 60
+      },
+      {
+       "label": "知情 C−B",
+       "key": "E1.aware",
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.32,
+       "n": 60
+      }
+     ]
+    },
+    "H4b": {
+     "text": "停电区外改了安排的人随跨区关系上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "外溢 B−A",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.05,
+       "neg": 0.13,
+       "n": 60
+      },
+      {
+       "label": "外溢 C−B",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.22,
+       "neg": 0.17,
+       "n": 60
+      }
+     ]
+    },
+    "H4c": {
+     "text": "措手不及基本不受影响（|中位差| < 1）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 C−A",
+       "key": "E1.surprisedPeople",
+       "median": 0,
+       "pos": 0.42,
+       "neg": 0.42,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": null,
+  "jev": {
+   "n": 10,
+   "experiment": "exp_75e77313",
+   "levels": {
+    "A": {
+     "E1.t50": 81158,
+     "E1.aware": 50.5,
+     "E1.exact": 25,
+     "E1.allDayEver": 0.5,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1243.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    },
+    "B": {
+     "E1.t50": 82320,
+     "E1.aware": 52.5,
+     "E1.exact": 25,
+     "E1.allDayEver": 1.5,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 2,
+     "E1.overreactMin": 1423,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    },
+    "C": {
+     "E1.t50": 84690,
+     "E1.aware": 51,
+     "E1.exact": 22.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 3,
+     "E1.overreactMin": 1491,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    }
+   },
+   "hypotheses": {
+    "H4a": {
+     "text": "跨区关系越多，停电时已知情的人越多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "知情 B−A",
+       "key": "E1.aware",
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "知情 C−B",
+       "key": "E1.aware",
+       "median": -2,
+       "pos": 0.1,
+       "neg": 0.8,
+       "n": 10
+      }
+     ]
+    },
+    "H4b": {
+     "text": "停电区外改了安排的人随跨区关系上升",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "外溢 B−A",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0,
+       "neg": 0.2,
+       "n": 10
+      },
+      {
+       "label": "外溢 C−B",
+       "key": "E1.intendedOutside",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H4c": {
+     "text": "措手不及基本不受影响（|中位差| < 1）",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "措手不及 C−A",
+       "key": "E1.surprisedPeople",
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0.2,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_f3ab8bac",
+   "jev": "exp_75e77313"
+  }
+ },
+ "S5": {
+  "name": "S5 失信的代价（两轮）",
+  "branches": {
+   "A": "E1 精确通知",
+   "B": "E1 不发通知",
+   "C": "E1 模糊标题"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 7682,
+     "E1.aware": 59,
+     "E1.exact": 34,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 938.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 26,
+     "trustAt.E2.govMean": 0.6595,
+     "E2.t50": 7466,
+     "E2.aware": 59,
+     "E2.intended": 21,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 822.5,
+     "E2.verified": 27,
+     "E2.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 201844,
+     "E1.aware": 30.5,
+     "E1.exact": 4,
+     "E1.allDayEver": 15.5,
+     "E1.intended": 15,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 12,
+     "E1.overreactMin": 732.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27,
+     "trustAt.E2.govMean": 0.596,
+     "E2.t50": 7804,
+     "E2.aware": 59,
+     "E2.intended": 20.5,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 829,
+     "E2.verified": 25,
+     "E2.disbelieved": 0
+    },
+    "C": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1131,
+     "E1.disbelieved": 0,
+     "E1.verified": 28,
+     "trustAt.E2.govMean": 0.659,
+     "E2.t50": 7640,
+     "E2.aware": 59,
+     "E2.intended": 21,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 786.5,
+     "E2.verified": 27,
+     "E2.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H5a": {
+     "text": "E1 之后对官方的信任 B < C < A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "key": "trustAt.E2.govMean",
+       "median": 0.002,
+       "pos": 0.55,
+       "neg": 0.42,
+       "n": 60
+      },
+      {
+       "label": "信任 C−B",
+       "key": "trustAt.E2.govMean",
+       "median": 0.061,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H5b": {
+     "text": "E2 的相信速度 B 慢于 A，查证 B 多于 A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "E2 t50 B−A",
+       "key": "E2.t50",
+       "median": 462,
+       "pos": 0.65,
+       "neg": 0.27,
+       "n": 60
+      },
+      {
+       "label": "E2 查证 B−A",
+       "key": "E2.verified",
+       "median": -1.5,
+       "pos": 0.32,
+       "neg": 0.63,
+       "n": 60
+      }
+     ]
+    },
+    "H5c": {
+     "text": "E2 措手不及 B ≥ A，但差距 < 2 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "E2 措手不及 B−A",
+       "key": "E2.surprisedPeople",
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.25,
+       "n": 60
+      }
+     ]
+    },
+    "H5d": {
+     "text": "E2 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E2 改安排 B−A",
+       "key": "E2.intended",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.4,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 6904,
+     "E1.aware": 59,
+     "E1.exact": 34,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 686,
+     "E1.disbelieved": 0,
+     "E1.verified": 21,
+     "trustAt.E2.govMean": 0.631,
+     "E2.t50": 7496,
+     "E2.aware": 59,
+     "E2.intended": 19,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 521,
+     "E2.verified": 23,
+     "E2.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 178590,
+     "E1.aware": 33,
+     "E1.exact": 4,
+     "E1.allDayEver": 11,
+     "E1.intended": 11,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 10,
+     "E1.overreactMin": 685,
+     "E1.disbelieved": 0,
+     "E1.verified": 25.5,
+     "trustAt.E2.govMean": 0.5985,
+     "E2.t50": 7680,
+     "E2.aware": 59,
+     "E2.intended": 17,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 501,
+     "E2.verified": 21,
+     "E2.disbelieved": 0
+    },
+    "C": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 847,
+     "E1.disbelieved": 0,
+     "E1.verified": 24,
+     "trustAt.E2.govMean": 0.628,
+     "E2.t50": 7418,
+     "E2.aware": 59,
+     "E2.intended": 19,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 479,
+     "E2.verified": 23,
+     "E2.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H5a": {
+     "text": "E1 之后对官方的信任 B < C < A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "key": "trustAt.E2.govMean",
+       "median": 0,
+       "pos": 0.48,
+       "neg": 0.45,
+       "n": 60
+      },
+      {
+       "label": "信任 C−B",
+       "key": "trustAt.E2.govMean",
+       "median": 0.032,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H5b": {
+     "text": "E2 的相信速度 B 慢于 A，查证 B 多于 A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "E2 t50 B−A",
+       "key": "E2.t50",
+       "median": 220,
+       "pos": 0.68,
+       "neg": 0.28,
+       "n": 60
+      },
+      {
+       "label": "E2 查证 B−A",
+       "key": "E2.verified",
+       "median": -1,
+       "pos": 0.35,
+       "neg": 0.55,
+       "n": 60
+      }
+     ]
+    },
+    "H5c": {
+     "text": "E2 措手不及 B ≥ A，但差距 < 2 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "E2 措手不及 B−A",
+       "key": "E2.surprisedPeople",
+       "median": 0,
+       "pos": 0.23,
+       "neg": 0.22,
+       "n": 60
+      }
+     ]
+    },
+    "H5d": {
+     "text": "E2 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E2 改安排 B−A",
+       "key": "E2.intended",
+       "median": -2,
+       "pos": 0.28,
+       "neg": 0.62,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_7fbf2b51",
+   "levels": {
+    "A": {
+     "E1.t50": 7446,
+     "E1.aware": 59.5,
+     "E1.exact": 35.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 938,
+     "E1.disbelieved": 0,
+     "E1.verified": 27,
+     "trustAt.E2.govMean": 0.667,
+     "E2.t50": 7452,
+     "E2.aware": 59,
+     "E2.intended": 21.5,
+     "E2.surprisedPeople": 1,
+     "E2.overreactMin": 891,
+     "E2.verified": 27,
+     "E2.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 172706,
+     "E1.aware": 32.5,
+     "E1.exact": 5.5,
+     "E1.allDayEver": 7.5,
+     "E1.intended": 14.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 12.5,
+     "E1.overreactMin": 626.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5,
+     "trustAt.E2.govMean": 0.602,
+     "E2.t50": 7484,
+     "E2.aware": 59,
+     "E2.intended": 21,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 994,
+     "E2.verified": 25.5,
+     "E2.disbelieved": 0
+    },
+    "C": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1032,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5,
+     "trustAt.E2.govMean": 0.667,
+     "E2.t50": 7134,
+     "E2.aware": 59,
+     "E2.intended": 22,
+     "E2.surprisedPeople": 0,
+     "E2.overreactMin": 791.5,
+     "E2.verified": 28.5,
+     "E2.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H5a": {
+     "text": "E1 之后对官方的信任 B < C < A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "key": "trustAt.E2.govMean",
+       "median": 0.004,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10
+      },
+      {
+       "label": "信任 C−B",
+       "key": "trustAt.E2.govMean",
+       "median": 0.068,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H5b": {
+     "text": "E2 的相信速度 B 慢于 A，查证 B 多于 A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "E2 t50 B−A",
+       "key": "E2.t50",
+       "median": 530,
+       "pos": 0.7,
+       "neg": 0.3,
+       "n": 10
+      },
+      {
+       "label": "E2 查证 B−A",
+       "key": "E2.verified",
+       "median": -2.5,
+       "pos": 0.3,
+       "neg": 0.6,
+       "n": 10
+      }
+     ]
+    },
+    "H5c": {
+     "text": "E2 措手不及 B ≥ A，但差距 < 2 人",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "E2 措手不及 B−A",
+       "key": "E2.surprisedPeople",
+       "median": -0.5,
+       "pos": 0,
+       "neg": 0.5,
+       "n": 10
+      }
+     ]
+    },
+    "H5d": {
+     "text": "E2 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E2 改安排 B−A",
+       "key": "E2.intended",
+       "median": -1,
+       "pos": 0.4,
+       "neg": 0.5,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_8f5e3b77",
+   "jev": "exp_7fbf2b51"
+  }
+ },
+ "S5b": {
+  "name": "S5b 失信的代价（第二轮只发网站）",
+  "exploratory": "S5 的第二轮通知很强（三渠道、精确标题），几乎人人都知道，信任下降没有机会影响行为；把第二轮改成只在网站发布，看信任在官方渠道弱的时候是否要紧。",
+  "branches": {
+   "A": "E1 精确通知",
+   "B": "E1 不发通知",
+   "C": "E1 模糊标题"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 7682,
+     "E1.aware": 59,
+     "E1.exact": 34,
+     "E1.allDayEver": 0.5,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 938.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 26,
+     "trustAt.E2.govMean": 0.6595,
+     "E2.t50": 86790,
+     "E2.aware": 51.5,
+     "E2.intended": 19,
+     "E2.surprisedPeople": 2,
+     "E2.overreactMin": 954,
+     "E2.verified": 28,
+     "E2.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 205980,
+     "E1.aware": 30.5,
+     "E1.exact": 4,
+     "E1.allDayEver": 13.5,
+     "E1.intended": 15,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 13,
+     "E1.overreactMin": 732.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27,
+     "trustAt.E2.govMean": 0.596,
+     "E2.t50": 87270,
+     "E2.aware": 52,
+     "E2.intended": 19,
+     "E2.surprisedPeople": 2,
+     "E2.overreactMin": 876.5,
+     "E2.verified": 27,
+     "E2.disbelieved": 0
+    },
+    "C": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1131,
+     "E1.disbelieved": 0,
+     "E1.verified": 28,
+     "trustAt.E2.govMean": 0.659,
+     "E2.t50": 86490,
+     "E2.aware": 51.5,
+     "E2.intended": 20,
+     "E2.surprisedPeople": 2,
+     "E2.overreactMin": 887.5,
+     "E2.verified": 28,
+     "E2.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H5a": {
+     "text": "E1 之后对官方的信任 B < C < A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "key": "trustAt.E2.govMean",
+       "median": 0.002,
+       "pos": 0.55,
+       "neg": 0.42,
+       "n": 60
+      },
+      {
+       "label": "信任 C−B",
+       "key": "trustAt.E2.govMean",
+       "median": 0.061,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H5b": {
+     "text": "E2 的相信速度 B 慢于 A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "E2 t50 B−A",
+       "key": "E2.t50",
+       "median": 270,
+       "pos": 0.52,
+       "neg": 0.43,
+       "n": 60
+      }
+     ]
+    },
+    "H5c′": {
+     "text": "第二轮通知弱时，E2 措手不及 B 多于 A",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "E2 措手不及 B−A",
+       "key": "E2.surprisedPeople",
+       "median": 0,
+       "pos": 0.28,
+       "neg": 0.43,
+       "n": 60
+      }
+     ]
+    },
+    "H5d": {
+     "text": "E2 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E2 改安排 B−A",
+       "key": "E2.intended",
+       "median": -1,
+       "pos": 0.32,
+       "neg": 0.52,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": null,
+  "jev": {
+   "n": 10,
+   "experiment": "exp_0d282249",
+   "levels": {
+    "A": {
+     "E1.t50": 7446,
+     "E1.aware": 59,
+     "E1.exact": 35,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1010,
+     "E1.disbelieved": 0,
+     "E1.verified": 28,
+     "trustAt.E2.govMean": 0.665,
+     "E2.t50": 86130,
+     "E2.aware": 53,
+     "E2.intended": 21,
+     "E2.surprisedPeople": 2,
+     "E2.overreactMin": 1308.5,
+     "E2.verified": 30,
+     "E2.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 179280,
+     "E1.aware": 33.5,
+     "E1.exact": 5.5,
+     "E1.allDayEver": 8,
+     "E1.intended": 15,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 11.5,
+     "E1.overreactMin": 653.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 27.5,
+     "trustAt.E2.govMean": 0.603,
+     "E2.t50": 86940,
+     "E2.aware": 52,
+     "E2.intended": 19.5,
+     "E2.surprisedPeople": 1.5,
+     "E2.overreactMin": 1320,
+     "E2.verified": 29,
+     "E2.disbelieved": 0
+    },
+    "C": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1032,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5,
+     "trustAt.E2.govMean": 0.667,
+     "E2.t50": 86580,
+     "E2.aware": 50.5,
+     "E2.intended": 20,
+     "E2.surprisedPeople": 2.5,
+     "E2.overreactMin": 1164.5,
+     "E2.verified": 28,
+     "E2.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H5a": {
+     "text": "E1 之后对官方的信任 B < C < A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "key": "trustAt.E2.govMean",
+       "median": 0,
+       "pos": 0.5,
+       "neg": 0.5,
+       "n": 10
+      },
+      {
+       "label": "信任 C−B",
+       "key": "trustAt.E2.govMean",
+       "median": 0.065,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H5b": {
+     "text": "E2 的相信速度 B 慢于 A",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "E2 t50 B−A",
+       "key": "E2.t50",
+       "median": 600,
+       "pos": 0.6,
+       "neg": 0.3,
+       "n": 10
+      }
+     ]
+    },
+    "H5c′": {
+     "text": "第二轮通知弱时，E2 措手不及 B 多于 A",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "E2 措手不及 B−A",
+       "key": "E2.surprisedPeople",
+       "median": -0.5,
+       "pos": 0.3,
+       "neg": 0.5,
+       "n": 10
+      }
+     ]
+    },
+    "H5d": {
+     "text": "E2 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E2 改安排 B−A",
+       "key": "E2.intended",
+       "median": -1.5,
+       "pos": 0.3,
+       "neg": 0.6,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_1eb279f3",
+   "jev": "exp_0d282249"
+  }
+ },
+ "S7": {
+  "name": "S7 连续失信（三轮）",
+  "exploratory": "S5/S5b 里一次沉默的代价被吸收了；模型里官方通知的可信度有下限（0.5 + 0.45 × 信任），推测再多几次沉默也不会出现“不信官方”的临界点。三轮同区停电，前两轮都不通知，第三轮只在网站发。",
+  "branches": {
+   "A": "两轮都如实通知",
+   "B": "两轮都不通知"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 5482,
+     "E1.aware": 59,
+     "E1.exact": 34.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1050,
+     "E1.disbelieved": 0,
+     "E1.verified": 27,
+     "trustAt.E3.govMean": 0.6964999999999999,
+     "E3.t50": 36600,
+     "E3.aware": 53,
+     "E3.intended": 21,
+     "E3.surprisedPeople": 1,
+     "E3.overreactMin": 1085.5,
+     "E3.verified": 30,
+     "E3.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 255420,
+     "E1.aware": 29,
+     "E1.exact": 3,
+     "E1.allDayEver": 13.5,
+     "E1.intended": 15,
+     "E1.intendedOutside": 1,
+     "E1.surprisedPeople": 13,
+     "E1.overreactMin": 694.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5,
+     "trustAt.E3.govMean": 0.576,
+     "E3.t50": 37830,
+     "E3.aware": 54,
+     "E3.intended": 19,
+     "E3.surprisedPeople": 1,
+     "E3.overreactMin": 1033.5,
+     "E3.verified": 27,
+     "E3.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H7a": {
+     "text": "E3 开始时对官方的信任 B < A",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 A−B",
+       "key": "trustAt.E3.govMean",
+       "median": 0.114,
+       "pos": 1,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H7b": {
+     "text": "没有临界点：E3 听到但不信的人 B 与 A 相差 < 1 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "E3 不信 B−A",
+       "key": "E3.disbelieved",
+       "median": 0,
+       "pos": 0,
+       "neg": 0,
+       "n": 60
+      }
+     ]
+    },
+    "H7c": {
+     "text": "E3 措手不及：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E3 措手不及 B−A",
+       "key": "E3.surprisedPeople",
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.42,
+       "n": 60
+      }
+     ]
+    },
+    "H7d": {
+     "text": "E3 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E3 改安排 B−A",
+       "key": "E3.intended",
+       "median": -1,
+       "pos": 0.3,
+       "neg": 0.62,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": null,
+  "jev": {
+   "n": 10,
+   "experiment": "exp_849f471e",
+   "levels": {
+    "A": {
+     "E1.t50": 5290,
+     "E1.aware": 59,
+     "E1.exact": 32,
+     "E1.allDayEver": 2.5,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1234.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5,
+     "trustAt.E3.govMean": 0.7064999999999999,
+     "E3.t50": 36420,
+     "E3.aware": 54,
+     "E3.intended": 23.5,
+     "E3.surprisedPeople": 1.5,
+     "E3.overreactMin": 1627.5,
+     "E3.verified": 33,
+     "E3.disbelieved": 0
+    },
+    "B": {
+     "E1.t50": 150948,
+     "E1.aware": 36.5,
+     "E1.exact": 3.5,
+     "E1.allDayEver": 16,
+     "E1.intended": 14.5,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 12.5,
+     "E1.overreactMin": 810,
+     "E1.disbelieved": 0,
+     "E1.verified": 31.5,
+     "trustAt.E3.govMean": 0.5834999999999999,
+     "E3.t50": 35820,
+     "E3.aware": 55,
+     "E3.intended": 22,
+     "E3.surprisedPeople": 0,
+     "E3.overreactMin": 1246,
+     "E3.verified": 29,
+     "E3.disbelieved": 0
+    }
+   },
+   "hypotheses": {
+    "H7a": {
+     "text": "E3 开始时对官方的信任 B < A",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 A−B",
+       "key": "trustAt.E3.govMean",
+       "median": 0.119,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H7b": {
+     "text": "没有临界点：E3 听到但不信的人 B 与 A 相差 < 1 人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "E3 不信 B−A",
+       "key": "E3.disbelieved",
+       "median": 0,
+       "pos": 0,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H7c": {
+     "text": "E3 措手不及：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E3 措手不及 B−A",
+       "key": "E3.surprisedPeople",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.4,
+       "n": 10
+      }
+     ]
+    },
+    "H7d": {
+     "text": "E3 改了安排的人：B 比 A 多还是少（不预设方向）",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "E3 改安排 B−A",
+       "key": "E3.intended",
+       "median": -3.5,
+       "pos": 0,
+       "neg": 0.9,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_777d4348",
+   "jev": "exp_849f471e"
+  }
+ },
+ "S6": {
+  "name": "S6 澄清时机",
+  "branches": {
+   "A": "不澄清",
+   "B": "当天中午澄清",
+   "C": "当晚澄清",
+   "D": "停电当天上午澄清"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 27.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 21.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1131,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "B": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 34,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1097.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    },
+    "C": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 32.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 1130,
+     "E1.disbelieved": 0,
+     "E1.verified": 27
+    },
+    "D": {
+     "E1.t50": 7388,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0.5,
+     "E1.overreactMin": 1119.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    }
+   },
+   "hypotheses": {
+    "H6a": {
+     "text": "任何澄清都减少过度调整，越早越好（B < C < D < A）",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−D",
+       "key": "E1.overreactMin",
+       "median": 0,
+       "pos": 0.32,
+       "neg": 0.3,
+       "n": 60
+      },
+      {
+       "label": "过度 D−C",
+       "key": "E1.overreactMin",
+       "median": 2,
+       "pos": 0.5,
+       "neg": 0.47,
+       "n": 60
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 21.5,
+       "pos": 0.53,
+       "neg": 0.47,
+       "n": 60
+      }
+     ]
+    },
+    "H6b": {
+     "text": "澄清增加停电时知道精确时段的人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "精确 B−A",
+       "key": "E1.exact",
+       "median": 7,
+       "pos": 0.98,
+       "neg": 0,
+       "n": 60
+      },
+      {
+       "label": "精确 C−A",
+       "key": "E1.exact",
+       "median": 6,
+       "pos": 0.92,
+       "neg": 0.07,
+       "n": 60
+      },
+      {
+       "label": "精确 D−A",
+       "key": "E1.exact",
+       "median": 4,
+       "pos": 0.9,
+       "neg": 0.02,
+       "n": 60
+      }
+     ]
+    },
+    "H6c": {
+     "text": "停电当天上午的澄清对过度调整几乎无效（减少 < 不澄清时的 15%）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "过度 (A−D)/A",
+       "key": "E1.overreactMin/ref:A",
+       "median": 0,
+       "pos": 0.32,
+       "neg": 0.3,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "ruleV1": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 28,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 847,
+     "E1.disbelieved": 0,
+     "E1.verified": 23.5
+    },
+    "B": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 34,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0.5,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 810,
+     "E1.disbelieved": 0,
+     "E1.verified": 23.5
+    },
+    "C": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 33,
+     "E1.allDayEver": 0,
+     "E1.intended": 21,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0.5,
+     "E1.overreactMin": 803,
+     "E1.disbelieved": 0,
+     "E1.verified": 24
+    },
+    "D": {
+     "E1.t50": 6552,
+     "E1.aware": 59,
+     "E1.exact": 31,
+     "E1.allDayEver": 0,
+     "E1.intended": 20,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0,
+     "E1.overreactMin": 761,
+     "E1.disbelieved": 0,
+     "E1.verified": 23.5
+    }
+   },
+   "hypotheses": {
+    "H6a": {
+     "text": "任何澄清都减少过度调整，越早越好（B < C < D < A）",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−D",
+       "key": "E1.overreactMin",
+       "median": 8.5,
+       "pos": 0.52,
+       "neg": 0.15,
+       "n": 60
+      },
+      {
+       "label": "过度 D−C",
+       "key": "E1.overreactMin",
+       "median": -46,
+       "pos": 0.4,
+       "neg": 0.55,
+       "n": 60
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 4.5,
+       "pos": 0.5,
+       "neg": 0.5,
+       "n": 60
+      }
+     ]
+    },
+    "H6b": {
+     "text": "澄清增加停电时知道精确时段的人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "精确 B−A",
+       "key": "E1.exact",
+       "median": 7,
+       "pos": 0.98,
+       "neg": 0.02,
+       "n": 60
+      },
+      {
+       "label": "精确 C−A",
+       "key": "E1.exact",
+       "median": 6,
+       "pos": 0.97,
+       "neg": 0.03,
+       "n": 60
+      },
+      {
+       "label": "精确 D−A",
+       "key": "E1.exact",
+       "median": 3,
+       "pos": 0.9,
+       "neg": 0.03,
+       "n": 60
+      }
+     ]
+    },
+    "H6c": {
+     "text": "停电当天上午的澄清对过度调整几乎无效（减少 < 不澄清时的 15%）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "过度 (A−D)/A",
+       "key": "E1.overreactMin/ref:A",
+       "median": 0.008,
+       "pos": 0.52,
+       "neg": 0.15,
+       "n": 60
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "experiment": "exp_19840cc3",
+   "levels": {
+    "A": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 30,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1032,
+     "E1.disbelieved": 0,
+     "E1.verified": 28.5
+    },
+    "B": {
+     "E1.t50": 7664,
+     "E1.aware": 59.5,
+     "E1.exact": 35,
+     "E1.allDayEver": 0.5,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 0.5,
+     "E1.overreactMin": 681,
+     "E1.disbelieved": 0,
+     "E1.verified": 29.5
+    },
+    "C": {
+     "E1.t50": 7664,
+     "E1.aware": 59.5,
+     "E1.exact": 35.5,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 936.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 29
+    },
+    "D": {
+     "E1.t50": 7664,
+     "E1.aware": 59,
+     "E1.exact": 33,
+     "E1.allDayEver": 0,
+     "E1.intended": 22.5,
+     "E1.intendedOutside": 0,
+     "E1.surprisedPeople": 1,
+     "E1.overreactMin": 1017.5,
+     "E1.disbelieved": 0,
+     "E1.verified": 28
+    }
+   },
+   "hypotheses": {
+    "H6a": {
+     "text": "任何澄清都减少过度调整，越早越好（B < C < D < A）",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "过度 A−D",
+       "key": "E1.overreactMin",
+       "median": 5.5,
+       "pos": 0.6,
+       "neg": 0.1,
+       "n": 10
+      },
+      {
+       "label": "过度 D−C",
+       "key": "E1.overreactMin",
+       "median": 65,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10
+      },
+      {
+       "label": "过度 C−B",
+       "key": "E1.overreactMin",
+       "median": 56,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10
+      }
+     ]
+    },
+    "H6b": {
+     "text": "澄清增加停电时知道精确时段的人",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "精确 B−A",
+       "key": "E1.exact",
+       "median": 8,
+       "pos": 0.9,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "精确 C−A",
+       "key": "E1.exact",
+       "median": 6.5,
+       "pos": 1,
+       "neg": 0,
+       "n": 10
+      },
+      {
+       "label": "精确 D−A",
+       "key": "E1.exact",
+       "median": 3.5,
+       "pos": 0.9,
+       "neg": 0,
+       "n": 10
+      }
+     ]
+    },
+    "H6c": {
+     "text": "停电当天上午的澄清对过度调整几乎无效（减少 < 不澄清时的 15%）",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "过度 (A−D)/A",
+       "key": "E1.overreactMin/ref:A",
+       "median": 0.003,
+       "pos": 0.6,
+       "neg": 0.1,
+       "n": 10
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_c9fbb1a3",
+   "jev": "exp_19840cc3"
+  }
+ }
+}

@@ -1,0 +1,3309 @@
+{
+ "knobs": [
+  {
+   "path": "attention.intercept",
+   "label": "注意基线",
+   "lo": -1.6,
+   "hi": -0.2,
+   "default": -0.9
+  },
+  {
+   "path": "attention.salience.push",
+   "label": "推送显著度",
+   "lo": -0.3,
+   "hi": 0.9,
+   "default": 0.3
+  },
+  {
+   "path": "attention.salience.board",
+   "label": "公告栏显著度",
+   "lo": -0.8,
+   "hi": 0.4,
+   "default": -0.2
+  },
+  {
+   "path": "mention.intercept",
+   "label": "提起消息基线",
+   "lo": -4.3,
+   "hi": -2.9,
+   "default": -3.6
+  },
+  {
+   "path": "mention.salience",
+   "label": "提起：显著性权重",
+   "lo": 1.8,
+   "hi": 3.4,
+   "default": 2.6
+  },
+  {
+   "path": "transmit.detailShift",
+   "label": "转述忠实度",
+   "lo": -0.2,
+   "hi": 0.2,
+   "default": 0
+  },
+  {
+   "path": "transmit.fillGain",
+   "label": "焦虑补全“全天”",
+   "lo": 0.6,
+   "hi": 1.9,
+   "default": 1.25
+  },
+  {
+   "path": "credibility.officialTrust",
+   "label": "官方可信度对信任的斜率",
+   "lo": 0.25,
+   "hi": 0.65,
+   "default": 0.45
+  },
+  {
+   "path": "credibility.talkTie",
+   "label": "口耳相传对关系信任的斜率",
+   "lo": 0.35,
+   "hi": 0.75,
+   "default": 0.55
+  },
+  {
+   "path": "credibility.believe",
+   "label": "相信阈值",
+   "lo": 0.45,
+   "hi": 0.65,
+   "default": 0.55
+  },
+  {
+   "path": "decision.avoid",
+   "label": "避损权重",
+   "lo": 1.1,
+   "hi": 2.1,
+   "default": 1.6
+  },
+  {
+   "path": "decision.keep",
+   "label": "惯性（照常）权重",
+   "lo": 0.3,
+   "hi": 0.6,
+   "default": 0.45
+  },
+  {
+   "path": "decision.tauBase",
+   "label": "抽样温度",
+   "lo": 0.07,
+   "hi": 0.17,
+   "default": 0.12
+  },
+  {
+   "path": "trust.scale",
+   "label": "信任变化幅度",
+   "lo": 0.5,
+   "hi": 3,
+   "default": 1
+  }
+ ],
+ "seeds": {
+  "oat": 20,
+  "lhs": 8
+ },
+ "nLhs": 200,
+ "classic": {
+  "baseline": {
+   "levels": {
+    "A": {
+     "t50": 84360,
+     "surprisedPeople": 4,
+     "overreactMin": 448,
+     "allDayEver": 0.5,
+     "exact": 13.5,
+     "intended": 9
+    },
+    "B": {
+     "t50": 14048,
+     "surprisedPeople": 0.5,
+     "overreactMin": 490.5,
+     "allDayEver": 0,
+     "exact": 13,
+     "intended": 10
+    },
+    "C": {
+     "t50": 13920,
+     "surprisedPeople": 2,
+     "overreactMin": 425.5,
+     "allDayEver": 0,
+     "exact": 16,
+     "intended": 9.5
+    },
+    "D": {
+     "t50": 13920,
+     "surprisedPeople": 1,
+     "overreactMin": 466,
+     "allDayEver": 0,
+     "exact": 16,
+     "intended": 11
+    },
+    "E": {
+     "t50": 12968,
+     "surprisedPeople": 1,
+     "overreactMin": 393,
+     "allDayEver": 0,
+     "exact": 15.5,
+     "intended": 9.5
+    }
+   },
+   "contrasts": {
+    "push_speed": {
+     "label": "加推送更快（t50：A − C）",
+     "median": 69862,
+     "pos": 1,
+     "neg": 0
+    },
+    "board_speed": {
+     "label": "加公告栏更快（t50：A − B）",
+     "median": 69262,
+     "pos": 1,
+     "neg": 0
+    },
+    "push_surprise": {
+     "label": "加推送少措手不及（A − C）",
+     "median": 2.5,
+     "pos": 0.75,
+     "neg": 0.15
+    },
+    "headline_over": {
+     "label": "精确标题少过度调整（C − E）",
+     "median": 0,
+     "pos": 0.45,
+     "neg": 0.45
+    },
+    "clarify_over": {
+     "label": "澄清少过度调整（C − D）",
+     "median": 54.5,
+     "pos": 0.55,
+     "neg": 0.45
+    },
+    "headline_surprise": {
+     "label": "精确标题少措手不及（C − E）",
+     "median": 0,
+     "pos": 0.3,
+     "neg": 0.3
+    }
+   }
+  },
+  "oat": [
+   {
+    "path": "attention.intercept",
+    "label": "注意基线",
+    "lo": -1.6,
+    "hi": -0.2,
+    "levels": {
+     "lo": {
+      "t50": 84750,
+      "surprisedPeople": 3.5,
+      "overreactMin": 446,
+      "allDayEver": 0,
+      "exact": 11.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84630,
+      "surprisedPeople": 4,
+      "overreactMin": 416.5,
+      "allDayEver": 1,
+      "exact": 14,
+      "intended": 9.5
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 72510,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 70144,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 70346,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69210,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 1.5,
+       "pos": 0.8,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.7,
+       "neg": 0.2
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 66.5,
+       "pos": 0.55,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 117,
+       "pos": 0.7,
+       "neg": 0.3
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -103,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -111,
+       "pos": 0.3,
+       "neg": 0.65
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.25
+      },
+      "hi": {
+       "median": -0.5,
+       "pos": 0.35,
+       "neg": 0.5
+      }
+     }
+    }
+   },
+   {
+    "path": "attention.salience.push",
+    "label": "推送显著度",
+    "lo": -0.3,
+    "hi": 0.9,
+    "levels": {
+     "lo": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 72192,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 70148,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 1.5,
+       "pos": 0.75,
+       "neg": 0.1
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.2
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -3.5,
+       "pos": 0.5,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 117,
+       "pos": 0.6,
+       "neg": 0.35
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -46.5,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -108,
+       "pos": 0.4,
+       "neg": 0.55
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": -0.5,
+       "pos": 0.35,
+       "neg": 0.5
+      }
+     }
+    }
+   },
+   {
+    "path": "attention.salience.board",
+    "label": "公告栏显著度",
+    "lo": -0.8,
+    "hi": 0.4,
+    "levels": {
+     "lo": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 70346,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68512,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2.5,
+       "pos": 0.75,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 2.5,
+       "pos": 0.75,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 54.5,
+       "pos": 0.55,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 54.5,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3
+      }
+     }
+    }
+   },
+   {
+    "path": "mention.intercept",
+    "label": "提起消息基线",
+    "lo": -4.3,
+    "hi": -2.9,
+    "levels": {
+     "lo": {
+      "t50": 87960,
+      "surprisedPeople": 7,
+      "overreactMin": 222.5,
+      "allDayEver": 0,
+      "exact": 11,
+      "intended": 8
+     },
+     "hi": {
+      "t50": 81120,
+      "surprisedPeople": 1,
+      "overreactMin": 502,
+      "allDayEver": 1,
+      "exact": 13,
+      "intended": 11
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 51958,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 71910,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 68880,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 67588,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 3,
+       "pos": 0.85,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.35
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -9.5,
+       "pos": 0.45,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 97.5,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -64,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -134,
+       "pos": 0.4,
+       "neg": 0.6
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.3
+      }
+     }
+    }
+   },
+   {
+    "path": "mention.salience",
+    "label": "提起：显著性权重",
+    "lo": 1.8,
+    "hi": 3.4,
+    "levels": {
+     "lo": {
+      "t50": 85410,
+      "surprisedPeople": 4,
+      "overreactMin": 409.5,
+      "allDayEver": 0,
+      "exact": 12.5,
+      "intended": 8
+     },
+     "hi": {
+      "t50": 83160,
+      "surprisedPeople": 2.5,
+      "overreactMin": 401,
+      "allDayEver": 1,
+      "exact": 14,
+      "intended": 10
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 69884,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 72300,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 67954,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 67412,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.65,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 47,
+       "pos": 0.5,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 28.5,
+       "pos": 0.55,
+       "neg": 0.4
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 160,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -50.5,
+       "pos": 0.25,
+       "neg": 0.75
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 1,
+       "pos": 0.55,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.35
+      }
+     }
+    }
+   },
+   {
+    "path": "transmit.detailShift",
+    "label": "转述忠实度",
+    "lo": -0.2,
+    "hi": 0.2,
+    "levels": {
+     "lo": {
+      "t50": 85140,
+      "surprisedPeople": 4,
+      "overreactMin": 515.5,
+      "allDayEver": 0,
+      "exact": 13,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84990,
+      "surprisedPeople": 3,
+      "overreactMin": 350.5,
+      "allDayEver": 0,
+      "exact": 13.5,
+      "intended": 8
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 73440,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 71952,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69502,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 70162,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.1
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.7,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 26,
+       "pos": 0.55,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 128.5,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -64,
+       "pos": 0.35,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -76.5,
+       "pos": 0.35,
+       "neg": 0.65
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.3
+      }
+     }
+    }
+   },
+   {
+    "path": "transmit.fillGain",
+    "label": "焦虑补全“全天”",
+    "lo": 0.6,
+    "hi": 1.9,
+    "levels": {
+     "lo": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 388.5,
+      "allDayEver": 0,
+      "exact": 13.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84360,
+      "surprisedPeople": 4.5,
+      "overreactMin": 414.5,
+      "allDayEver": 1,
+      "exact": 13.5,
+      "intended": 9
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2.5,
+       "pos": 0.75,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 3,
+       "pos": 0.8,
+       "neg": 0.2
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 144.5,
+       "pos": 0.55,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -26,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -75.5,
+       "pos": 0.4,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -55.5,
+       "pos": 0.35,
+       "neg": 0.6
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.4
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.officialTrust",
+    "label": "官方可信度对信任的斜率",
+    "lo": 0.25,
+    "hi": 0.65,
+    "levels": {
+     "lo": {
+      "t50": 84330,
+      "surprisedPeople": 4,
+      "overreactMin": 489,
+      "allDayEver": 0.5,
+      "exact": 12.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84330,
+      "surprisedPeople": 3.5,
+      "overreactMin": 414,
+      "allDayEver": 0,
+      "exact": 14,
+      "intended": 10
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 68032,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 71242,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 62640,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69734,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.7,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.65,
+       "neg": 0.2
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 15.5,
+       "pos": 0.5,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": -19.5,
+       "pos": 0.4,
+       "neg": 0.5
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 17,
+       "pos": 0.5,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": -142.5,
+       "pos": 0.35,
+       "neg": 0.65
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -0.5,
+       "pos": 0.4,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.4
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.talkTie",
+    "label": "口耳相传对关系信任的斜率",
+    "lo": 0.35,
+    "hi": 0.75,
+    "levels": {
+     "lo": {
+      "t50": 90240,
+      "surprisedPeople": 7.5,
+      "overreactMin": 274,
+      "allDayEver": 0,
+      "exact": 13,
+      "intended": 6.5
+     },
+     "hi": {
+      "t50": 82650,
+      "surprisedPeople": 2,
+      "overreactMin": 634.5,
+      "allDayEver": 0,
+      "exact": 13,
+      "intended": 11
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 65104,
+       "pos": 0.95,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 62302,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 73222,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68030,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 1,
+       "pos": 0.65,
+       "neg": 0.25
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.7,
+       "neg": 0.1
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 14.5,
+       "pos": 0.55,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": -61.5,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 3,
+       "pos": 0.5,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 66,
+       "pos": 0.6,
+       "neg": 0.35
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.35
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.believe",
+    "label": "相信阈值",
+    "lo": 0.45,
+    "hi": 0.65,
+    "levels": {
+     "lo": {
+      "t50": 82410,
+      "surprisedPeople": 1,
+      "overreactMin": 600.5,
+      "allDayEver": 0,
+      "exact": 13.5,
+      "intended": 10
+     },
+     "hi": {
+      "t50": 89160,
+      "surprisedPeople": 6.5,
+      "overreactMin": 354,
+      "allDayEver": 0,
+      "exact": 12,
+      "intended": 8
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 68630,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 49830,
+       "pos": 0.95,
+       "neg": 0.05
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69180,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68728,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.45
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -16.5,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -100.5,
+       "pos": 0.35,
+       "neg": 0.65
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 72.5,
+       "pos": 0.55,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -90.5,
+       "pos": 0.4,
+       "neg": 0.6
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0.15
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.avoid",
+    "label": "避损权重",
+    "lo": 1.1,
+    "hi": 2.1,
+    "levels": {
+     "lo": {
+      "t50": 84780,
+      "surprisedPeople": 4,
+      "overreactMin": 157.5,
+      "allDayEver": 0,
+      "exact": 14,
+      "intended": 7
+     },
+     "hi": {
+      "t50": 84210,
+      "surprisedPeople": 4,
+      "overreactMin": 612,
+      "allDayEver": 1,
+      "exact": 12.5,
+      "intended": 11
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 68692,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69622,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69224,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68952,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 1.5,
+       "pos": 0.65,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.75,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 185,
+       "pos": 0.75,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 16.5,
+       "pos": 0.5,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 2.5,
+       "pos": 0.5,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": -229,
+       "pos": 0.3,
+       "neg": 0.7
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -1,
+       "pos": 0.3,
+       "neg": 0.55
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.keep",
+    "label": "惯性（照常）权重",
+    "lo": 0.3,
+    "hi": 0.6,
+    "levels": {
+     "lo": {
+      "t50": 85140,
+      "surprisedPeople": 3,
+      "overreactMin": 317,
+      "allDayEver": 1,
+      "exact": 15,
+      "intended": 10.5
+     },
+     "hi": {
+      "t50": 84270,
+      "surprisedPeople": 3,
+      "overreactMin": 312.5,
+      "allDayEver": 1,
+      "exact": 14,
+      "intended": 8
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 71422,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 70012,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 70192,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68970,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.65,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -119,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -24,
+       "pos": 0.4,
+       "neg": 0.55
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -51.5,
+       "pos": 0.3,
+       "neg": 0.65
+      },
+      "hi": {
+       "median": 70,
+       "pos": 0.5,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.45
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.tauBase",
+    "label": "抽样温度",
+    "lo": 0.07,
+    "hi": 0.17,
+    "levels": {
+     "lo": {
+      "t50": 85890,
+      "surprisedPeople": 4,
+      "overreactMin": 173,
+      "allDayEver": 0.5,
+      "exact": 15,
+      "intended": 8
+     },
+     "hi": {
+      "t50": 84300,
+      "surprisedPeople": 3,
+      "overreactMin": 443.5,
+      "allDayEver": 1,
+      "exact": 13,
+      "intended": 9.5
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 71880,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 70252,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 66370,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 68392,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.65,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.65,
+       "neg": 0.25
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 9,
+       "pos": 0.5,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": -41,
+       "pos": 0.4,
+       "neg": 0.6
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -50.5,
+       "pos": 0.45,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -34.5,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.45
+      }
+     }
+    }
+   },
+   {
+    "path": "trust.scale",
+    "label": "信任变化幅度",
+    "lo": 0.5,
+    "hi": 3,
+    "levels": {
+     "lo": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     },
+     "hi": {
+      "t50": 84360,
+      "surprisedPeople": 4,
+      "overreactMin": 448,
+      "allDayEver": 0.5,
+      "exact": 13.5,
+      "intended": 9
+     }
+    },
+    "contrasts": {
+     "push_speed": {
+      "lo": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69862,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "board_speed": {
+      "lo": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 69262,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "push_surprise": {
+      "lo": {
+       "median": 2.5,
+       "pos": 0.75,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 2.5,
+       "pos": 0.75,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 54.5,
+       "pos": 0.55,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 54.5,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3
+      }
+     }
+    }
+   }
+  ],
+  "lhs": {
+   "robust": {
+    "push_speed": {
+     "label": "加推送更快（t50：A − C）",
+     "holds": 1,
+     "flips": 0,
+     "q10": 35433.6,
+     "q50": 61166,
+     "q90": 75665
+    },
+    "board_speed": {
+     "label": "加公告栏更快（t50：A − B）",
+     "holds": 1,
+     "flips": 0,
+     "q10": 26643.4,
+     "q50": 66841,
+     "q90": 73106.4
+    },
+    "push_surprise": {
+     "label": "加推送少措手不及（A − C）",
+     "holds": 0.84,
+     "flips": 0.05,
+     "q10": 0,
+     "q50": 2,
+     "q90": 3.5
+    },
+    "headline_over": {
+     "label": "精确标题少过度调整（C − E）",
+     "holds": 0.55,
+     "flips": 0.43,
+     "q10": -164.15,
+     "q50": 11.75,
+     "q90": 206.1
+    },
+    "clarify_over": {
+     "label": "澄清少过度调整（C − D）",
+     "holds": 0.36,
+     "flips": 0.64,
+     "q10": -215.85,
+     "q50": -48.25,
+     "q90": 87.55
+    },
+    "headline_surprise": {
+     "label": "精确标题少措手不及（C − E）",
+     "holds": 0.22,
+     "flips": 0.36,
+     "q10": -1,
+     "q50": 0,
+     "q90": 0.5
+    }
+   },
+   "spearman": {
+    "level:t50": {
+     "attention.intercept": 0.05,
+     "attention.salience.push": -0.17,
+     "attention.salience.board": -0.05,
+     "mention.intercept": -0.45,
+     "mention.salience": -0.36,
+     "transmit.detailShift": -0.16,
+     "transmit.fillGain": -0.11,
+     "credibility.officialTrust": -0.07,
+     "credibility.talkTie": -0.48,
+     "credibility.believe": 0.55,
+     "decision.avoid": -0.1,
+     "decision.keep": 0,
+     "decision.tauBase": -0.11,
+     "trust.scale": -0.06
+    },
+    "level:surprisedPeople": {
+     "attention.intercept": 0.08,
+     "attention.salience.push": -0.17,
+     "attention.salience.board": -0.05,
+     "mention.intercept": -0.46,
+     "mention.salience": -0.37,
+     "transmit.detailShift": -0.16,
+     "transmit.fillGain": -0.12,
+     "credibility.officialTrust": -0.03,
+     "credibility.talkTie": -0.51,
+     "credibility.believe": 0.5,
+     "decision.avoid": -0.05,
+     "decision.keep": -0.02,
+     "decision.tauBase": -0.1,
+     "trust.scale": -0.09
+    },
+    "level:overreactMin": {
+     "attention.intercept": -0.09,
+     "attention.salience.push": 0.15,
+     "attention.salience.board": 0.03,
+     "mention.intercept": 0.27,
+     "mention.salience": 0.15,
+     "transmit.detailShift": 0.05,
+     "transmit.fillGain": 0.1,
+     "credibility.officialTrust": -0.04,
+     "credibility.talkTie": 0.52,
+     "credibility.believe": -0.32,
+     "decision.avoid": 0.43,
+     "decision.keep": -0.02,
+     "decision.tauBase": 0.17,
+     "trust.scale": 0.12
+    },
+    "level:allDayEver": {
+     "attention.intercept": 0.03,
+     "attention.salience.push": -0.08,
+     "attention.salience.board": -0.02,
+     "mention.intercept": 0.21,
+     "mention.salience": 0.15,
+     "transmit.detailShift": -0.04,
+     "transmit.fillGain": 0.39,
+     "credibility.officialTrust": -0.09,
+     "credibility.talkTie": -0.01,
+     "credibility.believe": 0.05,
+     "decision.avoid": 0.02,
+     "decision.keep": 0.12,
+     "decision.tauBase": 0.02,
+     "trust.scale": 0
+    },
+    "level:exact": {
+     "attention.intercept": 0.14,
+     "attention.salience.push": 0.2,
+     "attention.salience.board": -0.02,
+     "mention.intercept": 0.38,
+     "mention.salience": 0.39,
+     "transmit.detailShift": 0.15,
+     "transmit.fillGain": 0.08,
+     "credibility.officialTrust": 0.21,
+     "credibility.talkTie": -0.07,
+     "credibility.believe": -0.39,
+     "decision.avoid": -0.05,
+     "decision.keep": -0.06,
+     "decision.tauBase": 0.03,
+     "trust.scale": 0.02
+    },
+    "level:intended": {
+     "attention.intercept": -0.08,
+     "attention.salience.push": 0.19,
+     "attention.salience.board": -0.01,
+     "mention.intercept": 0.43,
+     "mention.salience": 0.26,
+     "transmit.detailShift": 0.13,
+     "transmit.fillGain": 0.1,
+     "credibility.officialTrust": 0.03,
+     "credibility.talkTie": 0.52,
+     "credibility.believe": -0.4,
+     "decision.avoid": 0.3,
+     "decision.keep": -0.2,
+     "decision.tauBase": 0.14,
+     "trust.scale": 0.08
+    },
+    "contrast:push_speed": {
+     "attention.intercept": 0,
+     "attention.salience.push": -0.18,
+     "attention.salience.board": 0.06,
+     "mention.intercept": -0.45,
+     "mention.salience": -0.23,
+     "transmit.detailShift": -0.12,
+     "transmit.fillGain": -0.06,
+     "credibility.officialTrust": 0.17,
+     "credibility.talkTie": -0.2,
+     "credibility.believe": 0.11,
+     "decision.avoid": -0.01,
+     "decision.keep": 0.08,
+     "decision.tauBase": 0.01,
+     "trust.scale": -0.01
+    },
+    "contrast:board_speed": {
+     "attention.intercept": 0.08,
+     "attention.salience.push": -0.13,
+     "attention.salience.board": -0.05,
+     "mention.intercept": -0.57,
+     "mention.salience": -0.37,
+     "transmit.detailShift": -0.07,
+     "transmit.fillGain": -0.07,
+     "credibility.officialTrust": 0.09,
+     "credibility.talkTie": -0.34,
+     "credibility.believe": 0.19,
+     "decision.avoid": -0.13,
+     "decision.keep": 0.01,
+     "decision.tauBase": -0.05,
+     "trust.scale": -0.03
+    },
+    "contrast:push_surprise": {
+     "attention.intercept": 0.07,
+     "attention.salience.push": -0.12,
+     "attention.salience.board": -0.05,
+     "mention.intercept": -0.55,
+     "mention.salience": -0.37,
+     "transmit.detailShift": -0.07,
+     "transmit.fillGain": -0.04,
+     "credibility.officialTrust": -0.04,
+     "credibility.talkTie": -0.14,
+     "credibility.believe": 0.12,
+     "decision.avoid": -0.02,
+     "decision.keep": 0.01,
+     "decision.tauBase": -0.04,
+     "trust.scale": 0.01
+    },
+    "contrast:headline_over": {
+     "attention.intercept": -0.12,
+     "attention.salience.push": -0.08,
+     "attention.salience.board": 0.03,
+     "mention.intercept": -0.03,
+     "mention.salience": 0.01,
+     "transmit.detailShift": -0.12,
+     "transmit.fillGain": 0.02,
+     "credibility.officialTrust": 0.02,
+     "credibility.talkTie": -0.06,
+     "credibility.believe": 0.04,
+     "decision.avoid": -0.14,
+     "decision.keep": 0.01,
+     "decision.tauBase": -0.01,
+     "trust.scale": 0.09
+    },
+    "contrast:clarify_over": {
+     "attention.intercept": 0.14,
+     "attention.salience.push": -0.06,
+     "attention.salience.board": -0.04,
+     "mention.intercept": -0.06,
+     "mention.salience": -0.08,
+     "transmit.detailShift": -0.1,
+     "transmit.fillGain": 0.05,
+     "credibility.officialTrust": 0.05,
+     "credibility.talkTie": 0.1,
+     "credibility.believe": -0.11,
+     "decision.avoid": -0.1,
+     "decision.keep": -0.15,
+     "decision.tauBase": -0.03,
+     "trust.scale": 0.01
+    },
+    "contrast:headline_surprise": {
+     "attention.intercept": -0.03,
+     "attention.salience.push": 0.02,
+     "attention.salience.board": 0.02,
+     "mention.intercept": 0.01,
+     "mention.salience": 0.05,
+     "transmit.detailShift": 0.02,
+     "transmit.fillGain": 0.05,
+     "credibility.officialTrust": 0.05,
+     "credibility.talkTie": 0,
+     "credibility.believe": -0.09,
+     "decision.avoid": -0.1,
+     "decision.keep": 0,
+     "decision.tauBase": 0.02,
+     "trust.scale": 0.06
+    }
+   }
+  }
+ },
+ "lab42": {
+  "baseline": {
+   "levels": {
+    "P0": {
+     "t50": 7364,
+     "surprisedPeople": 0.5,
+     "overreactMin": 825.5,
+     "allDayEver": 0,
+     "exact": 30,
+     "intended": 20
+    },
+    "P1": {
+     "t50": 81838,
+     "surprisedPeople": 2.5,
+     "overreactMin": 1041,
+     "allDayEver": 2,
+     "exact": 23,
+     "intended": 21.5
+    },
+    "P2": {
+     "t50": 6708,
+     "surprisedPeople": 1,
+     "overreactMin": 697.5,
+     "allDayEver": 0,
+     "exact": 35,
+     "intended": 21
+    },
+    "P3": {
+     "t50": 7364,
+     "surprisedPeople": 0.5,
+     "overreactMin": 852.5,
+     "allDayEver": 0,
+     "exact": 35,
+     "intended": 21
+    }
+   },
+   "contrasts": {
+    "channels_speed": {
+     "label": "三渠道比仅网站快（t50：P1 − P0）",
+     "median": 75306,
+     "pos": 1,
+     "neg": 0
+    },
+    "channels_surprise": {
+     "label": "三渠道少措手不及（P1 − P0）",
+     "median": 2,
+     "pos": 0.8,
+     "neg": 0.05
+    },
+    "headline_over": {
+     "label": "精确标题少过度调整（P0 − P2）",
+     "median": 111.5,
+     "pos": 0.7,
+     "neg": 0.3
+    },
+    "clarify_over": {
+     "label": "澄清少过度调整（P0 − P3）",
+     "median": -70.5,
+     "pos": 0.4,
+     "neg": 0.6
+    },
+    "headline_surprise": {
+     "label": "精确标题少措手不及（P0 − P2）",
+     "median": 0,
+     "pos": 0.3,
+     "neg": 0.45
+    }
+   }
+  },
+  "oat": [
+   {
+    "path": "attention.intercept",
+    "label": "注意基线",
+    "lo": -1.6,
+    "hi": -0.2,
+    "levels": {
+     "lo": {
+      "t50": 7626,
+      "surprisedPeople": 0.5,
+      "overreactMin": 899.5,
+      "allDayEver": 0,
+      "exact": 27,
+      "intended": 21
+     },
+     "hi": {
+      "t50": 7544,
+      "surprisedPeople": 1,
+      "overreactMin": 1023,
+      "allDayEver": 1,
+      "exact": 28.5,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 75952,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 74766,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.85,
+       "neg": 0.1
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.85,
+       "neg": 0
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 141.5,
+       "pos": 0.65,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 224,
+       "pos": 0.7,
+       "neg": 0.3
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 115.5,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 94.5,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.15,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.4
+      }
+     }
+    }
+   },
+   {
+    "path": "attention.salience.push",
+    "label": "推送显著度",
+    "lo": -0.3,
+    "hi": 0.9,
+    "levels": {
+     "lo": {
+      "t50": 7022,
+      "surprisedPeople": 0.5,
+      "overreactMin": 1051.5,
+      "allDayEver": 0,
+      "exact": 27.5,
+      "intended": 20
+     },
+     "hi": {
+      "t50": 7382,
+      "surprisedPeople": 0,
+      "overreactMin": 696,
+      "allDayEver": 0.5,
+      "exact": 29,
+      "intended": 21
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 74834,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 74604,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 142,
+       "pos": 0.65,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 167.5,
+       "pos": 0.7,
+       "neg": 0.3
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -87,
+       "pos": 0.45,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -162,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -0.5,
+       "pos": 0.3,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.45
+      }
+     }
+    }
+   },
+   {
+    "path": "attention.salience.board",
+    "label": "公告栏显著度",
+    "lo": -0.8,
+    "hi": 0.4,
+    "levels": {
+     "lo": {
+      "t50": 7476,
+      "surprisedPeople": 0.5,
+      "overreactMin": 1007,
+      "allDayEver": 0,
+      "exact": 26.5,
+      "intended": 21
+     },
+     "hi": {
+      "t50": 7380,
+      "surprisedPeople": 0,
+      "overreactMin": 911.5,
+      "allDayEver": 0,
+      "exact": 29.5,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 75306,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 75306,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.7,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 172.5,
+       "pos": 0.7,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 75.5,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 112,
+       "pos": 0.55,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -42.5,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.15,
+       "neg": 0.4
+      }
+     }
+    }
+   },
+   {
+    "path": "mention.intercept",
+    "label": "提起消息基线",
+    "lo": -4.3,
+    "hi": -2.9,
+    "levels": {
+     "lo": {
+      "t50": 7534,
+      "surprisedPeople": 1,
+      "overreactMin": 935.5,
+      "allDayEver": 0,
+      "exact": 28,
+      "intended": 19.5
+     },
+     "hi": {
+      "t50": 5816,
+      "surprisedPeople": 0,
+      "overreactMin": 618,
+      "allDayEver": 0.5,
+      "exact": 28,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 78910,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 74456,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 4,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 1,
+       "pos": 0.65,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -2,
+       "pos": 0.5,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 24.5,
+       "pos": 0.5,
+       "neg": 0.5
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -23.5,
+       "pos": 0.5,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 1,
+       "pos": 0.5,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.3
+      }
+     }
+    }
+   },
+   {
+    "path": "mention.salience",
+    "label": "提起：显著性权重",
+    "lo": 1.8,
+    "hi": 3.4,
+    "levels": {
+     "lo": {
+      "t50": 7744,
+      "surprisedPeople": 0.5,
+      "overreactMin": 986,
+      "allDayEver": 0,
+      "exact": 28,
+      "intended": 21
+     },
+     "hi": {
+      "t50": 5918,
+      "surprisedPeople": 1,
+      "overreactMin": 825.5,
+      "allDayEver": 0,
+      "exact": 26.5,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 77724,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 74338,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 3,
+       "pos": 0.9,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.7,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 62,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": -50,
+       "pos": 0.45,
+       "neg": 0.55
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 89.5,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 79.5,
+       "pos": 0.65,
+       "neg": 0.35
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -1,
+       "pos": 0.1,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.25,
+       "neg": 0.25
+      }
+     }
+    }
+   },
+   {
+    "path": "transmit.detailShift",
+    "label": "转述忠实度",
+    "lo": -0.2,
+    "hi": 0.2,
+    "levels": {
+     "lo": {
+      "t50": 7416,
+      "surprisedPeople": 0,
+      "overreactMin": 845.5,
+      "allDayEver": 0,
+      "exact": 28,
+      "intended": 21
+     },
+     "hi": {
+      "t50": 6208,
+      "surprisedPeople": 0,
+      "overreactMin": 865.5,
+      "allDayEver": 0,
+      "exact": 27.5,
+      "intended": 21
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 73832,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 74972,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.85,
+       "neg": 0
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -16.5,
+       "pos": 0.45,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": 165,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 14,
+       "pos": 0.5,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 11.5,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -1,
+       "pos": 0.1,
+       "neg": 0.65
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.15,
+       "neg": 0.35
+      }
+     }
+    }
+   },
+   {
+    "path": "transmit.fillGain",
+    "label": "焦虑补全“全天”",
+    "lo": 0.6,
+    "hi": 1.9,
+    "levels": {
+     "lo": {
+      "t50": 7364,
+      "surprisedPeople": 1,
+      "overreactMin": 825.5,
+      "allDayEver": 0,
+      "exact": 31,
+      "intended": 20
+     },
+     "hi": {
+      "t50": 7242,
+      "surprisedPeople": 1,
+      "overreactMin": 826,
+      "allDayEver": 0,
+      "exact": 28,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 76186,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 75322,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2.5,
+       "pos": 0.8,
+       "neg": 0.1
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.9,
+       "neg": 0
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 75,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 88,
+       "pos": 0.65,
+       "neg": 0.35
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -16,
+       "pos": 0.5,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": -122,
+       "pos": 0.3,
+       "neg": 0.65
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.4
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.officialTrust",
+    "label": "官方可信度对信任的斜率",
+    "lo": 0.25,
+    "hi": 0.65,
+    "levels": {
+     "lo": {
+      "t50": 8118,
+      "surprisedPeople": 0.5,
+      "overreactMin": 985.5,
+      "allDayEver": 0,
+      "exact": 24.5,
+      "intended": 20
+     },
+     "hi": {
+      "t50": 7262,
+      "surprisedPeople": 1,
+      "overreactMin": 800,
+      "allDayEver": 0,
+      "exact": 30,
+      "intended": 21
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 77220,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 75036,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 3,
+       "pos": 0.85,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 219,
+       "pos": 0.65,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 44,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 30,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 3.5,
+       "pos": 0.5,
+       "neg": 0.45
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.15,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0.45
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.talkTie",
+    "label": "口耳相传对关系信任的斜率",
+    "lo": 0.35,
+    "hi": 0.75,
+    "levels": {
+     "lo": {
+      "t50": 8236,
+      "surprisedPeople": 4,
+      "overreactMin": 591,
+      "allDayEver": 0,
+      "exact": 30,
+      "intended": 17
+     },
+     "hi": {
+      "t50": 5378,
+      "surprisedPeople": 0,
+      "overreactMin": 979.5,
+      "allDayEver": 0,
+      "exact": 23.5,
+      "intended": 22
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 79902,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 73566,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 4,
+       "pos": 0.7,
+       "neg": 0.15
+      },
+      "hi": {
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 300,
+       "pos": 0.75,
+       "neg": 0.25
+      },
+      "hi": {
+       "median": 29.5,
+       "pos": 0.55,
+       "neg": 0.45
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 77.5,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 148,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -1,
+       "pos": 0.15,
+       "neg": 0.65
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.1,
+       "neg": 0.25
+      }
+     }
+    }
+   },
+   {
+    "path": "credibility.believe",
+    "label": "相信阈值",
+    "lo": 0.45,
+    "hi": 0.65,
+    "levels": {
+     "lo": {
+      "t50": 5300,
+      "surprisedPeople": 0,
+      "overreactMin": 683.5,
+      "allDayEver": 0,
+      "exact": 27.5,
+      "intended": 20.5
+     },
+     "hi": {
+      "t50": 12786,
+      "surprisedPeople": 4,
+      "overreactMin": 774,
+      "allDayEver": 1,
+      "exact": 27.5,
+      "intended": 18.5
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 74050,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 76158,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 1,
+       "pos": 0.6,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 3,
+       "pos": 0.75,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 112.5,
+       "pos": 0.6,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 170,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -1.5,
+       "pos": 0.45,
+       "neg": 0.5
+      },
+      "hi": {
+       "median": 13,
+       "pos": 0.5,
+       "neg": 0.5
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.1,
+       "neg": 0.2
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.3
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.avoid",
+    "label": "避损权重",
+    "lo": 1.1,
+    "hi": 2.1,
+    "levels": {
+     "lo": {
+      "t50": 6260,
+      "surprisedPeople": 0,
+      "overreactMin": 413.5,
+      "allDayEver": 0,
+      "exact": 28,
+      "intended": 16
+     },
+     "hi": {
+      "t50": 7346,
+      "surprisedPeople": 1,
+      "overreactMin": 1299.5,
+      "allDayEver": 0.5,
+      "exact": 27.5,
+      "intended": 22.5
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 74666,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 76444,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.15
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -60,
+       "pos": 0.35,
+       "neg": 0.65
+      },
+      "hi": {
+       "median": 312,
+       "pos": 0.75,
+       "neg": 0.25
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.4
+      },
+      "hi": {
+       "median": 106,
+       "pos": 0.6,
+       "neg": 0.4
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.45,
+       "neg": 0.35
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.keep",
+    "label": "惯性（照常）权重",
+    "lo": 0.3,
+    "hi": 0.6,
+    "levels": {
+     "lo": {
+      "t50": 7574,
+      "surprisedPeople": 0,
+      "overreactMin": 876,
+      "allDayEver": 0,
+      "exact": 27.5,
+      "intended": 23
+     },
+     "hi": {
+      "t50": 6644,
+      "surprisedPeople": 0.5,
+      "overreactMin": 745,
+      "allDayEver": 0,
+      "exact": 28.5,
+      "intended": 19
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 76024,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 76614,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.85,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.75,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": -105.5,
+       "pos": 0.45,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -16,
+       "pos": 0.5,
+       "neg": 0.5
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -16.5,
+       "pos": 0.45,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -1,
+       "pos": 0.45,
+       "neg": 0.5
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": -1,
+       "pos": 0.2,
+       "neg": 0.55
+      },
+      "hi": {
+       "median": -0.5,
+       "pos": 0.25,
+       "neg": 0.5
+      }
+     }
+    }
+   },
+   {
+    "path": "decision.tauBase",
+    "label": "抽样温度",
+    "lo": 0.07,
+    "hi": 0.17,
+    "levels": {
+     "lo": {
+      "t50": 5908,
+      "surprisedPeople": 1,
+      "overreactMin": 899.5,
+      "allDayEver": 0,
+      "exact": 27.5,
+      "intended": 20
+     },
+     "hi": {
+      "t50": 7440,
+      "surprisedPeople": 1,
+      "overreactMin": 1053.5,
+      "allDayEver": 0.5,
+      "exact": 27.5,
+      "intended": 22
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 76942,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 77460,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.9,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 1.5,
+       "pos": 0.9,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 30.5,
+       "pos": 0.55,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 298.5,
+       "pos": 0.8,
+       "neg": 0.2
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": 94.5,
+       "pos": 0.65,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": 169.5,
+       "pos": 0.75,
+       "neg": 0.2
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.35
+      },
+      "hi": {
+       "median": -1,
+       "pos": 0.3,
+       "neg": 0.55
+      }
+     }
+    }
+   },
+   {
+    "path": "trust.scale",
+    "label": "信任变化幅度",
+    "lo": 0.5,
+    "hi": 3,
+    "levels": {
+     "lo": {
+      "t50": 7364,
+      "surprisedPeople": 0.5,
+      "overreactMin": 825.5,
+      "allDayEver": 0,
+      "exact": 30,
+      "intended": 20
+     },
+     "hi": {
+      "t50": 7364,
+      "surprisedPeople": 0.5,
+      "overreactMin": 825.5,
+      "allDayEver": 0,
+      "exact": 30,
+      "intended": 20
+     }
+    },
+    "contrasts": {
+     "channels_speed": {
+      "lo": {
+       "median": 75306,
+       "pos": 1,
+       "neg": 0
+      },
+      "hi": {
+       "median": 75306,
+       "pos": 1,
+       "neg": 0
+      }
+     },
+     "channels_surprise": {
+      "lo": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0.05
+      },
+      "hi": {
+       "median": 2,
+       "pos": 0.8,
+       "neg": 0.05
+      }
+     },
+     "headline_over": {
+      "lo": {
+       "median": 111.5,
+       "pos": 0.7,
+       "neg": 0.3
+      },
+      "hi": {
+       "median": 111.5,
+       "pos": 0.7,
+       "neg": 0.3
+      }
+     },
+     "clarify_over": {
+      "lo": {
+       "median": -70.5,
+       "pos": 0.4,
+       "neg": 0.6
+      },
+      "hi": {
+       "median": -70.5,
+       "pos": 0.4,
+       "neg": 0.6
+      }
+     },
+     "headline_surprise": {
+      "lo": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.45
+      },
+      "hi": {
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.45
+      }
+     }
+    }
+   }
+  ],
+  "lhs": {
+   "robust": {
+    "channels_speed": {
+     "label": "三渠道比仅网站快（t50：P1 − P0）",
+     "holds": 1,
+     "flips": 0,
+     "q10": 72419.2,
+     "q50": 75839,
+     "q90": 79103.4
+    },
+    "channels_surprise": {
+     "label": "三渠道少措手不及（P1 − P0）",
+     "holds": 0.89,
+     "flips": 0.02,
+     "q10": 0,
+     "q50": 2,
+     "q90": 4
+    },
+    "headline_over": {
+     "label": "精确标题少过度调整（P0 − P2）",
+     "holds": 0.75,
+     "flips": 0.25,
+     "q10": -115.75,
+     "q50": 99.25,
+     "q90": 355.7
+    },
+    "clarify_over": {
+     "label": "澄清少过度调整（P0 − P3）",
+     "holds": 0.49,
+     "flips": 0.52,
+     "q10": -133.1,
+     "q50": -8.5,
+     "q90": 163.8
+    },
+    "headline_surprise": {
+     "label": "精确标题少措手不及（P0 − P2）",
+     "holds": 0.14,
+     "flips": 0.2,
+     "q10": -0.5,
+     "q50": 0,
+     "q90": 0.5
+    }
+   },
+   "spearman": {
+    "level:t50": {
+     "attention.intercept": -0.05,
+     "attention.salience.push": -0.13,
+     "attention.salience.board": -0.03,
+     "mention.intercept": -0.13,
+     "mention.salience": -0.2,
+     "transmit.detailShift": -0.16,
+     "transmit.fillGain": -0.15,
+     "credibility.officialTrust": -0.08,
+     "credibility.talkTie": -0.32,
+     "credibility.believe": 0.86,
+     "decision.avoid": -0.1,
+     "decision.keep": 0.01,
+     "decision.tauBase": -0.08,
+     "trust.scale": -0.09
+    },
+    "level:surprisedPeople": {
+     "attention.intercept": 0.05,
+     "attention.salience.push": -0.1,
+     "attention.salience.board": 0.04,
+     "mention.intercept": -0.09,
+     "mention.salience": -0.13,
+     "transmit.detailShift": -0.24,
+     "transmit.fillGain": -0.19,
+     "credibility.officialTrust": 0,
+     "credibility.talkTie": -0.59,
+     "credibility.believe": 0.57,
+     "decision.avoid": -0.08,
+     "decision.keep": -0.04,
+     "decision.tauBase": -0.18,
+     "trust.scale": -0.05
+    },
+    "level:overreactMin": {
+     "attention.intercept": -0.12,
+     "attention.salience.push": 0.03,
+     "attention.salience.board": -0.12,
+     "mention.intercept": 0.03,
+     "mention.salience": 0.01,
+     "transmit.detailShift": 0.06,
+     "transmit.fillGain": 0.01,
+     "credibility.officialTrust": -0.18,
+     "credibility.talkTie": 0.51,
+     "credibility.believe": 0.07,
+     "decision.avoid": 0.66,
+     "decision.keep": 0.02,
+     "decision.tauBase": 0.09,
+     "trust.scale": 0.13
+    },
+    "level:allDayEver": {
+     "attention.intercept": -0.1,
+     "attention.salience.push": 0.03,
+     "attention.salience.board": 0.04,
+     "mention.intercept": 0.23,
+     "mention.salience": 0.04,
+     "transmit.detailShift": 0.15,
+     "transmit.fillGain": 0.32,
+     "credibility.officialTrust": -0.06,
+     "credibility.talkTie": 0.22,
+     "credibility.believe": 0.23,
+     "decision.avoid": -0.01,
+     "decision.keep": 0.07,
+     "decision.tauBase": -0.1,
+     "trust.scale": 0
+    },
+    "level:exact": {
+     "attention.intercept": 0.43,
+     "attention.salience.push": 0.18,
+     "attention.salience.board": 0.16,
+     "mention.intercept": -0.07,
+     "mention.salience": 0,
+     "transmit.detailShift": 0.03,
+     "transmit.fillGain": -0.08,
+     "credibility.officialTrust": 0.35,
+     "credibility.talkTie": -0.59,
+     "credibility.believe": -0.24,
+     "decision.avoid": -0.17,
+     "decision.keep": -0.09,
+     "decision.tauBase": -0.06,
+     "trust.scale": -0.09
+    },
+    "level:intended": {
+     "attention.intercept": -0.03,
+     "attention.salience.push": 0.09,
+     "attention.salience.board": -0.04,
+     "mention.intercept": 0.01,
+     "mention.salience": 0.01,
+     "transmit.detailShift": 0.13,
+     "transmit.fillGain": 0.06,
+     "credibility.officialTrust": 0.06,
+     "credibility.talkTie": 0.47,
+     "credibility.believe": -0.28,
+     "decision.avoid": 0.54,
+     "decision.keep": -0.43,
+     "decision.tauBase": 0.07,
+     "trust.scale": 0.04
+    },
+    "contrast:channels_speed": {
+     "attention.intercept": 0.1,
+     "attention.salience.push": -0.17,
+     "attention.salience.board": -0.08,
+     "mention.intercept": -0.55,
+     "mention.salience": -0.32,
+     "transmit.detailShift": -0.08,
+     "transmit.fillGain": -0.11,
+     "credibility.officialTrust": 0.13,
+     "credibility.talkTie": -0.45,
+     "credibility.believe": 0.06,
+     "decision.avoid": -0.06,
+     "decision.keep": 0.01,
+     "decision.tauBase": 0.01,
+     "trust.scale": -0.08
+    },
+    "contrast:channels_surprise": {
+     "attention.intercept": 0.08,
+     "attention.salience.push": -0.2,
+     "attention.salience.board": -0.06,
+     "mention.intercept": -0.63,
+     "mention.salience": -0.41,
+     "transmit.detailShift": -0.15,
+     "transmit.fillGain": -0.13,
+     "credibility.officialTrust": -0.07,
+     "credibility.talkTie": -0.22,
+     "credibility.believe": 0.22,
+     "decision.avoid": 0.01,
+     "decision.keep": 0.06,
+     "decision.tauBase": -0.04,
+     "trust.scale": -0.08
+    },
+    "contrast:headline_over": {
+     "attention.intercept": -0.14,
+     "attention.salience.push": -0.03,
+     "attention.salience.board": -0.11,
+     "mention.intercept": 0.06,
+     "mention.salience": 0.12,
+     "transmit.detailShift": 0.09,
+     "transmit.fillGain": 0,
+     "credibility.officialTrust": -0.02,
+     "credibility.talkTie": 0.06,
+     "credibility.believe": 0.03,
+     "decision.avoid": 0.13,
+     "decision.keep": -0.12,
+     "decision.tauBase": -0.06,
+     "trust.scale": 0.04
+    },
+    "contrast:clarify_over": {
+     "attention.intercept": -0.14,
+     "attention.salience.push": -0.03,
+     "attention.salience.board": -0.07,
+     "mention.intercept": 0.07,
+     "mention.salience": 0.12,
+     "transmit.detailShift": 0.12,
+     "transmit.fillGain": 0.03,
+     "credibility.officialTrust": 0.07,
+     "credibility.talkTie": 0.16,
+     "credibility.believe": -0.09,
+     "decision.avoid": 0.07,
+     "decision.keep": -0.03,
+     "decision.tauBase": -0.06,
+     "trust.scale": 0.14
+    },
+    "contrast:headline_surprise": {
+     "attention.intercept": 0.04,
+     "attention.salience.push": 0.03,
+     "attention.salience.board": 0.11,
+     "mention.intercept": 0.19,
+     "mention.salience": 0.07,
+     "transmit.detailShift": 0.02,
+     "transmit.fillGain": 0.08,
+     "credibility.officialTrust": 0.01,
+     "credibility.talkTie": -0.06,
+     "credibility.believe": -0.19,
+     "decision.avoid": -0.04,
+     "decision.keep": -0.02,
+     "decision.tauBase": -0.01,
+     "trust.scale": -0.08
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@microcity/sim",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

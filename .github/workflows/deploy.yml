@@ -1,0 +1,62 @@
+# 推送到 main 后部署公开演示站（自己部署见 DEPLOY.md）。
+# 只在配了仓库变量 DEPLOY_ENVIRONMENT 的仓库运行，fork 里默认不会触发。
+# 仓库变量：DEPLOY_ENVIRONMENT（environment 名）。
+# environment 的 secrets：DEV_SERVER_HOST / PORT / USERNAME / SSH_KEY，以及 DEPLOY_APP_DIR（服务器上的仓库目录）、
+# DEPLOY_APP_PORT（服务端口）——后两个也放 secrets，是为了在公开的运行日志里打码。
+# 服务器用只读 deploy key（~/.ssh/deploy_microcity）经 ssh.github.com:443 拉代码，仓库私有或公开都一样。
+name: Deploy demo site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    if: vars.DEPLOY_ENVIRONMENT != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+        env:
+          MICROCITY_OFFLINE: '1'
+
+  deploy:
+    needs: [check]
+    if: vars.DEPLOY_ENVIRONMENT != ''
+    runs-on: ubuntu-latest
+    environment: ${{ vars.DEPLOY_ENVIRONMENT }}
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          port: ${{ secrets.DEV_SERVER_PORT }}
+          username: ${{ secrets.DEV_SERVER_USERNAME }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          script: |
+            set -e
+            export NVM_DIR="$HOME/.nvm"; source "$NVM_DIR/nvm.sh"; nvm use 22
+            eval $(ssh-agent -s) >/dev/null
+            trap 'eval $(ssh-agent -k) >/dev/null 2>&1 || true' EXIT
+            ssh-add ~/.ssh/deploy_microcity
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o HostName=ssh.github.com -p 443"
+            APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"; cd "$APP_DIR"; export CI=true; mkdir -p logs data
+            git fetch origin main && git reset --hard origin/main
+            NEW_HASH=$(md5sum pnpm-lock.yaml | cut -d' ' -f1)
+            OLD_HASH=$(cat .deploy-lock-hash 2>/dev/null || echo "")
+            if [ "$NEW_HASH" != "$OLD_HASH" ]; then
+              pnpm install --frozen-lockfile
+              pnpm rebuild esbuild   # this host ignores esbuild's build script
+              echo "$NEW_HASH" > .deploy-lock-hash
+            fi
+            pnpm --filter @microcity/web build
+            pm2 startOrRestart ecosystem.config.cjs --update-env && pm2 save
+            for i in 1 2 3 4 5; do sleep 3; S=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${{ secrets.DEPLOY_APP_PORT }}/api/health); echo "attempt $i: HTTP $S"; [ "$S" = "200" ] && break; done
+            [ "$S" = "200" ] || { tail -30 logs/error.log 2>/dev/null || true; exit 1; }

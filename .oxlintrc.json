@@ -1,0 +1,14 @@
+{
+  "overrides": [
+    {
+      "files": ["packages/sim/src/**/*.ts"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          { "object": "Math", "property": "random", "message": "sim 内核禁止 Math.random；用 core/rng" },
+          { "object": "Date", "property": "now", "message": "sim 内核禁止读墙钟；用 SimTime" }
+        ]
+      }
+    }
+  ]
+}

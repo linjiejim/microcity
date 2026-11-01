@@ -1,0 +1,58 @@
+{
+ "n": 60,
+ "errors": 0,
+ "retest（Jev 自身波动）": {
+  "reactions": 40,
+  "fitTopAgree": 0.975,
+  "choiceTopAgree": 0.975,
+  "choiceTV": 0.017,
+  "concernAbsDiff": 0.007,
+  "verifyAbsDiff": 0.007,
+  "messageAbsDiff": 0.005
+ },
+ "zh_zh vs 现用（换指令语言）": {
+  "reactions": 40,
+  "fitTopAgree": 0.875,
+  "choiceTopAgree": 0.95,
+  "choiceTV": 0.043,
+  "concernAbsDiff": 0.035,
+  "verifyAbsDiff": 0.049,
+  "messageAbsDiff": 0.017
+ },
+ "en_en vs 现用（换内容语言）": {
+  "reactions": 40,
+  "fitTopAgree": 0.75,
+  "choiceTopAgree": 0.85,
+  "choiceTV": 0.079,
+  "concernAbsDiff": 0.031,
+  "verifyAbsDiff": 0.019,
+  "messageAbsDiff": 0.03
+ },
+ "zh_zh vs en_en（全中文 vs 全英文）": {
+  "reactions": 40,
+  "fitTopAgree": 0.7,
+  "choiceTopAgree": 0.875,
+  "choiceTV": 0.091,
+  "concernAbsDiff": 0.059,
+  "verifyAbsDiff": 0.04,
+  "messageAbsDiff": 0.025
+ },
+ "规则 vs 现用（参照：心智差异）": {
+  "reactions": 40,
+  "fitTopAgree": 0.2,
+  "choiceTopAgree": 0.725,
+  "choiceTV": 0.282,
+  "concernAbsDiff": 0.148,
+  "verifyAbsDiff": 0.226,
+  "messageAbsDiff": 0.16
+ },
+ "规则 vs en_en": {
+  "reactions": 40,
+  "fitTopAgree": 0.275,
+  "choiceTopAgree": 0.7,
+  "choiceTV": 0.269,
+  "concernAbsDiff": 0.123,
+  "verifyAbsDiff": 0.225,
+  "messageAbsDiff": 0.156
+ }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "microcity",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.4",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @microcity/server --filter @microcity/web dev",
+    "dev:server": "pnpm --filter @microcity/server dev",
+    "dev:web": "pnpm --filter @microcity/web dev",
+    "build": "pnpm --filter @microcity/web build",
+    "typecheck": "tsc -p packages/sim && tsc -p apps/server && tsc -p apps/web",
+    "lint": "oxlint packages apps e2e",
+    "test": "vitest run",
+    "soak": "vitest run packages/sim/test/engine.test.ts -t 浸泡",
+    "e2e": "playwright test",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "devDependencies": {
+    "@microcity/sim": "workspace:*",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.19.0",
+    "oxlint": "^1.86.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  }
+}

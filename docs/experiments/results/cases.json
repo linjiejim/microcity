@@ -1,0 +1,1142 @@
+{
+ "W": {
+  "name": "经典·狼来了（虚报 vs 漏报）",
+  "branches": {
+   "A": "没有前情",
+   "B": "两次准确",
+   "C": "一次虚惊",
+   "D": "两次虚惊",
+   "E": "两次漏报"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "trustE3": 0.619,
+     "e3.intended": 20.5,
+     "e3.surprised": 0,
+     "e3.verified": 27,
+     "e3.disbelieved": 0,
+     "e3.t50": 5220,
+     "prior.over": 0,
+     "prior.surprised": 0
+    },
+    "B": {
+     "trustE3": 0.697,
+     "e3.intended": 22,
+     "e3.surprised": 0,
+     "e3.verified": 27,
+     "e3.disbelieved": 0,
+     "e3.t50": 4744,
+     "prior.over": 2399,
+     "prior.surprised": 2
+    },
+    "C": {
+     "trustE3": 0.552,
+     "e3.intended": 18,
+     "e3.surprised": 0,
+     "e3.verified": 26,
+     "e3.disbelieved": 0,
+     "e3.t50": 5410,
+     "prior.over": 3046,
+     "prior.surprised": 0
+    },
+    "D": {
+     "trustE3": 0.487,
+     "e3.intended": 15.5,
+     "e3.surprised": 0.5,
+     "e3.verified": 26.5,
+     "e3.disbelieved": 0,
+     "e3.t50": 6018,
+     "prior.over": 6024,
+     "prior.surprised": 0
+    },
+    "E": {
+     "trustE3": 0.576,
+     "e3.intended": 21,
+     "e3.surprised": 0,
+     "e3.verified": 24,
+     "e3.disbelieved": 0,
+     "e3.t50": 5424,
+     "prior.over": 1466,
+     "prior.surprised": 22
+    }
+   },
+   "hypotheses": {
+    "HW1": {
+     "kind": "检验",
+     "text": "虚惊伤信任：E3 开始时的信任 D < C < A",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "type": "positive",
+       "median": 0.067,
+       "pos": 1,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      },
+      {
+       "label": "信任 C−D",
+       "type": "positive",
+       "median": 0.065,
+       "pos": 1,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HW2": {
+     "kind": "检验",
+     "text": "狼来了：两次虚惊后 E3 照做的人更少",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "改安排 A−D",
+       "type": "positive",
+       "median": 5,
+       "pos": 0.933,
+       "neg": 0.017,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HW3": {
+     "kind": "检验",
+     "text": "一次不够：一次虚惊几乎不改变照做人数",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "改安排 C−A",
+       "type": "small",
+       "median": -2,
+       "pos": 0.133,
+       "neg": 0.733,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    },
+    "HW4": {
+     "kind": "检验",
+     "text": "社会吸收：两次虚惊后措手不及不明显增多",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 D−A",
+       "type": "small",
+       "median": 0,
+       "pos": 0.333,
+       "neg": 0.267,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HW5a": {
+     "kind": "检验",
+     "text": "虚报比漏报更伤信任",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 E−D",
+       "type": "positive",
+       "median": 0.091,
+       "pos": 1,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HW5b": {
+     "kind": "检验",
+     "text": "虚报比漏报更伤照做",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "改安排 E−D",
+       "type": "positive",
+       "median": 5,
+       "pos": 0.95,
+       "neg": 0.033,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "W-r1": {
+     "kind": "报告",
+     "text": "E3 查证：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "查证 D−A",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.433,
+       "neg": 0.483,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    },
+    "W-r2": {
+     "kind": "报告",
+     "text": "E3 半数相信用时：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "t50 D−A",
+       "type": "positive",
+       "median": 1046,
+       "pos": 0.783,
+       "neg": 0.183,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "W-r3": {
+     "kind": "报告",
+     "text": "E3 听到但不信：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "不信 D−A",
+       "type": "positive",
+       "median": 0,
+       "pos": 0,
+       "neg": 0,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "levels": {
+    "A": {
+     "trustE3": 0.624,
+     "e3.intended": 20.5,
+     "e3.surprised": 0.5,
+     "e3.verified": 27.5,
+     "e3.disbelieved": 0,
+     "e3.t50": 4656,
+     "prior.over": 0,
+     "prior.surprised": 0
+    },
+    "B": {
+     "trustE3": 0.705,
+     "e3.intended": 21.5,
+     "e3.surprised": 0,
+     "e3.verified": 30.5,
+     "e3.disbelieved": 0,
+     "e3.t50": 3270,
+     "prior.over": 2552.5,
+     "prior.surprised": 1
+    },
+    "C": {
+     "trustE3": 0.555,
+     "e3.intended": 22,
+     "e3.surprised": 0,
+     "e3.verified": 28,
+     "e3.disbelieved": 0,
+     "e3.t50": 5668,
+     "prior.over": 2891,
+     "prior.surprised": 0
+    },
+    "D": {
+     "trustE3": 0.485,
+     "e3.intended": 19,
+     "e3.surprised": 1,
+     "e3.verified": 26,
+     "e3.disbelieved": 0,
+     "e3.t50": 4144,
+     "prior.over": 5847.5,
+     "prior.surprised": 0
+    },
+    "E": {
+     "trustE3": 0.583,
+     "e3.intended": 21,
+     "e3.surprised": 0,
+     "e3.verified": 26.5,
+     "e3.disbelieved": 0,
+     "e3.t50": 4750,
+     "prior.over": 1924.5,
+     "prior.surprised": 22
+    }
+   },
+   "hypotheses": {
+    "HW1": {
+     "kind": "检验",
+     "text": "虚惊伤信任：E3 开始时的信任 D < C < A",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 A−C",
+       "type": "positive",
+       "median": 0.069,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      },
+      {
+       "label": "信任 C−D",
+       "type": "positive",
+       "median": 0.07,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HW2": {
+     "kind": "检验",
+     "text": "狼来了：两次虚惊后 E3 照做的人更少",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "改安排 A−D",
+       "type": "positive",
+       "median": 1.5,
+       "pos": 0.8,
+       "neg": 0.2,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HW3": {
+     "kind": "检验",
+     "text": "一次不够：一次虚惊几乎不改变照做人数",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "改安排 C−A",
+       "type": "small",
+       "median": 1,
+       "pos": 0.7,
+       "neg": 0.2,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "HW4": {
+     "kind": "检验",
+     "text": "社会吸收：两次虚惊后措手不及不明显增多",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "措手不及 D−A",
+       "type": "small",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0.1,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HW5a": {
+     "kind": "检验",
+     "text": "虚报比漏报更伤信任",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "信任 E−D",
+       "type": "positive",
+       "median": 0.102,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HW5b": {
+     "kind": "检验",
+     "text": "虚报比漏报更伤照做",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "改安排 E−D",
+       "type": "positive",
+       "median": 2,
+       "pos": 0.9,
+       "neg": 0.1,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "W-r1": {
+     "kind": "报告",
+     "text": "E3 查证：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "查证 D−A",
+       "type": "positive",
+       "median": -1.5,
+       "pos": 0.1,
+       "neg": 0.7,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "W-r2": {
+     "kind": "报告",
+     "text": "E3 半数相信用时：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "t50 D−A",
+       "type": "positive",
+       "median": 336,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10,
+       "grade": 1
+      }
+     ]
+    },
+    "W-r3": {
+     "kind": "报告",
+     "text": "E3 听到但不信：两次虚惊 vs 没有前情",
+     "verdict": "报告",
+     "terms": [
+      {
+       "label": "不信 D−A",
+       "type": "positive",
+       "median": 0,
+       "pos": 0,
+       "neg": 0,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_9d19f0d1",
+   "jev": "exp_a956a770"
+  }
+ },
+ "K": {
+  "name": "经典·知沟（老人与青年）",
+  "branches": {
+   "A": "只发网站",
+   "B": "网站 + 推送",
+   "C": "网站 + 公告栏",
+   "D": "三渠道"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "t50.youth": 86220,
+     "t50.senior": 80190,
+     "speedGap": -5430,
+     "aware.youth": 83.333,
+     "aware.senior": 83.333,
+     "exact.youth": 27.778,
+     "exact.senior": 29.167,
+     "surprised.youth": 0,
+     "surprised.senior": 5
+    },
+    "B": {
+     "t50.youth": 1980,
+     "t50.senior": 79560,
+     "speedGap": 77610,
+     "aware.youth": 100,
+     "aware.senior": 87.5,
+     "exact.youth": 47.222,
+     "exact.senior": 33.333,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    },
+    "C": {
+     "t50.youth": 37530,
+     "t50.senior": 7980,
+     "speedGap": -29262,
+     "aware.youth": 94.444,
+     "aware.senior": 100,
+     "exact.youth": 33.333,
+     "exact.senior": 37.5,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    },
+    "D": {
+     "t50.youth": 1710,
+     "t50.senior": 7872,
+     "speedGap": 6120,
+     "aware.youth": 100,
+     "aware.senior": 100,
+     "exact.youth": 44.444,
+     "exact.senior": 37.5,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    }
+   },
+   "hypotheses": {
+    "HK1": {
+     "kind": "检验",
+     "text": "知沟（速度）：推送拉大速度差",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "速度差 B−A",
+       "type": "positive",
+       "median": 82264,
+       "pos": 0.967,
+       "neg": 0.033,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HK2": {
+     "kind": "检验",
+     "text": "天花板（终局）：推送不拉大停电时的知情差",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情差 B−A（百分点）",
+       "type": "small",
+       "median": 17.361,
+       "pos": 0.883,
+       "neg": 0.1,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    },
+    "HK3": {
+     "kind": "检验",
+     "text": "公告栏缩小速度差",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "速度差 A−C",
+       "type": "positive",
+       "median": 26662,
+       "pos": 0.917,
+       "neg": 0.083,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HK4": {
+     "kind": "检验",
+     "text": "推送带来“早知道”，不是“知道得准”",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "精确差 B−A（百分点）",
+       "type": "small",
+       "median": 20.139,
+       "pos": 0.817,
+       "neg": 0.183,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    },
+    "HK5": {
+     "kind": "检验",
+     "text": "只发网站时老人更易措手不及；公告栏比推送更能缩小",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "A 的措手不及差",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.467,
+       "neg": 0.183,
+       "n": 60,
+       "grade": 0
+      },
+      {
+       "label": "措手不及差 B−C",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.133,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "levels": {
+    "A": {
+     "t50.youth": 83790,
+     "t50.senior": 79800,
+     "speedGap": -3494,
+     "aware.youth": 88.889,
+     "aware.senior": 93.75,
+     "exact.youth": 38.889,
+     "exact.senior": 43.75,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    },
+    "B": {
+     "t50.youth": 2340,
+     "t50.senior": 79380,
+     "speedGap": 76950,
+     "aware.youth": 100,
+     "aware.senior": 95.833,
+     "exact.youth": 50,
+     "exact.senior": 33.333,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    },
+    "C": {
+     "t50.youth": 37650,
+     "t50.senior": 7842,
+     "speedGap": -29558,
+     "aware.youth": 94.444,
+     "aware.senior": 100,
+     "exact.youth": 38.889,
+     "exact.senior": 43.75,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    },
+    "D": {
+     "t50.youth": 1800,
+     "t50.senior": 7904,
+     "speedGap": 6172,
+     "aware.youth": 94.444,
+     "aware.senior": 100,
+     "exact.youth": 44.444,
+     "exact.senior": 45.833,
+     "surprised.youth": 0,
+     "surprised.senior": 0
+    }
+   },
+   "hypotheses": {
+    "HK1": {
+     "kind": "检验",
+     "text": "知沟（速度）：推送拉大速度差",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "速度差 B−A",
+       "type": "positive",
+       "median": 80864,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HK2": {
+     "kind": "检验",
+     "text": "天花板（终局）：推送不拉大停电时的知情差",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "知情差 B−A（百分点）",
+       "type": "small",
+       "median": 6.944,
+       "pos": 0.8,
+       "neg": 0.1,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "HK3": {
+     "kind": "检验",
+     "text": "公告栏缩小速度差",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "速度差 A−C",
+       "type": "positive",
+       "median": 25814,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HK4": {
+     "kind": "检验",
+     "text": "推送带来“早知道”，不是“知道得准”",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "精确差 B−A（百分点）",
+       "type": "small",
+       "median": 17.361,
+       "pos": 0.8,
+       "neg": 0.2,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "HK5": {
+     "kind": "检验",
+     "text": "只发网站时老人更易措手不及；公告栏比推送更能缩小",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "A 的措手不及差",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.2,
+       "n": 10,
+       "grade": 0
+      },
+      {
+       "label": "措手不及差 B−C",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0.2,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_52381942",
+   "jev": "exp_0db806d8"
+  }
+ },
+ "R": {
+  "name": "经典·传话游戏（磨平与“重要性 × 模糊度”）",
+  "branches": {
+   "A": "标题写精确时段",
+   "B": "标题只写“下午”",
+   "C": "标题不写时间",
+   "D": "不发通知，只有工单"
+  },
+  "rule": {
+   "n": 60,
+   "levels": {
+    "A": {
+     "distortedEver": 40,
+     "versions": 62,
+     "relays": 222,
+     "relayNorth": 4.758,
+     "relaySouth": 2.517,
+     "allDayEver": 0,
+     "exactHop1": 0.476,
+     "exactHop2": 0.336,
+     "exactHop3": 0.296,
+     "aware": 59,
+     "surprised": 1
+    },
+    "B": {
+     "distortedEver": 45,
+     "versions": 61,
+     "relays": 229.5,
+     "relayNorth": 4.839,
+     "relaySouth": 2.586,
+     "allDayEver": 0,
+     "exactHop1": 0.377,
+     "exactHop2": 0.306,
+     "exactHop3": 0.24,
+     "aware": 59,
+     "surprised": 1
+    },
+    "C": {
+     "distortedEver": 46,
+     "versions": 64,
+     "relays": 230,
+     "relayNorth": 4.871,
+     "relaySouth": 2.552,
+     "allDayEver": 2,
+     "exactHop1": 0.377,
+     "exactHop2": 0.258,
+     "exactHop3": 0.231,
+     "aware": 59,
+     "surprised": 1
+    },
+    "D": {
+     "distortedEver": 27,
+     "versions": 26,
+     "relays": 81,
+     "relayNorth": 2.355,
+     "relaySouth": 0.293,
+     "allDayEver": 5.5,
+     "exactHop1": 0.75,
+     "exactHop2": 0.333,
+     "exactHop3": 0,
+     "aware": 30.5,
+     "surprised": 12
+    }
+   },
+   "hypotheses": {
+    "HR1": {
+     "kind": "检验",
+     "text": "模糊度越高，信过走样版本的人越多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "走样 B−A",
+       "type": "positive",
+       "median": 5,
+       "pos": 0.783,
+       "neg": 0.183,
+       "n": 60,
+       "grade": 2
+      },
+      {
+       "label": "走样 C−B",
+       "type": "positive",
+       "median": 1,
+       "pos": 0.533,
+       "neg": 0.4,
+       "n": 60,
+       "grade": 1
+      },
+      {
+       "label": "走样 D−C",
+       "type": "positive",
+       "median": -18,
+       "pos": 0,
+       "neg": 1,
+       "n": 60,
+       "grade": 0
+      }
+     ]
+    },
+    "HR2": {
+     "kind": "检验",
+     "text": "重要性：北区人均转述多于南区",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "B 北−南",
+       "type": "positive",
+       "median": 1.948,
+       "pos": 1,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      },
+      {
+       "label": "D 北−南",
+       "type": "positive",
+       "median": 1.907,
+       "pos": 0.967,
+       "neg": 0.033,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HR3": {
+     "kind": "检验",
+     "text": "重要性 × 模糊度：模糊度对转述的推动在北区更大",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "差中差",
+       "type": "positive",
+       "median": 0.083,
+       "pos": 0.567,
+       "neg": 0.433,
+       "n": 60,
+       "grade": 1
+      }
+     ]
+    },
+    "HR4": {
+     "kind": "演示",
+     "text": "磨平：没有官方原文时，精确时段随手数衰减",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "D 第1手−第3手",
+       "type": "positive",
+       "median": 0.64,
+       "pos": 0.983,
+       "neg": 0.017,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HR5": {
+     "kind": "检验",
+     "text": "官方原文把走样拉回来：有通知时衰减更平缓",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "衰减 D−B",
+       "type": "positive",
+       "median": 0.503,
+       "pos": 0.933,
+       "neg": 0.067,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    },
+    "HR6": {
+     "kind": "检验",
+     "text": "同化：“全天”只在缺时间信息时出现",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "A 的全天",
+       "type": "level",
+       "median": 0,
+       "pos": 0.483,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      },
+      {
+       "label": "B 的全天",
+       "type": "level",
+       "median": 0,
+       "pos": 0.35,
+       "neg": 0,
+       "n": 60,
+       "grade": 2
+      },
+      {
+       "label": "全天 D−B",
+       "type": "positive",
+       "median": 4,
+       "pos": 0.767,
+       "neg": 0.083,
+       "n": 60,
+       "grade": 2
+      }
+     ]
+    }
+   }
+  },
+  "jev": {
+   "n": 10,
+   "levels": {
+    "A": {
+     "distortedEver": 41,
+     "versions": 61,
+     "relays": 228,
+     "relayNorth": 5.065,
+     "relaySouth": 2.5,
+     "allDayEver": 0,
+     "exactHop1": 0.517,
+     "exactHop2": 0.364,
+     "exactHop3": 0.318,
+     "aware": 59,
+     "surprised": 1
+    },
+    "B": {
+     "distortedEver": 43.5,
+     "versions": 62,
+     "relays": 233,
+     "relayNorth": 5,
+     "relaySouth": 2.621,
+     "allDayEver": 0,
+     "exactHop1": 0.416,
+     "exactHop2": 0.304,
+     "exactHop3": 0.317,
+     "aware": 59,
+     "surprised": 1
+    },
+    "C": {
+     "distortedEver": 44.5,
+     "versions": 63.5,
+     "relays": 229,
+     "relayNorth": 5,
+     "relaySouth": 2.552,
+     "allDayEver": 1.5,
+     "exactHop1": 0.44,
+     "exactHop2": 0.335,
+     "exactHop3": 0.301,
+     "aware": 58.5,
+     "surprised": 1
+    },
+    "D": {
+     "distortedEver": 30,
+     "versions": 25.5,
+     "relays": 91,
+     "relayNorth": 2.645,
+     "relaySouth": 0.345,
+     "allDayEver": 1.5,
+     "exactHop1": 0.845,
+     "exactHop2": 0.425,
+     "exactHop3": 0.165,
+     "aware": 32.5,
+     "surprised": 12
+    }
+   },
+   "hypotheses": {
+    "HR1": {
+     "kind": "检验",
+     "text": "模糊度越高，信过走样版本的人越多",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "走样 B−A",
+       "type": "positive",
+       "median": 3,
+       "pos": 0.6,
+       "neg": 0.4,
+       "n": 10,
+       "grade": 1
+      },
+      {
+       "label": "走样 C−B",
+       "type": "positive",
+       "median": 0,
+       "pos": 0.4,
+       "neg": 0.4,
+       "n": 10,
+       "grade": 0
+      },
+      {
+       "label": "走样 D−C",
+       "type": "positive",
+       "median": -13,
+       "pos": 0,
+       "neg": 1,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "HR2": {
+     "kind": "检验",
+     "text": "重要性：北区人均转述多于南区",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "B 北−南",
+       "type": "positive",
+       "median": 2.398,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      },
+      {
+       "label": "D 北−南",
+       "type": "positive",
+       "median": 2.387,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HR3": {
+     "kind": "检验",
+     "text": "重要性 × 模糊度：模糊度对转述的推动在北区更大",
+     "verdict": "不支持",
+     "terms": [
+      {
+       "label": "差中差",
+       "type": "positive",
+       "median": -0.12,
+       "pos": 0.4,
+       "neg": 0.6,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    },
+    "HR4": {
+     "kind": "演示",
+     "text": "磨平：没有官方原文时，精确时段随手数衰减",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "D 第1手−第3手",
+       "type": "positive",
+       "median": 0.59,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HR5": {
+     "kind": "检验",
+     "text": "官方原文把走样拉回来：有通知时衰减更平缓",
+     "verdict": "支持",
+     "terms": [
+      {
+       "label": "衰减 D−B",
+       "type": "positive",
+       "median": 0.513,
+       "pos": 1,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      }
+     ]
+    },
+    "HR6": {
+     "kind": "检验",
+     "text": "同化：“全天”只在缺时间信息时出现",
+     "verdict": "部分支持",
+     "terms": [
+      {
+       "label": "A 的全天",
+       "type": "level",
+       "median": 0,
+       "pos": 0.2,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      },
+      {
+       "label": "B 的全天",
+       "type": "level",
+       "median": 0,
+       "pos": 0.3,
+       "neg": 0,
+       "n": 10,
+       "grade": 2
+      },
+      {
+       "label": "全天 D−B",
+       "type": "positive",
+       "median": 0.5,
+       "pos": 0.5,
+       "neg": 0.1,
+       "n": 10,
+       "grade": 0
+      }
+     ]
+    }
+   }
+  },
+  "ui": {
+   "rule": "exp_0f13414a",
+   "jev": "exp_a4fb2e44"
+  }
+ }
+}

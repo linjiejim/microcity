@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+data/
+*.sqlite
+*.sqlite-*
+test-results/
+playwright-report/
+.DS_Store
+*.tsbuildinfo
+.claude/settings.local.json
+# 部署：PM2 日志与依赖锁哈希
+logs/
+.deploy-lock-hash

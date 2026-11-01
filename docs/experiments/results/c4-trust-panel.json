@@ -1,0 +1,378 @@
+{
+ "tpl": "panel_v1",
+ "n": 30,
+ "levels": {
+  "V0": {
+   "trust": 0.605,
+   "act": 0.748,
+   "verify": 0.689,
+   "concern": 0.352
+  },
+  "V1": {
+   "trust": 0.494,
+   "act": 0.794,
+   "verify": 0.716,
+   "concern": 0.478
+  },
+  "V2": {
+   "trust": 0.502,
+   "act": 0.697,
+   "verify": 0.7,
+   "concern": 0.447
+  },
+  "V3": {
+   "trust": 0.747,
+   "act": 0.879,
+   "verify": 0.655,
+   "concern": 0.289
+  },
+  "V4": {
+   "trust": 0.496,
+   "act": 0.821,
+   "verify": 0.733,
+   "concern": 0.431
+  },
+  "V5": {
+   "trust": 0.676,
+   "act": 0.819,
+   "verify": 0.738,
+   "concern": 0.357
+  },
+  "V6": {
+   "trust": 0.473,
+   "act": 0.668,
+   "verify": 0.71,
+   "concern": 0.374
+  },
+  "V7": {
+   "trust": 0.517,
+   "act": 0.599,
+   "verify": 0.686,
+   "concern": 0.306
+  },
+  "V8": {
+   "trust": 0.361,
+   "act": 0.503,
+   "verify": 0.722,
+   "concern": 0.375
+  },
+  "R0": {
+   "friend": 0.585,
+   "actFriend": 0.591
+  },
+  "R1": {
+   "friend": 0.386,
+   "actFriend": 0.568
+  },
+  "R2": {
+   "friend": 0.728,
+   "actFriend": 0.644
+  },
+  "R3": {
+   "friend": 0.388,
+   "actFriend": 0.513
+  }
+ },
+ "deltas": [
+  {
+   "id": "V1",
+   "rule": "surprisedUninformed",
+   "v1": -0.11,
+   "trust": {
+    "mean": -0.11,
+    "lo": -0.13,
+    "hi": -0.09,
+    "n": 30
+   },
+   "act": {
+    "mean": 0.046,
+    "lo": 0.035,
+    "hi": 0.056,
+    "n": 30
+   },
+   "verify": {
+    "mean": 0.027,
+    "lo": 0.021,
+    "hi": 0.033,
+    "n": 30
+   },
+   "concern": {
+    "mean": 0.126,
+    "lo": 0.11,
+    "hi": 0.142,
+    "n": 30
+   }
+  },
+  {
+   "id": "V2",
+   "rule": "surprisedInformed",
+   "v1": -0.1,
+   "trust": {
+    "mean": -0.102,
+    "lo": -0.12,
+    "hi": -0.085,
+    "n": 30
+   },
+   "act": {
+    "mean": -0.051,
+    "lo": -0.064,
+    "hi": -0.038,
+    "n": 30
+   },
+   "verify": {
+    "mean": 0.011,
+    "lo": 0.003,
+    "hi": 0.019,
+    "n": 30
+   },
+   "concern": {
+    "mean": 0.095,
+    "lo": 0.076,
+    "hi": 0.114,
+    "n": 30
+   }
+  },
+  {
+   "id": "V3",
+   "rule": "accurateNotice",
+   "v1": 0.14,
+   "trust": {
+    "mean": 0.143,
+    "lo": 0.122,
+    "hi": 0.163,
+    "n": 30
+   },
+   "act": {
+    "mean": 0.131,
+    "lo": 0.11,
+    "hi": 0.151,
+    "n": 30
+   },
+   "verify": {
+    "mean": -0.034,
+    "lo": -0.048,
+    "hi": -0.02,
+    "n": 30
+   },
+   "concern": {
+    "mean": -0.062,
+    "lo": -0.074,
+    "hi": -0.051,
+    "n": 30
+   }
+  },
+  {
+   "id": "V4",
+   "rule": "vagueHeadline",
+   "v1": -0.11,
+   "trust": {
+    "mean": -0.109,
+    "lo": -0.127,
+    "hi": -0.09,
+    "n": 30
+   },
+   "act": {
+    "mean": 0.073,
+    "lo": 0.056,
+    "hi": 0.09,
+    "n": 30
+   },
+   "verify": {
+    "mean": 0.044,
+    "lo": 0.036,
+    "hi": 0.051,
+    "n": 30
+   },
+   "concern": {
+    "mean": 0.079,
+    "lo": 0.053,
+    "hi": 0.104,
+    "n": 30
+   }
+  },
+  {
+   "id": "V5",
+   "rule": "clarification",
+   "v1": 0.07,
+   "trust": {
+    "mean": 0.072,
+    "lo": 0.05,
+    "hi": 0.093,
+    "n": 30
+   },
+   "act": {
+    "mean": 0.071,
+    "lo": 0.059,
+    "hi": 0.082,
+    "n": 30
+   },
+   "verify": {
+    "mean": 0.049,
+    "lo": 0.042,
+    "hi": 0.056,
+    "n": 30
+   },
+   "concern": {
+    "mean": 0.005,
+    "lo": -0.005,
+    "hi": 0.015,
+    "n": 30
+   }
+  },
+  {
+   "id": "V6",
+   "rule": "falseAlarmCostly",
+   "v1": 0,
+   "trust": {
+    "mean": -0.131,
+    "lo": -0.151,
+    "hi": -0.112,
+    "n": 30
+   },
+   "act": {
+    "mean": -0.08,
+    "lo": -0.098,
+    "hi": -0.062,
+    "n": 30
+   },
+   "verify": {
+    "mean": 0.021,
+    "lo": 0.016,
+    "hi": 0.026,
+    "n": 30
+   },
+   "concern": {
+    "mean": 0.022,
+    "lo": 0.002,
+    "hi": 0.042,
+    "n": 30
+   }
+  },
+  {
+   "id": "V7",
+   "rule": "falseAlarm",
+   "v1": 0,
+   "trust": {
+    "mean": -0.088,
+    "lo": -0.102,
+    "hi": -0.074,
+    "n": 30
+   },
+   "act": {
+    "mean": -0.149,
+    "lo": -0.166,
+    "hi": -0.132,
+    "n": 30
+   },
+   "verify": {
+    "mean": -0.003,
+    "lo": -0.01,
+    "hi": 0.004,
+    "n": 30
+   },
+   "concern": {
+    "mean": -0.046,
+    "lo": -0.062,
+    "hi": -0.03,
+    "n": 30
+   }
+  },
+  {
+   "id": "R1",
+   "rule": "relayAllDay",
+   "v1": -0.2,
+   "friend": {
+    "mean": -0.199,
+    "lo": -0.217,
+    "hi": -0.181,
+    "n": 30
+   },
+   "actFriend": {
+    "mean": -0.023,
+    "lo": -0.053,
+    "hi": 0.008,
+    "n": 30
+   }
+  },
+  {
+   "id": "R2",
+   "rule": "relayExact",
+   "v1": 0.14,
+   "friend": {
+    "mean": 0.143,
+    "lo": 0.127,
+    "hi": 0.158,
+    "n": 30
+   },
+   "actFriend": {
+    "mean": 0.054,
+    "lo": 0.036,
+    "hi": 0.071,
+    "n": 30
+   }
+  },
+  {
+   "id": "R3",
+   "rule": "relayWrongPlace",
+   "v1": -0.2,
+   "friend": {
+    "mean": -0.198,
+    "lo": -0.216,
+    "hi": -0.179,
+    "n": 30
+   },
+   "actFriend": {
+    "mean": -0.077,
+    "lo": -0.103,
+    "hi": -0.052,
+    "n": 30
+   }
+  }
+ ],
+ "twiceFalseAlarm": {
+  "trust": {
+   "mean": -0.244,
+   "lo": -0.27,
+   "hi": -0.218,
+   "n": 30
+  },
+  "act": {
+   "mean": -0.245,
+   "lo": -0.263,
+   "hi": -0.226,
+   "n": 30
+  },
+  "verify": {
+   "mean": 0.033,
+   "lo": 0.026,
+   "hi": 0.04,
+   "n": 30
+  },
+  "concern": {
+   "mean": 0.024,
+   "lo": -0.003,
+   "hi": 0.05,
+   "n": 30
+  }
+ },
+ "retest": {
+  "trust": {
+   "meanAbsDiff": 0.007,
+   "exactSame": 0.167
+  },
+  "act": {
+   "meanAbsDiff": 0.008,
+   "exactSame": 0.433
+  },
+  "verify": {
+   "meanAbsDiff": 0.007,
+   "exactSame": 0.467
+  },
+  "concern": {
+   "meanAbsDiff": 0.005,
+   "exactSame": 0.133
+  }
+ },
+ "trustTraitVsPanel": 0.852,
+ "actOnTrustSlope": 0.691
+}
