@@ -237,10 +237,23 @@ describe('生活的典型事实（14 天）', () => {
     }
   });
 
-  it('上班上学基本不迟到：错过的固定安排不到 2%', () => {
+  it('上班上学基本不迟到：错过的固定安排不到 2%，迟到五分钟以上的班不到 1%', () => {
     const started = events.filter((x) => x.type === 'act_started' && x.act.commit).length;
     const missed = events.filter((x) => x.type === 'commit_missed').length;
     expect(missed / (started + missed)).toBeLessThan(0.02);
+    const map = new WorldMap(def.map);
+    const ctx = { seed: 1, params: DEFAULT_PARAMS, map, P: P(), H: Object.fromEntries(def.households.map((h) => [h.id, h])) };
+    let shifts = 0;
+    let late = 0;
+    for (const ev of events) {
+      if (ev.type !== 'act_started' || ev.act.kind !== 'work' || !ev.act.commit) continue;
+      const day = Number(ev.act.commit.split(':')[0]);
+      const c = commitsFor(ctx, ctx.P[ev.agent]!, day).find((x) => x.id === ev.act.commit)!;
+      shifts++;
+      if (ev.t - c.start > 300) late++;
+    }
+    expect(shifts).toBeGreaterThan(500);
+    expect(late / shifts).toBeLessThan(0.01);
   });
 
   it('钱：入不敷出的家庭不到一成；个人钱包不为负', () => {

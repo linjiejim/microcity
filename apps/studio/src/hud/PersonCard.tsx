@@ -7,7 +7,7 @@ import { set, useApp } from '../store.ts';
 import { NEED_HEX } from '../theme/palette.ts';
 import { Badge, Button, Icon, Meter, SecTitle } from '../ui/kit.tsx';
 import { Avatar } from './Avatar.tsx';
-import { FACTOR_LABEL, feelings, fmtClock, fmtMoney, NEED_LABEL, NEEDS, roleOf, TIE_LABEL, WEATHER_LABEL } from './format.ts';
+import { FACTOR_LABEL, FACTOR_SAYING, feelings, fmtClock, fmtMoney, NEED_LABEL, NEEDS, roleOf, TIE_LABEL, WEATHER_LABEL } from './format.ts';
 import type { DecisionRec } from '../timeline/segments.ts';
 
 const signed = (x: number): string => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(1)}`;
@@ -101,13 +101,14 @@ export function PersonCard() {
     when: `${weekday(dayOf(now))} ${fmtClock(now)}，${WEATHER_LABEL[state.weather]}`,
     doing: where && !doing.includes(where) ? `在${where}${doing}` : doing,
     why: fixed
-      ? ['这是每天固定的安排']
+      ? ['到点了，该做这件事']
       : lastDecision
         ? Object.entries(lastDecision.options.find((o) => o.id === lastDecision.chosen)?.f ?? {})
             .filter(([, v]) => v > 0.3)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 2)
-            .map(([k]) => FACTOR_LABEL[k] ?? k)
+            .map(([k]) => FACTOR_SAYING[k] ?? '')
+            .filter(Boolean)
         : [],
     feelings: feelings(n),
     today: marks.map((m) => m.text).reverse(),

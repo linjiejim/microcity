@@ -93,8 +93,10 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
   };
 
   // ── 睡觉：到点就困，越晚越想睡
-  if (sod >= hm(19, 30) || sod < hm(5) || n[1] < 0.08) {
-    const intent = e.sleepIntent(p, t + e.travelSec(p, cur, home));
+  // 离该起床不到一个半小时就不再睡（否则早起的人洗漱完又躺回去，上班迟到）
+  const bedAt = t + e.travelSec(p, cur, home);
+  if ((sod >= hm(19, 30) || sod < hm(5) || n[1] < 0.08) && e.wakeDue(p, bedAt) - bedAt >= 90 * MIN) {
+    const intent = e.sleepIntent(p, bedAt);
     push('sleep', '睡觉', home, intent, { need: need(P.rates.sleep, Math.min(intent.dur, 8 * HOUR)), habit: 4 * clamp(lateH, -2.5, 2), base: -1 });
   }
   // 午睡
@@ -171,11 +173,13 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
         if (liked) f.like = P.interestBonus;
         if (cost > 0) f.cost = costTerm(cost);
         if (repeat) f.repeat = repeat;
-        if (h.outdoor) {
+        // 露天的地方（公园、广场、球场）看天气，不管这件事本身算不算户外活动
+        if (pl.open) {
           if (weather === 'rain') f.weather = -P.rainOutdoor;
           else if (weather === 'cloud') f.weather = -P.cloudOutdoor;
-          f.base = (p.traits.active - 0.5) * 1.0;
-        } else if (where === 'home') f.base = -(p.traits.active - 0.5) * 0.4;
+        }
+        if (h.outdoor) f.base = (p.traits.active - 0.5) * 1.0;
+        else if (where === 'home') f.base = -(p.traits.active - 0.5) * 0.4;
         if (h.social >= 0.1 && where !== 'home') {
           // 同伴：熟人在场、同好在场
           let close = 0;

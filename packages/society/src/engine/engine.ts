@@ -296,13 +296,18 @@ export class Engine {
     return undefined;
   }
 
-  /** 这一觉睡到几点：平时的起床时间，或者被第二天第一件事催着早起 */
-  wakeTime(p: PersonDef, t: SimTime): SimTime {
+  /** 该起床的时刻：平时的起床时间，或者被当天第一件事催着早起（可能已经过了） */
+  wakeDue(p: PersonDef, t: SimTime): SimTime {
     const morning = timeOfDay(t) < hm(12) ? dayOf(t) : dayOf(t) + 1;
     let wake = habitWake(this.seed, p, morning);
     const first = this.commitsOf(p, morning).find((c) => c.start > dayStart(morning) + hm(3));
     if (first) wake = Math.min(wake, first.start - this.travelSec(p, p.home, first.place, first.pace) - this.params.lead - this.params.morningPrep);
-    return Math.max(wake, t + 60 * MIN);
+    return wake;
+  }
+
+  /** 这一觉睡到几点（至少睡一个小时） */
+  wakeTime(p: PersonDef, t: SimTime): SimTime {
+    return Math.max(this.wakeDue(p, t), t + 60 * MIN);
   }
 
   sleepIntent(p: PersonDef, t: SimTime): Intent {

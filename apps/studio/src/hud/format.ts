@@ -23,6 +23,16 @@ export const FACTOR_LABEL: Record<string, string> = {
   base: '性格与惯性',
 };
 
+/** 同样的因子，用居民自己的口气说（想法里用） */
+export const FACTOR_SAYING: Record<string, string> = {
+  need: '正好需要',
+  like: '本来就喜欢',
+  habit: '这个点习惯这样',
+  company: '那边有熟人',
+  weather: '天气合适',
+  base: '就想这样',
+};
+
 /** 把需求值说成一句感受；都不缺时返回空数组 */
 export function feelings(n: readonly number[]): string[] {
   const words: Record<NeedKey, [string, string]> = { hunger: ['饿了', '有点饿'], energy: ['很困', '有点累'], social: ['很想找人说说话', '想找人聊聊'], fun: ['闷得慌', '有点闷'] };

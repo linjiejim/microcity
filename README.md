@@ -16,7 +16,7 @@
 
 ## 新版：活的小社会
 
-![跟随一位居民](docs/assets/v5/m0-follow.jpg)
+![跟着一位居民回家吃晚饭：墙让开了，右边是此刻在做什么、为什么](docs/assets/v5/app-dinner.jpg)
 
 ```bash
 pnpm install

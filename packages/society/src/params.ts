@@ -196,7 +196,7 @@ export const DEFAULT_PARAMS: RuleParams = {
 
 /** 三餐的时段（当天秒数） */
 export const MEAL_WINDOWS: Array<[number, number, string]> = [
-  [hm(6), hm(9), '早饭'],
+  [hm(4, 30), hm(9), '早饭'],
   [hm(11, 15), hm(13, 30), '午饭'],
   [hm(17, 30), hm(20), '晚饭'],
 ];

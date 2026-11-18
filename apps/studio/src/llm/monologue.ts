@@ -46,9 +46,9 @@ export function validateMonologue(text: string, f: MonologueFacts, allNames: rea
 
 /** 不调用模型时的想法：直接用事实拼一句 */
 export function templateThought(f: MonologueFacts): string {
-  const feel = f.feelings[0] ? `${f.feelings[0]}。` : '';
-  const why = f.why[0] ? `${f.why[0]}。` : '';
-  return `${f.doing}。${feel}${why}`.slice(0, 88);
+  const feel = f.feelings.length ? `，${f.feelings.slice(0, 2).join('，')}` : '';
+  const why = f.why.length ? `——${f.why.join('，')}` : '';
+  return `${f.doing}${feel}${why}。`.slice(0, 88);
 }
 
 export type Monologue = { text: string; source: 'model' | 'cache' | 'template'; note?: string };
