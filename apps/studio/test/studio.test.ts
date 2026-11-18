@@ -217,3 +217,170 @@ describe('内心独白只能复述事实表', () => {
     expect(await monologue(good, facts, everyone)).toMatchObject({ source: 'model', text: '饿了，来碗面垫垫。' });
   });
 });
+
+// ───────────────────────── 画像、分享、对话建镇、第二意见
+
+import { cleanConfig, cleanExperiment, cleanIntervention, experimentLink, readLink, worldLink } from '../src/share.ts';
+import { applyPatch, buildFromText, parsePatch } from '../src/llm/builder.ts';
+import { normalizeProbs, secondOpinion } from '../src/llm/second.ts';
+import { calibration, flows, groups, groupStats, heat, money, paper, personSeries, social } from '../src/portrait/data.ts';
+import { CASES } from '../src/lab/presets.ts';
+import { INDICATORS, PRESETS, validateExperiment, type DayAgg } from '@microcity/society';
+
+describe('画像的数据', () => {
+  let aggs: DayAgg[];
+  beforeAll(() => {
+    const runner = new DayRunner(def, { seed: 1 }, false);
+    aggs = [1, 2, 3, 4, 5, 6, 7, 8].map(() => runner.next().agg);
+  });
+
+  it('人群的时间利用：每组一天正好 24 小时；所有人这一组等于全体', () => {
+    for (const g of groups(def)) expect(groupStats(aggs, g.idx).hours.reduce((a, b) => a + b, 0)).toBeCloseTo(24, 5);
+    expect(groups(def)[0]!.idx.length).toBe(def.people.length);
+  });
+
+  it('钱的流向：有工资、养老金、买东西，名字都是中文', () => {
+    const f = flows(aggs, 40);
+    expect(f.length).toBeGreaterThan(8);
+    for (const x of f) {
+      expect(x.perDay).toBeGreaterThan(0);
+      expect(`${x.from}${x.to}${x.kind}`).not.toMatch(/firm|person|household|ext|undefined/);
+    }
+    expect(f.some((x) => x.kind === '工资')).toBe(true);
+    expect(f.some((x) => x.to === '菜市场' && x.kind === '买东西')).toBe(true);
+  });
+
+  it('场所热度、钱、关系、个人序列都算得出来', () => {
+    const h = heat(aggs);
+    expect(h.rows[0]!.label).toBe('在家');
+    expect(h.rows[0]!.byHour[3]!).toBeGreaterThan(def.people.length * 0.9);
+    expect(h.rows.some((r) => r.label === '学校')).toBe(true);
+    const m = money(def, aggs);
+    expect(m.trend.length).toBe(aggs.length);
+    expect(m.hist.reduce((a, b) => a + b.n, 0)).toBe(def.people.filter((p) => p.age >= 18).length);
+    expect(m.gini).toBeGreaterThan(0);
+    expect(social(aggs).ties.reduce((a, b) => a + b.n, 0)).toBeGreaterThan(def.ties.length - 1);
+    const s = personSeries(aggs, 0);
+    expect(s.mood.length).toBe(aggs.length);
+    expect(s.hours.reduce((a, b) => a + b, 0)).toBeCloseTo(24, 5);
+  });
+
+  it('校准：六大类加起来是 24 小时，参照也是', () => {
+    const rows = calibration(def, aggs);
+    expect(rows.reduce((a, r) => a + r.model, 0)).toBeCloseTo(1440, 3);
+    expect(rows.reduce((a, r) => a + r.reference, 0)).toBe(1440);
+  });
+
+  it('日报：每一句里出现的人名都是这个社区的人，数字来自当天的统计', () => {
+    const agg = aggs[2]!;
+    const items = paper(def, agg);
+    expect(items.length).toBeGreaterThan(4);
+    const text = items.map((i) => i.text).join('');
+    expect(text).toContain(`${agg.chats} 次天`);
+    expect(text).not.toMatch(/undefined|NaN/);
+  });
+});
+
+describe('分享链接（D96）', () => {
+  it('世界与实验都能编码再读回；默认的世界用短链接', () => {
+    expect(worldLink('http://x/', { spec: PRESETS.oldtown, seed: 1, interventions: [] })).toBe('http://x/');
+    expect(worldLink('http://x/', { spec: PRESETS.village, seed: 3, interventions: [] }, { t: 'D03 18:30', who: 'p001' })).toBe('http://x/?c=village&seed=3&t=D03+18%3A30&who=p001');
+    const config = { spec: { ...PRESETS.newtown, population: 150 }, seed: 7, interventions: [{ kind: 'grant' as const, amount: 500, day: 4 }] };
+    const url = new URL(worldLink('http://x/', config, { t: 'D02 08:00' }));
+    const back = readLink(url.search, url.hash);
+    expect(back.config).toEqual(config);
+    expect(back.t).toBe(86400 + 8 * 3600);
+    const x = CASES[0]!.experiment;
+    const u2 = new URL(experimentLink('http://x/', x));
+    const b2 = readLink(u2.search, u2.hash);
+    expect(b2.view).toBe('lab');
+    expect(b2.experiment).toEqual({ ...x, predictions: x.predictions.map((p, i) => ({ ...p, id: `P${i + 1}` })) });
+  });
+
+  it('坏链接与越界的值：退回默认，或者拉回范围，绝不抛错', () => {
+    expect(readLink('?seed=abc&t=nonsense', '#w=%%%').config).toEqual({ spec: PRESETS.oldtown, seed: 1, interventions: [] });
+    expect(cleanConfig({ spec: { template: 'mars', population: 99999 }, seed: -5, interventions: [{ kind: 'boom' }, { kind: 'grant', amount: 1e9, day: 4 }, { kind: 'close', place: 'market', from: 4 }] })).toMatchObject({ seed: 1, spec: { template: 'oldtown', population: 220 }, interventions: [{ kind: 'close', place: 'market', from: 4 }] });
+    expect(cleanIntervention({ kind: 'rumor', topic: 'not-a-topic', seeds: 3, day: 2 })).toBeUndefined();
+    expect(cleanIntervention({ kind: 'weather', weather: 'rain', from: 2 })).toBeUndefined();
+    expect(cleanExperiment({ name: 'x', seeds: [1], days: 5, interventions: [] })).toBeUndefined();
+  });
+
+  it('案例预设都是合法的实验清单，指标都存在', () => {
+    expect(CASES.length).toBeGreaterThanOrEqual(5);
+    for (const c of CASES) {
+      expect(validateExperiment(c.experiment), c.id).toEqual([]);
+      for (const p of c.experiment.predictions) expect(INDICATORS[p.metric], p.metric).toBeTruthy();
+    }
+    expect(new Set(CASES.map((c) => c.id)).size).toBe(CASES.length);
+  });
+});
+
+describe('对话建镇（D94）', () => {
+  it('只认白名单字段；类型不对的丢掉并记下', () => {
+    const r = parsePatch('```json\n{"template":"village","population":160,"renters":"很多","evil":1,"households":{"single":0.4,"aliens":9}}\n```')!;
+    expect(r.patch).toEqual({ template: 'village', population: 160, households: { single: 0.4 } });
+    expect(r.ignored.sort()).toEqual(['evil', 'households.aliens', 'renters']);
+    expect(parsePatch('不是 JSON')).toBeUndefined();
+    expect(parsePatch('[1,2]')).toBeUndefined();
+  });
+
+  it('补丁过规范化：越界的拉回范围并说明；换模板时以那个模板为底', () => {
+    const a = applyPatch(PRESETS.oldtown, { population: 5000, cityShare: 0.5 });
+    expect(a.spec.population).toBe(220);
+    expect(a.spec.cityShare).toBe(0.5);
+    expect(a.adjustments.map((x) => x.field)).toEqual(['population']);
+    const b = applyPatch(PRESETS.oldtown, { template: 'factory', name: '钢城' });
+    expect(b.spec.template).toBe('factory');
+    expect(b.spec.cityShare).toBe(PRESETS.factory.cityShare);
+    expect(b.spec.name).toBe('钢城');
+  });
+
+  it('没有密钥时不发请求；有密钥时采用补丁并说明；乱答时不采用', async () => {
+    const none = await buildFromText(deps({ body: {} }, { n: 0 }), PRESETS.oldtown, '年轻人多的新小区');
+    expect(none.ok).toBe(false);
+    const d = deps({ body: { choices: [{ message: { content: '{"template":"newtown","population":900,"hack":true}' } }], usage: { cost: 0.0002 } } }, { n: 0 });
+    savePrefs(d.kv, { ...DEFAULT_PREFS, key: TEST_KEY });
+    const ok = await buildFromText(d, PRESETS.oldtown, '年轻人多的新小区');
+    expect(ok).toMatchObject({ ok: true, spec: { template: 'newtown', population: 220 } });
+    if (ok.ok) {
+      expect(ok.notes.join('；')).toContain('超出范围');
+      expect(ok.notes.join('；')).toContain('没有采用的字段：hack');
+    }
+    const bad = deps({ body: { choices: [{ message: { content: '好的，我来帮你。' } }], usage: { cost: 0.0002 } } }, { n: 0 });
+    savePrefs(bad.kv, { ...DEFAULT_PREFS, key: TEST_KEY });
+    expect(await buildFromText(bad, PRESETS.oldtown, '年轻人多的新小区')).toMatchObject({ ok: false });
+  });
+});
+
+describe('第二意见（D92）', () => {
+  const options = [
+    { id: 'a', label: '看电视', u: 1, p: 0.6, f: {} },
+    { id: 'b', label: '去公园散步', u: 0.5, p: 0.4, f: {} },
+  ];
+  const who = { person: '64 岁，退休', now: '周三 19:10，晴', location: '9 号院', feelings: ['有点闷'] };
+
+  it('归一化：缺的选项用极小值兜底，加起来是 1', () => {
+    const p = normalizeProbs(['a', 'b', 'c'], { o1: 0.7, o2: 0.3 });
+    expect(p.a! + p.b! + p.c!).toBeCloseTo(1, 2);
+    expect(p.c!).toBeGreaterThan(0);
+    expect(p.a!).toBeGreaterThan(p.b!);
+  });
+
+  it('没有密钥时不发请求；有密钥时发到决策模型的接口，结果记账并缓存', async () => {
+    const calls: { n: number; last?: RequestInit; url?: string } = { n: 0 };
+    const none = await secondOpinion(deps({ body: {} }, calls), who, options);
+    expect(none.ok).toBe(false);
+    expect(calls.n).toBe(0);
+    const d = deps({ body: { answers: { fit: { choice: 'o2', probabilities: { o1: 0.2, o2: 0.8 } } }, usage: { input_tokens: 300, output_tokens: 0, cost: 0.00002 } } }, calls);
+    savePrefs(d.kv, { ...DEFAULT_PREFS, key: TEST_KEY });
+    const r = await secondOpinion(d, who, options);
+    expect(r).toMatchObject({ ok: true, top: 'b', cached: false });
+    expect(calls.url).toBe('https://openrouter.ai/api/v1/systemone');
+    const sent = JSON.parse(String(calls.last!.body)) as { model: string; questions: { fit: { criteria: Record<string, string> } } };
+    expect(sent.model).toBe('typesafe/jev-1.13');
+    expect(sent.questions.fit.criteria).toEqual({ o1: '看电视', o2: '去公园散步' });
+    expect(await secondOpinion(d, who, options)).toMatchObject({ ok: true, cached: true });
+    expect(calls.n).toBe(1);
+    expect(loadLedger(d.kv)).toMatchObject({ calls: 1, cacheHits: 1, costUsd: 0.00002 });
+  });
+});

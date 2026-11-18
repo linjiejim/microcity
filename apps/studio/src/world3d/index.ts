@@ -651,8 +651,10 @@ class World3D implements World3DApi {
   private placeEmotes(poses: readonly ActorPose[]): void {
     let k = 0;
     const dist = this.rig.distance;
-    const size = Math.max(0.7, Math.min(7, dist * 0.028));
-    const reach = dist * 0.8 + 30;
+    // 贴身视角离人很近：图标要小得多，也只画近处的
+    const pov = this.rig.povActive;
+    const size = pov ? 0.3 : Math.max(0.7, Math.min(7, dist * 0.028));
+    const reach = pov ? 16 : dist * 0.8 + 30;
     for (let i = 0; i < poses.length && k < this.emotes.length; i++) {
       const p = poses[i]!;
       if (!p.emote || !this.actors.shown[i]) continue;

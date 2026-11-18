@@ -37,10 +37,14 @@ class Runtime {
   private lastSync = 0;
   private wall = 0;
   private wantDay = 0;
+  private pendingWho: string | undefined;
+  /** 画面是否在看（不在看时不推进时钟、不画） */
+  visible = true;
 
-  /** 打开一个世界；at 是想停在的时刻（不给就从第一天清晨开始） */
-  boot(config: WorldConfig, at?: number): void {
+  /** 打开一个世界；at 是想停在的时刻（不给就从第一天清晨开始），who 是打开后要跟着的人 */
+  boot(config: WorldConfig, at?: number, who?: string): void {
     this.config = config;
+    this.pendingWho = who;
     this.aggs = [];
     this.story = null;
     this.storyKey = '';
@@ -78,6 +82,11 @@ class Runtime {
     this.cursor = new Cursor(pack, DEFAULT_PARAMS);
     this.storyKey = '';
     set({ phase: 'ready', waiting: false, now: this.t, weather: pack.snapshot.weather });
+    if (this.pendingWho && this.people[this.pendingWho]) {
+      const who = this.pendingWho;
+      this.pendingWho = undefined;
+      this.follow(who);
+    }
   }
 
   /** 确保某一天的数据在手；还没算到就等 */
@@ -129,6 +138,7 @@ class Runtime {
 
   /** 画一帧。dt 是墙钟毫秒 */
   frame(dt: number): void {
+    if (!this.visible) return;
     const s = useApp.getState();
     this.wall += dt;
     const cur = this.cursor;

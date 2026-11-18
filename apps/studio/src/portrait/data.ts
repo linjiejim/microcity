@@ -115,9 +115,11 @@ export function flows(aggs: DayAgg[], top = 12): Flow[] {
   for (const d of aggs) for (const k in d.flows) sum.set(k, (sum.get(k) ?? 0) + d.flows[k]!);
   return [...sum]
     .map(([key, v]) => {
-      const [pair, kind] = key.split(':');
-      const [from, to] = pair!.split('>');
-      return { from: sectorName(from!), to: sectorName(to!), kind: KIND_LABEL[kind!] ?? kind!, perDay: v / Math.max(1, aggs.length) };
+      // 键是 `付方>收方:种类`；付方收方里可能有冒号（firm:market），种类取最后一段
+      const cut = key.lastIndexOf(':');
+      const kind = key.slice(cut + 1);
+      const [from, to] = key.slice(0, cut).split('>');
+      return { from: sectorName(from!), to: sectorName(to!), kind: KIND_LABEL[kind] ?? kind, perDay: v / Math.max(1, aggs.length) };
     })
     .sort((a, b) => b.perDay - a.perDay)
     .slice(0, top);

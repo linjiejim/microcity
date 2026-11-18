@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { closenessAt, dayOf, DEFAULT_PARAMS, householdAccount, ITEMS, needsAt, weekday, type TieState } from '@microcity/society';
 import { browserDeps } from '../llm/openrouter.ts';
 import { monologue, templateThought, type Monologue, type MonologueFacts } from '../llm/monologue.ts';
+import { secondOpinion, type Second } from '../llm/second.ts';
 import { runtime } from '../runtime.ts';
 import { set, useApp } from '../store.ts';
 import { NEED_HEX } from '../theme/palette.ts';
@@ -11,6 +12,31 @@ import { FACTOR_LABEL, FACTOR_SAYING, feelings, fmtClock, fmtMoney, NEED_LABEL, 
 import type { DecisionRec } from '../timeline/segments.ts';
 
 const signed = (x: number): string => `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(1)}`;
+
+/** 第二意见（D92）：同一次选择，规则算的概率与决策模型的判断并排；只用来比较，不改世界 */
+function SecondOpinion({ rec, second }: { rec: DecisionRec; second: Second }) {
+  if (!second.ok) return <div className="note">{second.detail}</div>;
+  const agree = second.top === rec.chosen;
+  return (
+    <div className="second" data-testid="second">
+      <div className="second-row head">
+        <span>{agree ? '决策模型最看好的，正是这个人选的。' : '决策模型最看好的是另一个。'}{second.cached ? '（本机缓存）' : ''}</span>
+        <span className="num">规则</span>
+        <span className="num">模型</span>
+      </div>
+      {rec.options.map((o) => (
+        <div className="second-row" key={o.id}>
+          <span>
+            {o.id === rec.chosen ? <b>{o.label}</b> : o.label}
+            {o.id === second.top ? ' ◀' : ''}
+          </span>
+          <span className="num dim">{Math.round(o.p * 100)}%</span>
+          <span className="num">{Math.round((second.probs[o.id] ?? 0) * 100)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /** 一次选择：选了什么、最主要的两条理由；展开看全部候选 */
 function Why({ rec, open }: { rec: DecisionRec; open: boolean }) {
@@ -70,6 +96,8 @@ export function PersonCard() {
   useApp((s) => s.storyRev);
   const [thought, setThought] = useState<{ key: string; m: Monologue } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [second, setSecond] = useState<{ key: string; s: Second } | null>(null);
+  const [asking, setAsking] = useState(false);
   const p = follow ? runtime.people[follow] : undefined;
   const state = runtime.cursor?.state;
   const ps = p && state ? state.people[p.id] : undefined;
@@ -124,6 +152,13 @@ export function PersonCard() {
     setBusy(false);
   };
 
+  const askSecond = async (rec: DecisionRec) => {
+    setAsking(true);
+    const s = await secondOpinion(browserDeps(), { person: p.bio, now: facts.when, location: where || '路上', feelings: facts.feelings }, rec.options);
+    setSecond({ key: `${p.id}:${rec.n}`, s });
+    setAsking(false);
+  };
+
   return (
     <aside className="hud card" data-testid="person-card">
       <div className="card-head">
@@ -173,6 +208,14 @@ export function PersonCard() {
             为什么
           </SecTitle>
           {fixed ? <div className="dim">这是固定的安排：到点就去，不用选。</div> : lastDecision ? <Why rec={lastDecision} open={whyOpen} /> : <div className="dim">今天还没做过选择。</div>}
+          {lastDecision && !fixed && whyOpen && (
+            <>
+              <Button size="sm" icon="sparkle" variant="ghost" disabled={asking} onClick={() => void askSecond(lastDecision)} testId="second-ask" title="把同样的候选交给决策模型判断（需要密钥）；只用来比较，不改世界">
+                {asking ? '在问…' : '问问决策模型会怎么选'}
+              </Button>
+              {second && second.key === `${p.id}:${lastDecision.n}` && <SecondOpinion rec={lastDecision} second={second.s} />}
+            </>
+          )}
         </section>
 
         <section>

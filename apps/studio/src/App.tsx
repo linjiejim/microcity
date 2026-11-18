@@ -1,56 +1,42 @@
-import { useEffect } from 'react';
-import { dayOf, OLDTOWN, parseTime } from '@microcity/society';
+import { useEffect, useMemo } from 'react';
+import { dayOf } from '@microcity/society';
 import './theme/tokens.css';
 import './ui/ui.css';
 import './app.css';
+import './pages.css';
+import { CommunityModal } from './community/CommunityModal.tsx';
 import { PeoplePanel } from './hud/PeoplePanel.tsx';
 import { PersonCard } from './hud/PersonCard.tsx';
 import { PlaceCard } from './hud/PlaceCard.tsx';
 import { TimeBar } from './hud/TimeBar.tsx';
 import { TopBar } from './hud/TopBar.tsx';
+import { LabView } from './lab/LabView.tsx';
+import { PortraitView } from './portrait/PortraitView.tsx';
 import { runtime } from './runtime.ts';
 import { SettingsModal } from './settings/SettingsModal.tsx';
-import { set, SPEEDS, useApp } from './store.ts';
+import { readLink } from './share.ts';
+import { set, SPEEDS, useApp, type View } from './store.ts';
 import { WorldCanvas } from './world/WorldCanvas.tsx';
-
-/** 链接里可以带：seed（运行种子）、t（例如 D03 18:30）、who（居民 id）——同一个链接看到同一刻（D85）；带 t 时停在那一刻 */
-function readLink(): { seed: number; t?: number; who?: string } {
-  const q = new URLSearchParams(location.search);
-  const seed = Number(q.get('seed') ?? 1);
-  let t: number | undefined;
-  try {
-    const raw = q.get('t');
-    if (raw) t = parseTime(raw);
-  } catch {
-    t = undefined;
-  }
-  return { seed: Number.isFinite(seed) ? seed : 1, ...(t !== undefined ? { t } : {}), ...(q.get('who') ? { who: q.get('who')! } : {}) };
-}
 
 export function App() {
   const phase = useApp((s) => s.phase);
   const computed = useApp((s) => s.computed);
   const error = useApp((s) => s.error);
   const follow = useApp((s) => s.follow);
+  const view = useApp((s) => s.view);
+  // 链接只在打开时读一次（D85、D96）
+  const link = useMemo(() => readLink(location.search, location.hash), []);
 
   useEffect(() => {
-    const link = readLink();
-    if (link.t !== undefined) {
-      runtime.t = link.t;
-      set({ playing: false });
-    }
-    runtime.boot(OLDTOWN, link.seed);
-    let pendingWho = link.who;
-    const off = useApp.subscribe((s) => {
-      if (pendingWho && s.phase === 'ready' && runtime.people[pendingWho]) {
-        const who = pendingWho;
-        pendingWho = undefined;
-        runtime.follow(who);
-      }
-    });
+    const view: View = link.experiment || link.view === 'lab' ? 'lab' : link.view === 'portrait' ? 'portrait' : 'world';
+    runtime.visible = view === 'world';
+    // 带 t 的链接打开就停在那一刻
+    set({ view, playing: link.t === undefined });
+    runtime.boot(link.config, link.t, link.who);
     const key = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
       const s = useApp.getState();
+      if (s.view !== 'world' || s.communityOpen || s.settingsOpen) return;
       if (e.key === ' ') {
         e.preventDefault();
         set({ playing: !s.playing });
@@ -63,11 +49,10 @@ export function App() {
     };
     window.addEventListener('keydown', key);
     return () => {
-      off();
       window.removeEventListener('keydown', key);
       runtime.dispose();
     };
-  }, []);
+  }, [link]);
 
   if (phase === 'error') {
     return (
@@ -79,15 +64,21 @@ export function App() {
   }
   const booted = phase === 'ready';
   return (
-    <div className={`app${follow ? ' following' : ''}`} data-testid="app" data-phase={phase}>
+    <div className={`app${follow ? ' following' : ''} view-${view}`} data-testid="app" data-phase={phase} data-view={view}>
       <WorldCanvas />
       {booted && (
         <>
           <TopBar />
-          <PeoplePanel />
-          <PersonCard />
-          <PlaceCard />
-          <TimeBar />
+          {view === 'world' && (
+            <>
+              <PeoplePanel />
+              <PersonCard />
+              <PlaceCard />
+              <TimeBar />
+            </>
+          )}
+          {view === 'portrait' && <PortraitView />}
+          {view === 'lab' && <LabView {...(link.experiment ? { initial: link.experiment } : {})} />}
         </>
       )}
       {!booted && (
@@ -96,6 +87,7 @@ export function App() {
           <div className="dim">正在让街坊们过上日子…{computed > 0 ? `已经算完第 ${computed} 天` : ''}</div>
         </div>
       )}
+      <CommunityModal />
       <SettingsModal />
     </div>
   );

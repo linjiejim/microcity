@@ -65,7 +65,7 @@ function draftHouseholds(spec: CommunitySpec): Draft[] {
     const kid = (k: string, parentAge: number, lo = 5, hi = 17) => members.push({ age: clamp(r(k, lo, hi), 5, Math.max(5, parentAge - 23)), gender: u(`${k}g`) < 0.5 ? 'f' : 'm', role: 'child' });
     switch (type) {
       case 'elder_couple':
-        couple(62, 84, 'elder');
+        couple(60, 84, 'elder');
         break;
       case 'elder_single':
         members.push({ age: r('age', 66, 88), gender: u('g') < 0.64 ? 'f' : 'm', role: 'elder' });
@@ -80,17 +80,19 @@ function draftHouseholds(spec: CommunitySpec): Draft[] {
         break;
       }
       case 'nuclear': {
-        couple(31, 50, 'adult');
+        couple(31, 54, 'adult');
         const pa = members[members.length - 1]!.age;
         kid('k1', pa);
         if (u('k2?') < 0.32) kid('k2', pa, 5, 13);
         break;
       }
       case 'couple':
-        couple(24, 36, 'adult');
+        // 多数是小两口；也有孩子已经搬走的中年夫妻
+        if (u('empty-nest') < 0.3) couple(47, 59, 'adult');
+        else couple(24, 36, 'adult');
         break;
       case 'single':
-        members.push({ age: u('older') < 0.14 ? r('age', 40, 56) : r('age', 22, 38), gender: u('g') < 0.48 ? 'f' : 'm', role: 'adult' });
+        members.push({ age: u('older') < 0.22 ? r('age', 40, 59) : r('age', 22, 38), gender: u('g') < 0.48 ? 'f' : 'm', role: 'adult' });
         break;
       case 'single_parent': {
         const pa = r('age', 32, 48);

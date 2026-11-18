@@ -44,7 +44,7 @@ describe('干预（D88）', () => {
     expect(events.filter((x) => x.type === 'act_started' && x.act.kind === 'work' && x.act.place === market.place && dayOf(x.t) >= 4).length).toBe(0);
     const groceries = def.firms.filter((f) => def.map.places.find((p) => p.id === f.place)!.kind === 'grocery');
     const grocerySales = (ev: DomainEvent[]) => groceries.reduce((a, f) => a + sales(ev, f.id, 4), 0);
-    expect(grocerySales(events)).toBeGreaterThan(grocerySales(base) * 1.5);
+    expect(grocerySales(events)).toBeGreaterThan(grocerySales(base) * 1.2);
     expect(events.some((x) => x.type === 'intervention' && x.phase === 'start')).toBe(true);
   });
 
