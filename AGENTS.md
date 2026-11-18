@@ -1,29 +1,77 @@
 # AGENTS.md
 
-微缩城 MicroCity：一座可以做社会实验的微缩小镇。
-- 设计：按模板生成小镇，支持对话建镇；
-- 观察：结构化主张传播；
-- 复盘：可审计决策、信任演化、多 seed 对照、以事实表为界的 LLM 报告。
+微缩城 MicroCity：一个可以暂停、倒带、分叉的小社会。
 
-先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照当前方案的决定记录（D1…D61）。
+正在按 [v5 方案](docs/specs/20261118-microcity-v5-living-society.md) 重做（D62–D85）：
+- **新版**：`packages/society`（需求驱动的生活内核）+ `apps/studio`（纯浏览器应用，立体世界、跟随、回放）。M0–M2 已落地。
+- **经典版**：`packages/sim` + `apps/server` + `apps/web`，停电通知传播实验室（v0–v4，标签 `v4-classic`）。原样保留到 M4 接替其功能后删除（D63）；公开演示站目前跑的还是它。
+
+先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照方案的决定记录（D1…D85）。新功能只加在新版里；经典版只修会影响演示站的问题。
 
 ## 仓库结构
 
 ```
-packages/sim/    确定性内核（纯 TS，无 IO，前后端同构）
-  scenario/      town30（经典手工小镇）、events（事件规格 → 剧本）、spec（TownSpec 与规范化）、generate（生成器）、presets、stats
-  mind/          候选与效用（reaction）、social（信任裁决 social_v1）、thought（人物画像与想法）
-  metrics/       漏斗与后果、chronicle（节拍）、series（曲线）
-apps/server/     Node 22：运行、SQLite（node:sqlite）、HTTP/WS、Jev/DeepSeek 适配、场景登记、建镇会话、多 seed 实验、复盘计算、报告
-apps/web/        React + react-three-fiber：shell（顶栏、诊断）、gallery（实验广场）、design、observe、review、city、panels（弹窗与档案）
-e2e/             Playwright 端到端测试
-scripts/         开发脚本（冒烟、多 seed 对比、真实 Jev 实验、截图）
-  lab/           实验脚本：敏感性、Jev 对规则与拟合、中英模板、信任面板、社会实验
-docs/specs/      方案（日期前缀文件名 + 索引）
-docs/experiments/ 实验记录（预注册的假设、结果、洞察）、模板 TEMPLATE.md、汇总数据 results/、实验广场内容 gallery.json
+packages/society/  新内核：确定性、无 IO、前后端同构
+  core/            rng、pq、time、hash
+  model/           def（社区定义，运行期间不变）、state（只由事件改变）、events
+  data/tables.ts   数据表：活动、班次、职业、岗位、兴趣、物品
+  params.ts        规则参数与版本号
+  world/           map（寻路）、interiors（室内模板与站位，内核与三维层共用）
+  community/       spec（社区规格）、layout（布局）、generate（人口合成）、names
+  engine/          时钟、任务队列、发事件、“做完一件选下一件”
+  systems/         commits（固定安排）、choose（候选与效用）、economy、social
+  reduce.ts        同构 reducer
+  checks.ts        不变量
+apps/studio/       新应用：纯静态，没有服务端
+  sim/             Web Worker：按天推进内核，按天交数据
+  timeline/        cursor（任一时刻的状态）、poses（站位与走位）、segments（一个人的一天）
+  world3d/         立体世界（命令式 three.js）；types.ts 是对外契约
+  hud/             顶栏、时间轴、人物卡、居民名单、地点卡
+  llm/ settings/   OpenRouter 直连、预算闸、缓存、用量；设置弹窗
+  theme/ ui/       v4 的颜色、图标、组件
+packages/sim/ apps/server/ apps/web/   经典版（见上）
+e2e/               Playwright 端到端测试
+scripts/           开发脚本；lab/ 是实验脚本，lab/society-probe.ts 是新内核的体检
+docs/specs/        方案（日期前缀文件名 + 索引）
+docs/experiments/  实验记录、模板、汇总数据 results/、实验广场内容 gallery.json
 ```
 
-## 内核规则（packages/sim）
+## 新内核规则（packages/society）
+
+- 状态只通过事件改变：新增状态字段就新增事件类型，并在 `reduce.ts` 里处理；应用用同一个 reducer 重建状态。
+- 禁止 `Math.random`、`Date.now`（oxlint 会拦）：随机数用 `core/rng.ts` 的计数器式 `rand(seed, ...key)`，键要能说明用途。
+- 需求、位置、关系的淡化在两个事件之间按闭式计算（D66），不要逐秒发事件。
+- 人的行为是“固定安排 + 需求驱动的下一步”（D64）：
+  - 固定安排（上班、上学、接送、一家人的饭）是（人, 日期）的纯函数，在 `systems/commits.ts`，不占状态；
+  - 其余时间由 `systems/choose.ts` 的候选 + 效用 + softmax 抽样决定，并写成 `decision` 事件（候选、各项因子、概率、选中项）；
+  - 要“一起做”的事，靠同一时刻出发、同一速度走来对齐（D84），不要写人与人之间的耦合。
+- 模型永远不直接改世界：决策模型只回答语义因子（M4 接入），选择仍由效用 + 抽样完成。
+- 常数都在 `params.ts` 的 `RuleParams`，规则模块里不写魔法数：
+  - 改默认值要升 `PARAMS_VERSION`，并写明依据；实验换参数用引擎选项覆盖；
+  - 改候选的生成或效用公式升 `POLICY_VERSION`；改关系变化的规则升 `SOCIAL_RULES_VERSION`。
+- 职业、班次、兴趣、商品、室内都是数据表（D65）：加内容先改 `data/tables.ts`、`world/interiors.ts`，不要在规则里写死。
+- 不要写死地点 id：用 `WorldMap.ofKind` / `nearestOf` 按类型找。
+- 钱守恒（D67）：社区外的收支记在 `EXT` 账户；付钱只走 `engine.pay`。
+- 站位由内核分配（D68）：室内模板 `interiorOf(place)` 是内核与三维层共用的一份数据；改模板不得让站位落到占地之外。
+- 路程按真实街区尺度算（D82）：用 `engine.meters` / `travelSec`，不要直接拿 `map.meters` 算时间。
+- 生成器是纯函数：同一规格必须生成同一社区。
+- 新机制必须带测试：不变量（`checks.ts`）、重放一致、分叉前后一致、典型事实（`test/society.test.ts`）。
+
+## 新应用规则（apps/studio）
+
+- 没有服务端（D69）。内核跑在 Worker 里；主线程按天取“快照 + 事件”（D83），只留最近几天。
+- 先算后看（D70）：观看全是回放。逐帧变化的东西（时钟、游标、姿态）放在 `runtime.ts`，不进 React 状态；界面要的时刻每秒同步几次。
+- 表现层只读（D77）：`timeline/poses.ts` 把状态变成姿态，`world3d/` 只负责画；两者都不回写内核。
+- 立体世界用命令式 three.js（D76），建筑与角色程序化生成（D75），不引入外部模型资产；对外只通过 `world3d/types.ts` 的契约。
+- 模型调用都走 `llm/openrouter.ts`（D71–D73）：
+  - 密钥只存本机 localStorage，只发往 openrouter.ai；不要把它写进链接、日志或别的请求；
+  - 预算闸、答案缓存（只缓存通过校验的答案）、逐次记账都在这里；
+  - 语言模型只能复述事实表：独白用 `validateMonologue` 校验，不过就退回模板并说明原因；改提示词升 `MONOLOGUE_TEMPLATE_VERSION`。
+- 视觉语言沿用 v4（暖色纸面 + 深青强调）：颜色只用 `theme/tokens.css` 的变量，canvas 与三维用 `theme/palette.ts`；图标用 `ui/icons.ts`，组件用 `ui/kit.tsx`。
+- 信息减法（D55、D81）：世界是外壳；人物卡先回答“此刻在做什么、为什么”，其余往下排；新增控件先问“它回答的是这一屏的问题吗”。
+- 可交互元素加 `data-testid`；不要把按钮嵌在按钮里；界面文字不用“他 / 她”指代居民。
+
+## 经典版 · 内核规则（packages/sim）
 
 - 状态只通过事件改变：新增状态字段就新增事件类型，并在 `state/reducer.ts` 里处理；前端用同一个 reducer 重建状态。
 - 禁止 `Math.random`、`Date.now`（oxlint 会拦）：随机数用 `core/rng.ts` 的计数器式 `rand(seed, ...key)`，键要能说明用途（人、决策种类、主张族、局部计数）。
@@ -41,7 +89,7 @@ docs/experiments/ 实验记录（预注册的假设、结果、洞察）、模�
 - 生成器 `scenario/generate.ts` 是纯函数：同一规格必须生成同一场景；默认经典规格必须与 `town30()` 逐字段相等（有测试）。
 - 新机制必须带测试：不变量（`checks/invariants.ts`）、重放一致、分叉前后哈希、知识隔离不能被破坏；生成小镇要过可达与浸泡。
 
-## 服务端规则（apps/server）
+## 经典版 · 服务端规则（apps/server）
 
 - 公开演示站（`MICROCITY_PUBLIC=1`）的限制都在 `config.publicLimits`：
   - 新增会调用模型或会写库的接口，要接上 `throttled` 限速；
@@ -58,7 +106,7 @@ docs/experiments/ 实验记录（预注册的假设、结果、洞察）、模�
 - 报告只能引用事实表（`report.ts`）：数字、时刻、人名、引用都要能在事实表里找到；校验失败就回退模板报告，并记录原因。
 - 建镇补丁走白名单（`builder.ts` 的 `applyPatch`），再过 `normalizeSpec`，把调整原因告诉用户。
 
-## 前端规则（apps/web）
+## 经典版 · 前端规则（apps/web）
 
 视觉语言见 [v4 方案](docs/specs/20260930-microcity-v4-design-language.md)（暖色纸面 + 深青强调，D53–D61）：
 - 颜色只用 `theme/tokens.css` 的变量；canvas 与三维场景读不到 CSS 变量，用 `theme/palette.ts` 的同一套值。
@@ -80,8 +128,10 @@ docs/experiments/ 实验记录（预注册的假设、结果、洞察）、模�
 ## 常用命令
 
 ```bash
-pnpm dev          # 服务端 5317 + 前端 5318
-pnpm test         # vitest：内核 + 服务端
+pnpm dev:studio   # 新版应用 5320（不需要服务端）
+pnpm probe        # 新内核体检：30 天的耗时、不变量、时间利用
+pnpm dev          # 经典版：服务端 5317 + 前端 5318
+pnpm test         # vitest：两套内核 + 服务端 + 新应用的纯逻辑
 pnpm e2e          # Playwright（离线，独立端口与数据库）
 pnpm typecheck
 pnpm lint
@@ -89,7 +139,8 @@ pnpm lint
 
 ## 密钥与花费
 
-- `OPENROUTER_API_KEY` 只放 `.env.local`（已 gitignore），不进仓库、不下发前端。
+- 新版：密钥由使用者在设置里自己填，只存在其浏览器里（D71）；仓库里、测试里都不出现真实密钥，测试用假的存储与假的网络。
+- 经典版：`OPENROUTER_API_KEY` 只放 `.env.local`（已 gitignore），不进仓库、不下发前端。
 - 测试默认离线（`MICROCITY_OFFLINE=1`），模型路径用夹具测试；真实调用前确认预算闸（`MICROCITY_RUN_BUDGET` / `MICROCITY_GLOBAL_BUDGET`）。
 
 ## 实验
@@ -105,7 +156,7 @@ pnpm lint
 
 ## 部署
 
-公开演示站：推送到 main 后由 GitHub Actions 部署到作者的服务器，见 [DEPLOY.md](DEPLOY.md)。
+公开演示站（目前是经典版）：推送到 main 后由 GitHub Actions 部署到作者的服务器，见 [DEPLOY.md](DEPLOY.md)。新版是纯静态站，换上线的时机与方式另定（D80）。
 
 ## 数据
 

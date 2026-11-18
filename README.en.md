@@ -2,6 +2,8 @@
 
 [中文](README.md) · **English**
 
+> **Being rebuilt (v5).** MicroCity is turning from a lab for one notice spreading through a town into a small society you can pause, rewind and fork: need-driven daily life, jobs and shifts, money, changing relationships, a 3D world you can follow one resident through. The new code lives in `packages/society` and `apps/studio` (`pnpm dev:studio`, no server or API key needed). See the [v5 spec](docs/specs/20261118-microcity-v5-living-society.md) (Chinese). Everything below describes the classic version, which still runs the demo site.
+
 A miniature town of 30–60 residents, built for social experiments.
 
 Send a power-outage notice into it, then watch:

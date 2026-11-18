@@ -4,6 +4,8 @@ import { defineConfig } from '@playwright/test';
 const API = 5417;
 const WEB = 5418 + 100;
 const data = '/tmp/microcity-e2e';
+// 新版应用（v5）：纯静态，没有服务端
+const STUDIO = 5520;
 
 export default defineConfig({
   testDir: 'e2e',
@@ -13,8 +15,11 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   outputDir: 'test-results',
+  projects: [
+    { name: 'classic', testMatch: 'app.spec.ts', use: { baseURL: `http://127.0.0.1:${WEB}` } },
+    { name: 'studio', testMatch: 'studio.spec.ts', use: { baseURL: `http://127.0.0.1:${STUDIO}` } },
+  ],
   use: {
-    baseURL: `http://127.0.0.1:${WEB}`,
     viewport: { width: 1600, height: 980 },
     launchOptions: { args: ['--use-gl=angle', '--ignore-gpu-blocklist'] },
     screenshot: 'only-on-failure',
@@ -30,6 +35,12 @@ export default defineConfig({
     {
       command: `MICROCITY_PORT=${API} MICROCITY_WEB_PORT=${WEB} pnpm --filter @microcity/web exec vite --port ${WEB} --strictPort`,
       url: `http://127.0.0.1:${WEB}`,
+      reuseExistingServer: false,
+      timeout: 60_000,
+    },
+    {
+      command: `MICROCITY_STUDIO_PORT=${STUDIO} pnpm --filter @microcity/studio exec vite --port ${STUDIO} --strictPort`,
+      url: `http://127.0.0.1:${STUDIO}`,
       reuseExistingServer: false,
       timeout: 60_000,
     },

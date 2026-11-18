@@ -148,6 +148,17 @@ describe('引擎', () => {
     expect(events.some((x) => x.type === 'transfer' && x.kind === 'pension')).toBe(true);
   });
 
+  it('浸泡：30 天每天结束时不变量都成立，耗时在 10 秒以内（M0 的性能探针）', () => {
+    const e = Engine.create(def, { seed: 2 });
+    const total0 = totalMoney(e.state);
+    const t0 = performance.now();
+    for (let d = 1; d <= 30; d++) {
+      e.advance(d * DAY - 1);
+      expect(checkInvariants(def, e.state, total0), `D${d}`).toEqual([]);
+    }
+    expect(performance.now() - t0).toBeLessThan(10_000);
+  });
+
   it('重放一致：事件流经 reducer 重建的状态与引擎内状态相同', () => {
     const { e, events } = run(4, 4);
     const st = initialState(def, DEFAULT_PARAMS, 4, rand);

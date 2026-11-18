@@ -1,0 +1,225 @@
+/*
+ * 微缩城设计系统（v4）：暖色纸面 + 深青强调
+ * - 颜色只用这里的变量；canvas 与三维场景从 theme/palette.ts 取同一套值
+ * - 字体用系统字体：正文无衬线，标题衬线（缺失时回落无衬线）
+ * - 描边 1px，圆角 6 / 10 / 14，阴影柔和分三级，过渡 150ms
+ */
+:root {
+  /* 纸面与卡片 */
+  --paper: #faf7f2;
+  --surface: #ffffff;
+  --surface-2: #f3eee6;
+  --surface-3: #e9e2d7;
+  --line: #e7e0d5;
+  --line-2: #d8cfc1;
+
+  /* 墨 */
+  --ink: #26241f;
+  --ink-2: #5e5a52;
+  --ink-3: #8f897e;
+
+  /* 强调与辅助 */
+  --teal: #1f5f63;
+  --teal-2: #2e7c80;
+  --teal-soft: #e3efee;
+  --amber: #e3a13a;
+  --amber-soft: #fbefd8;
+
+  /* 语义色 */
+  --ok: #3e8e63;
+  --ok-soft: #e4f1e9;
+  --warn: #d98a2b;
+  --warn-soft: #fbeedc;
+  --bad: #c2553a;
+  --bad-soft: #f8e5df;
+  --info: #4b7ead;
+  --info-soft: #e5edf6;
+  --rumor: #a45a8a;
+  --c-plum: #8a6a9a;
+  --c-pink: #d9776a;
+  --c-brown: #9c6b4e;
+  --c-jev: #2f8a91;
+
+  /* 知情三态（城市、地图、图例统一） */
+  --st-unaware: #bdb6aa;
+  --st-heard: #e3a13a;
+  --st-believe: #1f5f63;
+
+  /* 渠道色（城市连线、时间轴、图例一致） */
+  --ch-website: #4b7ead;
+  --ch-push: #e3a13a;
+  --ch-board: #5c9e6e;
+  --ch-talk: #d9776a;
+  --ch-dm: #a45a8a;
+  --ch-org: #3f9aa0;
+
+  /* 时段精度色 */
+  --w-exact: #3e8e63;
+  --w-coarse: #e3a13a;
+  --w-allday: #c2553a;
+  --w-unknown: #a8a298;
+
+  /* 兼容名：组件里的语义别名（v4 起指向新配色） */
+  --bg-0: var(--paper);
+  --bg-1: var(--surface);
+  --bg-2: var(--surface-2);
+  --bg-3: var(--surface-3);
+  --hi: var(--line-2);
+  --fg-0: var(--ink);
+  --fg-1: var(--ink);
+  --fg-2: var(--ink-2);
+  --fg-3: var(--ink-3);
+  --accent: var(--teal);
+  --accent-hi: var(--teal-2);
+  --accent-soft: var(--teal-soft);
+
+  /* 字体 */
+  --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', sans-serif;
+  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', var(--font);
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+  --fs-2: var(--fs-xl);
+  --lh: 1.55;
+
+  /* 形状 */
+  --r-sm: 6px;
+  --r: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+  --sh-1: 0 1px 2px rgba(38, 36, 31, 0.06), 0 1px 1px rgba(38, 36, 31, 0.03);
+  --sh-2: 0 4px 16px rgba(38, 36, 31, 0.08), 0 1px 2px rgba(38, 36, 31, 0.05);
+  --sh-3: 0 16px 48px rgba(38, 36, 31, 0.16), 0 2px 6px rgba(38, 36, 31, 0.06);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --u: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--fs);
+  line-height: var(--lh);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--teal-soft);
+  color: var(--ink);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-3);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- 表面：卡片 / 凹槽 / 分隔 ---------- */
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+
+.well {
+  background: var(--surface-2);
+  border-radius: var(--r);
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 10px 0 12px;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  letter-spacing: 0.01em;
+}
+
+.t-2x {
+  font-size: var(--fs-xl);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+.dim {
+  color: var(--ink-2);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes blink-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.blink {
+  animation: blink-soft 1.6s ease-in-out infinite;
+}
+
+@keyframes rise-in {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
