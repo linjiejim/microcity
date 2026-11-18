@@ -67,7 +67,8 @@ export interface ActorPose {
 }
 
 export type Weather = 'sun' | 'cloud' | 'rain';
-export type CameraMode = 'overview' | 'street' | 'follow';
+/** pov：贴在被跟随者身后、齐眼高的视角（没有跟随对象时等同 street） */
+export type CameraMode = 'overview' | 'street' | 'follow' | 'pov';
 
 export interface Pick {
   kind: 'actor' | 'place';

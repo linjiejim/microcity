@@ -66,6 +66,15 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
   };
   const travelMin = (place: string) => e.travelSec(p, cur, place) / MIN;
   const costTerm = (cost: number) => -cost * (P.costBase + P.costTight * tight + P.costThrift * p.traits.thrift);
+  // 眼下最便宜的菜价（每份）：在家吃饭的成本、各家店比价的基准
+  let foodPrice = Infinity;
+  for (const kind of ['market', 'grocery'] as const)
+    for (const pl of e.map.ofKind(kind)) {
+      if (e.rules.closed(pl.id, dayOf(t))) continue;
+      const fp = e.priceAt(pl.id, 'food', t);
+      if (fp !== undefined && fp < foodPrice) foodPrice = fp;
+    }
+  if (!Number.isFinite(foodPrice)) foodPrice = 8;
 
   /** 在某地做 want 秒，受下一件事、营业时间、人数的限制；做不成返回 null */
   const fit = (place: string, want: number, min: number, service: boolean): number | null => {
@@ -74,6 +83,7 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
     let d = want;
     if (deadline) d = Math.min(d, deadline.at - arrive - e.travelSec(p, place, deadline.place, deadline.pace));
     const pl = e.map.place(place);
+    if (e.rules.closed(place, dayOf(arrive))) return null;
     if (pl.hours) {
       const a = timeOfDay(arrive);
       if (a < pl.hours[0] || a >= pl.hours[1]) return null;
@@ -112,38 +122,41 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
     const name = meal ?? '东西';
     if (pantry.food >= 1) {
       const d = fit(home, (25 + Math.floor(u01('eat-home') * 11)) * MIN, 15 * MIN, false);
-      if (d) push('eat_home', `在家吃${name}`, home, { kind: 'eat_home', dur: d, label: `在家吃${name}`, anchors: ['dine'] }, { need: need(P.rates.eat_home, d), habit, base: -P.cookEffort * (1.4 - p.traits.order) });
+      if (d) push('eat_home', `在家吃${name}`, home, { kind: 'eat_home', dur: d, label: `在家吃${name}`, anchors: ['dine'] }, { need: need(P.rates.eat_home, d), habit, base: -P.cookEffort * (1.4 - p.traits.order), cost: costTerm(foodPrice) });
     }
     const job = p.job;
     if (job && cur === job.place && deadline?.place === cur && pantry.food >= 1) {
       const d = fit(cur, 20 * MIN, 12 * MIN, false);
       if (d) push('eat_work', '吃自带的饭', cur, { kind: 'eat_work', dur: d, label: '吃自带的饭', anchors: ['table', 'desk', 'free'] }, { need: need(P.rates.eat_work, d), habit, base: 0.3 });
     }
-    const eateries = e.map
-      .ofKind('eatery')
+    const eateries = e
+      .mealPlaces(t)
       .map((pl) => ({ pl, m: travelMin(pl.id) }))
       .sort((a, b) => a.m - b.m || (a.pl.id < b.pl.id ? -1 : 1));
     for (const { pl } of eateries) {
-      const price = e.firmAt(pl.id)?.offers.find((o) => o.item === 'meal')?.price;
+      const price = e.priceAt(pl.id, 'meal', t);
       if (price === undefined || wallet < price || p.age < P.eatOutAge) continue;
-      const d = fit(pl.id, (20 + Math.floor(u01('eat-out', pl.id) * 11)) * MIN, 12 * MIN, true);
-      if (d) push(`eat_out:${pl.id}`, `去${pl.name}吃${name}`, pl.id, { kind: 'eat_out', dur: d, label: `在${pl.name}吃${name}`, anchors: ['table'] }, { need: need(P.rates.eat_out, d), habit, cost: costTerm(price) });
+      const d = fit(pl.id, (20 + Math.floor(u01('eat-out', pl.id) * 11)) * MIN, 12 * MIN, pl.kind === 'eatery');
+      if (d) push(`eat_out:${pl.id}`, `去${pl.name}吃${name}`, pl.id, { kind: 'eat_out', dur: d, label: `在${pl.name}吃${name}`, anchors: ['table', 'read', 'board', 'free'] }, { need: need(P.rates.eat_out, d), habit, cost: costTerm(price) });
     }
   }
 
   // ── 买菜、买日用品：由家里负责采购的人去
   if (p.age >= 16 && (hh.shopper === p.id || pantry.food < members)) {
-    const lowFood = pantry.food < members * P.pantryLow;
+    const lines = e.pantry(hh, t);
+    const lowFood = pantry.food < members * lines.low;
     const lowSup = pantry.supplies < members * P.suppliesLow;
     if (lowFood || lowSup) {
-      const shortage = clamp(1 - pantry.food / (members * P.pantryLow), 0, 1) + (pantry.food < members ? 0.8 : 0) + (lowSup ? 0.3 : 0);
+      const shortage = clamp(1 - pantry.food / (members * lines.low), 0, 1) + (pantry.food < members ? 0.8 : 0) + (lowSup ? 0.3 : 0);
       const targets: PlaceKind[] = lowFood ? ['market', 'grocery'] : ['grocery'];
       for (const kind of targets)
         for (const pl of e.map.ofKind(kind)) {
           const d = fit(pl.id, (12 + Math.floor(u01('shop', pl.id) * 11)) * MIN, 8 * MIN, true);
           if (!d) continue;
           const what = kind === 'market' ? '买菜' : lowFood ? '买菜和日用品' : '买日用品';
-          push(`shop:${pl.id}`, `去${pl.name}${what}`, pl.id, { kind: 'shop', dur: d, label: `在${pl.name}${what}`, anchors: ['browse', 'queue'] }, { base: 1.2, need: 5 * shortage, habit: kind === 'market' && sod < hm(10) ? 1 : 0, cost: kind === 'grocery' && lowFood ? -0.4 : 0 });
+          // 同样买菜，哪家贵哪家吃亏：按每份菜的价差算
+          const unit = lowFood ? (e.priceAt(pl.id, 'food', t) ?? foodPrice) : 0;
+          push(`shop:${pl.id}`, `去${pl.name}${what}`, pl.id, { kind: 'shop', dur: d, label: `在${pl.name}${what}`, anchors: ['browse', 'queue'] }, { base: 1.2, need: 5 * shortage, habit: kind === 'market' && sod < hm(10) ? 1 : 0, cost: lowFood ? costTerm((unit - foodPrice) * 4) : 0 });
         }
     }
   }
@@ -164,7 +177,7 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
     for (const where of h.where) {
       const places = where === 'home' ? [e.map.place(home)] : e.map.ofKind(where);
       for (const pl of places) {
-        const cost = h.cost[pl.kind] ?? 0;
+        const cost = (h.cost[pl.kind] ?? 0) * (h.item ? e.rules.priceFactor(pl.id, h.item, dayOf(t)) : 1);
         if (cost > wallet) continue;
         const d = fit(pl.id, want, min, pl.kind === 'teahouse');
         if (!d) continue;

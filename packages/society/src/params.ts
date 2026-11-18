@@ -103,6 +103,8 @@ export interface RuleParams {
   schoolLunch: number;
   /** 儿童每周零花钱（元） */
   allowance: number;
+  /** 被裁后每月的失业补助（元） */
+  joblessAid: number;
 
   /** 聊天让亲密度涨多少（随现有亲密度递减） */
   chatCloseness: number;
@@ -186,6 +188,7 @@ export const DEFAULT_PARAMS: RuleParams = {
   cityLunch: 20,
   schoolLunch: 8,
   allowance: 30,
+  joblessAid: 900,
 
   chatCloseness: 0.03,
   acquaintAfter: 3,

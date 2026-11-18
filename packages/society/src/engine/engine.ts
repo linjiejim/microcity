@@ -3,7 +3,8 @@ import { MinHeap, type Keyed } from '../core/pq.ts';
 import { rand, type RngKey } from '../core/rng.ts';
 import { DAY, dayOf, dayStart, hm, MIN, timeOfDay, type SimTime } from '../core/time.ts';
 import { ACT_BUCKET, GOODS_LABEL, HOBBIES, SHIFTS } from '../data/tables.ts';
-import { EXT, householdAccount, type CommunityDef, type FirmDef, type HouseholdDef, type PersonDef, type PlaceDef } from '../model/def.ts';
+import { EXT, householdAccount, type CommunityDef, type FirmDef, type HouseholdDef, type OfferDef, type PersonDef, type PlaceDef } from '../model/def.ts';
+import type { Intervention } from '../model/intervention.ts';
 import type { DomainEvent, EventBody, TransferKind } from '../model/events.ts';
 import type { ActState, Intent, PersonState, WorldState } from '../model/state.ts';
 import { DEFAULT_PARAMS, PARAMS_VERSION, POLICY_VERSION, SOCIAL_RULES_VERSION, type RuleParams } from '../params.ts';
@@ -11,6 +12,8 @@ import { initialState, needsAt, reduce, weatherOf } from '../reduce.ts';
 import { choose, type Deadline } from '../systems/choose.ts';
 import { commitsFor, habitWake, type Commit, type CommitCtx } from '../systems/commits.ts';
 import { payroll, pensions, restock, weekly } from '../systems/economy.ts';
+import { applyIntervention } from '../systems/interventions.ts';
+import { pantryLines, Rules } from '../systems/rules.ts';
 import { maybeChat } from '../systems/social.ts';
 import { interiorOf, type AnchorKind } from '../world/interiors.ts';
 import { WorldMap } from '../world/map.ts';
@@ -19,6 +22,8 @@ export interface EngineOptions {
   seed: number;
   /** 覆盖默认参数（实验用）；只做一层合并，rates 与 needWeight 再合并一层 */
   params?: Partial<RuleParams>;
+  /** 干预（D88）：对规则的补丁；不给就是基线 */
+  interventions?: Intervention[];
   /** 从第一个事件起就要收到的监听者（开局的事件在 create 里就发出了） */
   onEvent?: (e: DomainEvent) => void;
 }
@@ -26,15 +31,17 @@ export interface EngineOptions {
 type TaskBody =
   | { k: 'midnight'; day: number }
   | { k: 'econ'; what: 'restock' | 'weekly' | 'payroll' | 'pension' }
+  | { k: 'iv'; index: number; phase: 'start' | 'end' }
   | { k: 'end'; agent: string; actId: string }
   | { k: 'arrive'; agent: string; moveId: string };
 type Task = Keyed & TaskBody;
 
-const PRIO: Record<TaskBody['k'], number> = { midnight: 0, econ: 1, end: 2, arrive: 3 };
+const PRIO: Record<TaskBody['k'], number> = { midnight: 0, iv: 1, econ: 2, end: 3, arrive: 4 };
 
 export interface EngineSnapshot {
   seed: number;
   params: RuleParams;
+  interventions: Intervention[];
   now: SimTime;
   seq: number;
   taskSeq: number;
@@ -63,6 +70,7 @@ export class Engine {
   readonly P: Record<string, PersonDef>;
   readonly H: Record<string, HouseholdDef>;
   readonly F: Record<string, FirmDef>;
+  readonly rules: Rules;
   state: WorldState;
   now: SimTime;
 
@@ -75,8 +83,9 @@ export class Engine {
   private readonly commitCtx: CommitCtx;
   private depth = 0;
 
-  private constructor(def: CommunityDef, seed: number, params: RuleParams, state: WorldState, now: SimTime) {
+  private constructor(def: CommunityDef, seed: number, params: RuleParams, interventions: Intervention[], state: WorldState, now: SimTime) {
     this.def = def;
+    this.rules = new Rules(def, interventions);
     this.seed = seed;
     this.params = params;
     this.map = new WorldMap(def.map);
@@ -85,19 +94,19 @@ export class Engine {
     this.F = Object.fromEntries(def.firms.map((f) => [f.id, f]));
     this.state = state;
     this.now = now;
-    this.commitCtx = { seed, params, map: this.map, P: this.P, H: this.H };
+    this.commitCtx = { seed, params, map: this.map, P: this.P, H: this.H, idle: (p, day) => !!this.state.people[p.id]?.laidOff || (!!p.job && this.rules.closed(p.job.place, day)) };
   }
 
   static create(def: CommunityDef, opts: EngineOptions): Engine {
     const params = mergeParams(opts.params);
-    const e = new Engine(def, opts.seed, params, initialState(def, params, opts.seed, rand), 0);
+    const e = new Engine(def, opts.seed, params, opts.interventions ?? [], initialState(def, params, opts.seed, rand), 0);
     if (opts.onEvent) e.listeners.push(opts.onEvent);
     e.boot();
     return e;
   }
 
   static restore(def: CommunityDef, snap: EngineSnapshot): Engine {
-    const e = new Engine(def, snap.seed, snap.params, structuredClone(snap.state), snap.now);
+    const e = new Engine(def, snap.seed, snap.params, snap.interventions, structuredClone(snap.state), snap.now);
     e.seq = snap.seq;
     e.taskSeq = snap.taskSeq;
     e.actSeq = snap.actSeq;
@@ -106,7 +115,7 @@ export class Engine {
   }
 
   snapshot(): EngineSnapshot {
-    return { seed: this.seed, params: this.params, now: this.now, seq: this.seq, taskSeq: this.taskSeq, actSeq: this.actSeq, tasks: this.heap.toArray().map((t) => ({ ...t })), state: structuredClone(this.state) };
+    return { seed: this.seed, params: this.params, interventions: this.rules.list, now: this.now, seq: this.seq, taskSeq: this.taskSeq, actSeq: this.actSeq, tasks: this.heap.toArray().map((t) => ({ ...t })), state: structuredClone(this.state) };
   }
 
   stateHash(): string {
@@ -129,7 +138,13 @@ export class Engine {
 
   private boot(): void {
     this.emit({ type: 'run_started', community: this.def.id, seed: this.seed, versions: { params: PARAMS_VERSION, policy: POLICY_VERSION, social: SOCIAL_RULES_VERSION } });
-    this.emit({ type: 'day_started', day: 1, weather: this.state.weather });
+    this.emit({ type: 'day_started', day: 1, weather: this.rules.weather(1) ?? this.state.weather });
+    this.rules.list.forEach((iv, index) => {
+      const from = 'day' in iv ? iv.day : iv.from;
+      // 一次性的干预在当天上午九点发生；有起止的在当天零点生效
+      this.schedule(dayStart(from) + ('day' in iv ? hm(9) : 0), { k: 'iv', index, phase: 'start' });
+      if ('from' in iv && iv.to !== undefined) this.schedule(dayStart(iv.to + 1), { k: 'iv', index, phase: 'end' });
+    });
     for (const p of this.def.people) this.begin(p, this.state.people[p.id]!, this.sleepIntent(p, 0));
     this.schedule(DAY, { k: 'midnight', day: 2 });
     this.schedule(hm(3, 30), { k: 'econ', what: 'restock' });
@@ -169,6 +184,8 @@ export class Engine {
         return this.midnight(t.day);
       case 'econ':
         return this.econ(t.what);
+      case 'iv':
+        return applyIntervention(this, t.index, t.phase);
       case 'end':
         return this.onEnd(t.agent, t.actId);
       case 'arrive':
@@ -188,7 +205,7 @@ export class Engine {
       const mood = Math.round(Math.min(1, 0.2 * n[0] + 0.25 * n[1] + 0.25 * n[2] + 0.3 * n[3] + Math.min(0.1, ps.today.chats * 0.02)) * 1000) / 1000;
       this.emit({ type: 'day_summary', agent: p.id, day: day - 1, use, spent: ps.today.spent, earned: ps.today.earned, chats: ps.today.chats, mood, needs: n.map((x) => Math.round(x * 1000) / 1000) as [number, number, number, number] });
     }
-    this.emit({ type: 'day_started', day, weather: weatherOf(this.seed, day, rand) });
+    this.emit({ type: 'day_started', day, weather: this.rules.weather(day) ?? weatherOf(this.seed, day, rand) });
     for (const h of this.def.households) {
       const used = Math.min(this.state.households[h.id]!.supplies, h.members.length * this.params.suppliesDaily);
       if (used > 0) this.emit({ type: 'stock', holder: householdAccount(h.id), item: 'supplies', delta: -used, memo: '日常消耗' });
@@ -228,6 +245,37 @@ export class Engine {
     return id ? this.F[id] : undefined;
   }
 
+  /** 这家店今天卖的东西：固定的商品，加上干预开的伙食 */
+  offersAt(place: string, day: number): OfferDef[] {
+    const firm = this.firmAt(place);
+    const extra = this.rules.canteenAt(place, day);
+    if (!firm) return [];
+    return extra && !firm.offers.some((o) => o.item === extra.item) ? [...firm.offers, extra] : firm.offers;
+  }
+
+  /** 现在的售价（含调价）；不卖返回 undefined */
+  priceAt(place: string, item: string, t: SimTime = this.now): number | undefined {
+    const day = dayOf(t);
+    const offer = this.offersAt(place, day).find((o) => o.item === item);
+    return offer ? Math.round(offer.price * this.rules.priceFactor(place, item, day) * 100) / 100 : undefined;
+  }
+
+  /** 现在能吃饭的地方：饭馆，加上开了伙的地点 */
+  mealPlaces(t: SimTime): PlaceDef[] {
+    const extra = this.rules.canteens(dayOf(t)).map((c) => this.map.place(c.place));
+    return extra.length ? [...this.map.ofKind('eatery'), ...extra.filter((p) => p.kind !== 'eatery')] : this.map.ofKind('eatery');
+  }
+
+  /** 这户人家现在的存粮线（信了传言会更高） */
+  pantry(hh: HouseholdDef, t: SimTime = this.now): { low: number; target: number } {
+    return pantryLines(this.params, hh.members.map((m) => this.state.people[m]!), t);
+  }
+
+  /** 干预让固定安排变了：丢掉缓存（一个人不上班了，家里其他人的饭点安排也跟着变，所以全丢） */
+  forgetCommits(): void {
+    this.commitCache.clear();
+  }
+
   has(p: PersonDef, item: string): boolean {
     return p.belongings.includes(item) || this.hh(p).belongings.includes(item);
   }
@@ -256,6 +304,7 @@ export class Engine {
 
   /** 地点在 [t0, t1] 是否都开着 */
   openDuring(place: string, t0: SimTime, t1: SimTime): boolean {
+    if (this.rules.closed(place, dayOf(t0))) return false;
     const h = this.map.place(place).hours;
     if (!h) return true;
     const a = timeOfDay(t0);
@@ -344,6 +393,7 @@ export class Engine {
 
   /** 到了地方发现做不成的原因；能做返回 undefined */
   private cannot(_p: PersonDef, _ps: PersonState, place: string, intent: Intent): string | undefined {
+    if (this.rules.closed(place, dayOf(this.now))) return '停业了';
     if (!this.openDuring(place, this.now, this.now + Math.min(intent.dur, 10 * MIN))) return '已经关门了';
     const needsService = intent.kind === 'eat_out' || intent.kind === 'shop' || (intent.kind === 'hobby' && this.map.place(place).kind === 'teahouse');
     if (needsService && !this.served(place)) return '没有人看店';
@@ -443,12 +493,12 @@ export class Engine {
       }
       case 'eat_out': {
         const firm = this.firmAt(place);
-        const offer = firm?.offers.find((o) => o.item === 'meal');
-        if (!firm || !offer) return fail('这里不卖饭');
+        const price = this.priceAt(place, 'meal');
+        if (!firm || price === undefined) return fail('这里不卖饭');
         if ((this.state.stock[firm.id]?.meal ?? 0) < 1) return fail('卖完了');
-        if (this.balance(p.id) < offer.price) return fail('钱不够');
+        if (this.balance(p.id) < price) return fail('钱不够');
         this.emit({ type: 'stock', holder: firm.id, item: 'meal', delta: -1, memo: `卖给${p.name}` });
-        this.pay(p.id, firm.id, offer.price, 'purchase', `在${firm.name}吃饭`);
+        this.pay(p.id, firm.id, price, 'purchase', `在${firm.name}吃饭`);
         break;
       }
       case 'shop': {
@@ -456,18 +506,19 @@ export class Engine {
         if (!firm) return fail('这里不卖东西');
         const n = hh.members.length;
         const home = this.state.households[hh.id]!;
+        const lines = this.pantry(hh);
         let bought = 0;
         for (const [item, have, target] of [
-          ['food', home.food, n * this.params.pantryTarget],
+          ['food', home.food, n * lines.target],
           ['supplies', home.supplies, n * this.params.suppliesTarget],
         ] as const) {
-          const offer = firm.offers.find((o) => o.item === item);
-          if (!offer) continue;
+          const price = this.priceAt(place, item);
+          if (price === undefined) continue;
           const qty = Math.min(Math.ceil(target - have), Math.floor(this.state.stock[firm.id]?.[item] ?? 0));
           if (qty <= 0) continue;
           this.emit({ type: 'stock', holder: firm.id, item, delta: -qty, memo: `卖给${hh.label}` });
           this.emit({ type: 'stock', holder: hhAcc, item, delta: qty, memo: `${p.name}在${firm.name}买的` });
-          this.pay(hhAcc, firm.id, qty * offer.price, 'purchase', `${GOODS_LABEL[item]} × ${qty}（${firm.name}）`);
+          this.pay(hhAcc, firm.id, qty * price, 'purchase', `${GOODS_LABEL[item]} × ${qty}（${firm.name}）`);
           bought += qty;
         }
         if (bought === 0) return fail('没买到东西');
@@ -475,9 +526,10 @@ export class Engine {
       }
       case 'hobby': {
         const h = intent.hobby ? HOBBIES[intent.hobby] : undefined;
-        const cost = h?.cost[this.map.place(place).kind] ?? 0;
+        const base = h?.cost[this.map.place(place).kind] ?? 0;
         const firm = this.firmAt(place);
-        if (cost > 0 && firm) {
+        if (base > 0 && firm) {
+          const cost = Math.round(base * (h?.item ? this.rules.priceFactor(place, h.item, dayOf(t)) : 1) * 100) / 100;
           if (this.balance(p.id) < cost) return fail('钱不够');
           if (h?.item) this.emit({ type: 'stock', holder: firm.id, item: h.item, delta: -1, memo: `${p.name}的茶位` });
           this.pay(p.id, firm.id, cost, 'purchase', `在${firm.name}${h?.label ?? ''}`);

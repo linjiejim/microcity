@@ -1,4 +1,6 @@
 import { r3 } from '../core/rng.ts';
+import { DAY } from '../core/time.ts';
+import { RUMORS } from '../model/intervention.ts';
 import { HOBBIES } from '../data/tables.ts';
 import { tieKey, type PersonDef } from '../model/def.ts';
 import type { ActState, PersonState } from '../model/state.ts';
@@ -37,6 +39,22 @@ function scene(act: ActState, home: string): string | undefined {
 
 const TOPIC: Record<string, string> = { eat: '吃饭', shop: '买东西', work: '干活', school: '上课', 'school-gate': '接送孩子' };
 
+/** 聊天时把还在信的传言说给对方（最小版信息系统，D89）：只有“知道 / 不知道” */
+function spreadRumors(e: Engine, a: string, b: string): void {
+  for (const [from, to] of [
+    [a, b],
+    [b, a],
+  ] as const) {
+    const heard = e.state.people[from]!.heard;
+    for (const topic in heard) {
+      const info = RUMORS[topic];
+      if (!info || e.now - heard[topic]! > info.days * DAY) continue;
+      if (e.state.people[to]!.heard[topic] !== undefined || e.P[to]!.age < 14) continue;
+      if (e.rand('rumor', topic, from, to, Math.floor(e.now / DAY)) < info.spread) e.emit({ type: 'heard', agent: to, topic, from });
+    }
+  }
+}
+
 export function maybeChat(e: Engine, p: PersonDef, ps: PersonState): void {
   const act = ps.act;
   if (!act) return;
@@ -65,6 +83,7 @@ export function maybeChat(e: Engine, p: PersonDef, ps: PersonState): void {
   const topic = act.kind === 'hobby' && act.hobby ? HOBBIES[act.hobby]!.label : TOPIC[sc]!;
   const d = best.known ? r3(e.params.chatCloseness * Math.pow(1 - best.closeness, 1.5)) : 0;
   e.emit({ type: 'chat', a: p.id, b: best.id, place: act.place, topic, d });
+  spreadRumors(e, p.id, best.id);
   const key = tieKey(p.id, best.id);
   const tie = e.state.ties[key];
   if (!tie) {

@@ -359,7 +359,7 @@ export function Demo() {
     // 热更新会重建世界：把跟随状态接回去
     if (sim.current.follow) {
       w.setFollow('hero');
-      w.setCameraMode('follow');
+      w.setCameraMode(sim.current.mode === 'pov' ? 'pov' : 'follow');
     } else w.setCameraMode(sim.current.mode ?? 'overview');
     if (sim.current.orbit) w.debugOrbit?.({ ...sim.current.orbit, snap: true });
     const poses = people.map(blank);
@@ -414,7 +414,7 @@ export function Demo() {
         if (o.follow !== undefined) {
           s.follow = o.follow;
           w.setFollow(o.follow ? 'hero' : null);
-          w.setCameraMode(o.follow ? 'follow' : (o.mode ?? 'street'));
+          w.setCameraMode(o.follow ? (o.mode === 'pov' ? 'pov' : 'follow') : (o.mode ?? 'street'));
         } else if (o.mode) w.setCameraMode(o.mode);
         if (o.mode) s.mode = o.mode;
         s.orbit = o.orbit ?? null;
@@ -442,7 +442,7 @@ export function Demo() {
   const cam = (m: CameraMode) => {
     const w = world.current;
     if (!w) return;
-    if (m === 'follow') {
+    if (m === 'follow' || m === 'pov') {
       s.follow = true;
       w.setFollow('hero');
     } else {
@@ -496,7 +496,7 @@ export function Demo() {
           ))}
         </Row>
         <Row>
-          {(['overview', 'street', 'follow'] as CameraMode[]).map((v) => (
+          {(['overview', 'street', 'follow', 'pov'] as CameraMode[]).map((v) => (
             <Btn key={v} on={mode === v} onClick={() => cam(v)} id={`demo-cam-${v}`}>
               {v === 'overview' ? '俯瞰' : v === 'street' ? '街道' : '跟随主角'}
             </Btn>

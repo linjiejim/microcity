@@ -277,12 +277,17 @@ class World3D implements World3DApi {
 
     // 镜头
     const f = this.followPose;
-    const following = this.rig.mode === 'follow' && f !== null;
+    const mode = this.rig.mode;
+    const following = (mode === 'follow' || mode === 'pov') && f !== null;
     let indoor = false;
     if (following) {
       const pi = f.place === null ? undefined : this.placeIndex.get(f.place);
       indoor = pi !== undefined && !this.built[pi]!.place.open && f.visible;
-      if (f.visible) this.rig.track(f.x, f.h, f.y, indoor);
+      if (f.visible) {
+        const i = this.followIndex;
+        if (mode === 'pov' && this.actors.shown[i]) this.rig.trackPov(this.actors.eye[i * 4]!, this.actors.eye[i * 4 + 1]!, this.actors.eye[i * 4 + 2]!, this.actors.eye[i * 4 + 3]!, indoor);
+        else this.rig.track(f.x, f.h, f.y, indoor);
+      }
       this.cutPlace = indoor ? pi! : -1;
       this.cutFloor = f.floor;
     } else this.cutPlace = -1;
@@ -307,7 +312,9 @@ class World3D implements World3DApi {
     if (this.rain.visible) this.updateRain(dist);
 
     const k = Math.max(0, Math.min(1, (dist - 30) / 300));
-    this.post.tune(this.env.night, indoor ? 0.5 : 1.0 + 1.7 * k, indoor ? 0.34 : 0.3 - 0.12 * k, Math.max(0.6, Math.min(3.5, dist * 0.012)));
+    // 齐眼高的视角不要移轴：那是俯拍微缩模型才有的效果
+    if (this.rig.povActive) this.post.tune(this.env.night, 0.25, 0.5, 0.7);
+    else this.post.tune(this.env.night, indoor ? 0.5 : 1.0 + 1.7 * k, indoor ? 0.34 : 0.3 - 0.12 * k, Math.max(0.6, Math.min(3.5, dist * 0.012)));
     this.post.render(dt / 1000);
   }
 
@@ -636,6 +643,8 @@ class World3D implements World3DApi {
     for (let i = 0; i < poses.length && k < this.emotes.length; i++) {
       const p = poses[i]!;
       if (!p.emote || !this.actors.shown[i]) continue;
+      // 贴在身后看时，自己头顶的图标会挡住视线
+      if (i === this.followIndex && this.rig.povActive) continue;
       const x = this.actors.top[i * 3]!;
       const z = this.actors.top[i * 3 + 2]!;
       if (Math.abs(x - this.rig.target.x) + Math.abs(z - this.rig.target.z) > reach) continue;

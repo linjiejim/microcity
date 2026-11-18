@@ -4,6 +4,9 @@ import type { CameraMode } from './types.ts';
 /**
  * 镜头：绕目标点的轨道相机，三档（俯瞰、街道、跟随）之间平滑过渡。
  * 视场角很小，离得远，所以近大远小很弱——这是“微缩模型”观感的来源之一。
+ *
+ * 第四档 pov 不是轨道相机：贴在被跟随者身后、齐眼高、略偏右肩，看向其前方；
+ * 拖动是环顾，滚轮是离得近一点或远一点。没有跟随对象时退回街道档的轨道相机。
  */
 
 interface Orbit {
@@ -17,10 +20,14 @@ const PRESET: Record<CameraMode | 'interior', Orbit> = {
   overview: { yaw: 0.5, pitch: 0.86, dist: 400, fov: 22 },
   street: { yaw: 0.5, pitch: 0.62, dist: 110, fov: 24 },
   follow: { yaw: 0.45, pitch: 0.66, dist: 32, fov: 26 },
+  pov: { yaw: 0.5, pitch: 0.62, dist: 110, fov: 24 },
   interior: { yaw: 0.45, pitch: 0.92, dist: 27, fov: 26 },
 };
 
 const LIMIT = { minDist: 9, maxDist: 560, minPitch: 0.2, maxPitch: 1.45 };
+const POV = { fov: 56, back: 2.5, minBack: 0.9, maxBack: 7, side: 0.42, up: 0.2, pitch: 0.1, minPitch: -0.7, maxPitch: 0.95 };
+const TMP = new THREE.Vector3();
+const TMP2 = new THREE.Vector3();
 
 export class CameraRig {
   readonly camera = new THREE.PerspectiveCamera(22, 1, 1, 4000);
@@ -41,6 +48,18 @@ export class CameraRig {
   private readonly onMode: (m: CameraMode) => void;
   private readonly onClick: (x: number, y: number) => void;
   private readonly off: Array<() => void> = [];
+  /** pov：这一帧有没有可贴的人、其眼睛位置与朝向；环顾的偏移；平滑后的相机位置与注视点 */
+  private povOn = false;
+  private povWas = false;
+  private readonly povEye = new THREE.Vector3();
+  private povFace = 0;
+  private povYaw = 0;
+  private povIndoor = false;
+  private povYawOff = 0;
+  private povPitchOff = 0;
+  private povBack = POV.back;
+  private readonly povPos = new THREE.Vector3();
+  private readonly povLook = new THREE.Vector3();
 
   constructor(el: HTMLElement, bounds: { w: number; h: number }, onMode: (m: CameraMode) => void, onClick: (x: number, y: number) => void) {
     this.el = el;
@@ -53,8 +72,14 @@ export class CameraRig {
     this.apply();
   }
 
+  /** 镜头离目标多远（米）。pov 时给一个近景的名义值：雾、阴影范围、遮蔽半径都按它调 */
   get distance(): number {
-    return this.cur.dist;
+    return this.povActive ? 14 : this.cur.dist;
+  }
+
+  /** 此刻是不是真的贴在人身后（pov 档且有可贴的人） */
+  get povActive(): boolean {
+    return this.mode === 'pov' && this.povWas;
   }
 
   get yaw(): number {
@@ -69,6 +94,9 @@ export class CameraRig {
     this.goal.fov = p.fov;
     this.userDist = 1;
     this.interior = false;
+    this.povYawOff = 0;
+    this.povPitchOff = 0;
+    this.povBack = POV.back;
     if (!keepTarget || mode === 'overview') this.goalTarget.set(this.bounds.w / 2, 0, this.bounds.h / 2);
   }
 
@@ -88,8 +116,67 @@ export class CameraRig {
     }
   }
 
+  /** pov：每帧给出被跟随者眼睛的位置与朝向；这一帧不调用就退回轨道相机 */
+  trackPov(ex: number, ey: number, ez: number, face: number, indoor: boolean): void {
+    this.povOn = true;
+    this.povEye.set(ex, ey, ez);
+    this.povFace = face;
+    this.povIndoor = indoor;
+    this.goalTarget.set(ex, ey - 0.5, ez);
+  }
+
+  private updatePov(dt: number): void {
+    if (!this.povWas) {
+      // 刚贴上去：从当前的相机位置飞过来
+      this.povYaw = this.povFace;
+      this.povPos.copy(this.camera.position);
+      this.povLook.copy(this.target);
+    }
+    let d = this.povFace - this.povYaw;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    this.povYaw += d * (1 - Math.exp(-dt / 0.45));
+    const yaw = this.povYaw + this.povYawOff;
+    const pitch = POV.pitch + this.povPitchOff;
+    const cp = Math.cos(pitch);
+    const fx = Math.sin(yaw) * cp;
+    const fy = -Math.sin(pitch);
+    const fz = Math.cos(yaw) * cp;
+    // 面朝 +Z 时右手边是 -X
+    const rx = -Math.cos(yaw);
+    const rz = Math.sin(yaw);
+    const back = this.povIndoor ? Math.min(this.povBack, 1.7) : this.povBack;
+    TMP.set(this.povEye.x - fx * back + rx * POV.side, Math.max(this.povEye.y - fy * back + POV.up, 0.35), this.povEye.z - fz * back + rz * POV.side);
+    TMP2.set(this.povEye.x + fx * 9 + rx * POV.side, this.povEye.y + fy * 9 + POV.up, this.povEye.z + fz * 9 + rz * POV.side);
+    const k = 1 - Math.exp(-dt / (this.povWas ? 0.14 : 0.3));
+    this.povPos.lerp(TMP, k);
+    this.povLook.lerp(TMP2, k);
+    this.cur.fov += (POV.fov - this.cur.fov) * (1 - Math.exp(-dt / 0.3));
+    this.target.lerp(this.goalTarget, 1 - Math.exp(-dt / 0.2));
+    // 轨道相机的角度悄悄跟着，切回别的档时不至于甩一大圈
+    this.cur.yaw = this.goal.yaw = yaw + Math.PI;
+    this.camera.position.copy(this.povPos);
+    this.camera.lookAt(this.povLook);
+    this.camera.fov = this.cur.fov;
+    this.camera.near = 0.12;
+    this.camera.far = 2800;
+    this.camera.updateProjectionMatrix();
+  }
+
   update(dtMs: number): void {
     const dt = Math.min(0.1, dtMs / 1000);
+    const pov = this.mode === 'pov' && this.povOn;
+    this.povOn = false;
+    if (pov) {
+      this.updatePov(dt);
+      this.povWas = true;
+      return;
+    }
+    if (this.povWas) {
+      // 离开 pov：轨道相机从街道档的距离接手
+      this.povWas = false;
+      this.cur.dist = Math.min(this.cur.dist, 40);
+      this.cur.pitch = 0.3;
+    }
     const k = 1 - Math.exp(-dt / 0.28);
     const kt = 1 - Math.exp(-dt / (this.mode === 'follow' ? 0.22 : 0.3));
     this.target.lerp(this.goalTarget, kt);
@@ -113,8 +200,14 @@ export class CameraRig {
     this.camera.updateProjectionMatrix();
   }
 
-  /** 验收与截图用：直接摆镜头 */
+  /** 验收与截图用：直接摆镜头（pov 时 yaw、pitch 是环顾的偏移，dist 是身后的距离） */
   debugOrbit(o: { yaw?: number; pitch?: number; dist?: number; x?: number; z?: number; snap?: boolean }): void {
+    if (this.mode === 'pov') {
+      if (o.yaw !== undefined) this.povYawOff = o.yaw;
+      if (o.pitch !== undefined) this.povPitchOff = o.pitch;
+      if (o.dist !== undefined) this.povBack = o.dist;
+      return;
+    }
     if (o.yaw !== undefined) this.goal.yaw = o.yaw;
     if (o.pitch !== undefined) this.goal.pitch = o.pitch;
     if (o.dist !== undefined) this.goal.dist = o.dist;
@@ -132,6 +225,10 @@ export class CameraRig {
   }
 
   private zoom(factor: number): void {
+    if (this.povActive) {
+      this.povBack = Math.max(POV.minBack, Math.min(POV.maxBack, this.povBack * factor));
+      return;
+    }
     const d = Math.max(LIMIT.minDist, Math.min(LIMIT.maxDist, this.goal.dist * factor));
     if (this.mode === 'follow') {
       this.userDist *= d / this.goal.dist;
@@ -168,6 +265,11 @@ export class CameraRig {
   }
 
   private orbit(dx: number, dy: number): void {
+    if (this.povActive) {
+      this.povYawOff -= dx * 0.005;
+      this.povPitchOff = Math.max(POV.minPitch - POV.pitch, Math.min(POV.maxPitch - POV.pitch, this.povPitchOff + dy * 0.004));
+      return;
+    }
     this.goal.yaw -= dx * 0.006;
     this.goal.pitch = Math.max(LIMIT.minPitch, Math.min(LIMIT.maxPitch, this.goal.pitch + dy * 0.005));
   }
@@ -188,7 +290,7 @@ export class CameraRig {
         this.dragging = null;
         return;
       }
-      this.dragging = { x: e.clientX, y: e.clientY, orbit: e.button === 2 || e.shiftKey || e.altKey || this.mode === 'follow', moved: 0 };
+      this.dragging = { x: e.clientX, y: e.clientY, orbit: e.button === 2 || e.shiftKey || e.altKey || this.mode === 'follow' || this.povActive, moved: 0 };
     });
     on('pointermove', (e) => {
       const p = this.pointers.get(e.pointerId);

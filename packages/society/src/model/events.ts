@@ -35,6 +35,11 @@ export type EventBody =
   | { type: 'chat'; a: string; b: string; place: string; topic: string; d: number }
   | { type: 'tie_formed'; a: string; b: string; kind: TieKind; via: string }
   | { type: 'tie_changed'; a: string; b: string; from: TieKind; to: TieKind }
+  /** 干预开始或结束（时间轴上的记号；规则的改变由运行配置给出） */
+  | { type: 'intervention'; index: number; kind: string; phase: 'start' | 'end'; label: string }
+  | { type: 'laid_off'; agent: string; firm: string }
+  /** 听说了一条传言；from 是告诉此人的人（最初的几个人没有） */
+  | { type: 'heard'; agent: string; topic: string; from?: string }
   /** 每人每天的小结（午夜） */
   | { type: 'day_summary'; agent: string; day: number; use: Record<Bucket, number>; spent: number; earned: number; chats: number; mood: number; needs: [number, number, number, number] };
 
@@ -50,6 +55,8 @@ export function eventAgents(e: DomainEvent): string[] {
       return [e.a, e.b];
     case 'transfer':
       return [e.from, e.to];
+    case 'heard':
+      return e.from ? [e.agent, e.from] : [e.agent];
     default:
       return 'agent' in e ? [e.agent] : [];
   }

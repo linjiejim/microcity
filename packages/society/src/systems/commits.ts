@@ -32,6 +32,8 @@ export interface CommitCtx {
   map: WorldMap;
   P: Record<string, PersonDef>;
   H: Record<string, HouseholdDef>;
+  /** 这一天不上班的额外原因：被裁了，或者单位停业（干预）；默认没有 */
+  idle?: (p: PersonDef, day: number) => boolean;
 }
 
 const weekdayIndex = (day: number): number => (day - 1) % 7;
@@ -50,10 +52,10 @@ export function worksOn(p: PersonDef, day: number): boolean {
 
 export const schoolOn = (p: PersonDef, day: number): boolean => !!p.school && weekdayIndex(day) < 5;
 
-/** 这一天被工作或上学占住的时段（绝对时间） */
-export function busy(p: PersonDef, day: number): Array<[SimTime, SimTime]> {
+/** 这一天被工作或上学占住的时段（绝对时间）；works 默认按班次表 */
+export function busy(p: PersonDef, day: number, works: (p: PersonDef, day: number) => boolean = worksOn): Array<[SimTime, SimTime]> {
   const d0 = dayStart(day);
-  if (worksOn(p, day)) return SHIFTS[p.job!.shift]!.segs.map(([a, b]) => [d0 + a, d0 + b]);
+  if (works(p, day)) return SHIFTS[p.job!.shift]!.segs.map(([a, b]) => [d0 + a, d0 + b]);
   if (schoolOn(p, day)) return [[d0 + (p.school!.away ? hm(7, 10) : hm(7, 50)), d0 + (p.school!.away ? hm(17, 20) : hm(16, 30))]];
   return [];
 }
@@ -94,9 +96,10 @@ export function commitsFor(ctx: CommitCtx, p: PersonDef, day: number): Commit[] 
   const add = (key: string, c: Omit<Commit, 'id'>) => out.push({ id: `${day}:${key}`, ...c });
   const slow = params.walkSpeed * params.slowFactor;
   const walk = (from: string, to: string) => Math.round((map.meters(from, to) * params.streetScale) / slow);
+  const works = (m: PersonDef, d: number) => worksOn(m, d) && !ctx.idle?.(m, d);
 
   // 上班
-  if (worksOn(p, day)) {
+  if (works(p, day)) {
     const job = p.job!;
     const shift = SHIFTS[job.shift]!;
     const occ = OCCUPATIONS[job.occupation]!;
@@ -139,17 +142,17 @@ export function commitsFor(ctx: CommitCtx, p: PersonDef, day: number): Commit[] 
     const plan = (key: 'lunch' | 'dinner', at: number, len: number, prep: number, name: string) => {
       const t0 = d0 + at;
       const canEat = (m: PersonDef): boolean => {
-        const b = busy(m, day);
+        const b = busy(m, day, works);
         if (overlaps(b, t0 - 5 * MIN, t0 + len)) return false;
         // 午饭：当天上班的人自己解决；晚饭：下班赶得回来才算
         if (key === 'lunch') return b.length === 0;
         const lastEnd = b.reduce((x, [, y]) => (y <= t0 ? Math.max(x, y) : x), 0);
-        if (lastEnd > 0 && worksOn(m, day) && !SHIFTS[m.job!.shift]!.away) return lastEnd + Math.round((map.meters(m.job!.place, m.home) * params.streetScale) / params.walkSpeed) + params.lead <= t0 + 10 * MIN;
+        if (lastEnd > 0 && works(m, day) && !SHIFTS[m.job!.shift]!.away) return lastEnd + Math.round((map.meters(m.job!.place, m.home) * params.streetScale) / params.walkSpeed) + params.lead <= t0 + 10 * MIN;
         return true;
       };
       const eaters = members.filter(canEat);
       if (eaters.length < 2) return;
-      const freeBefore = (m: PersonDef) => m.age >= 16 && !overlaps(busy(m, day), t0 - prep - 10 * MIN, t0);
+      const freeBefore = (m: PersonDef) => m.age >= 16 && !overlaps(busy(m, day, works), t0 - prep - 10 * MIN, t0);
       const cook = (eaters.find((m) => m.id === hh.cook && freeBefore(m)) ?? eaters.find(freeBefore))?.id;
       if (!cook) return;
       if (!eaters.some((m) => m.id === p.id)) return;

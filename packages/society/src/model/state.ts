@@ -98,6 +98,10 @@ export interface PersonState {
   lastWorkDay: number;
   /** 买完东西还没回家 */
   carrying: boolean;
+  /** 被裁了：不再有班上，也没有工资 */
+  laidOff?: boolean;
+  /** 听说过的传言：话题 → 听到的时刻 */
+  heard: Record<string, SimTime>;
 }
 
 export interface TieState {

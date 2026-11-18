@@ -1,5 +1,6 @@
 import { EXT, householdAccount } from '../model/def.ts';
 import type { Engine } from '../engine/engine.ts';
+import { dayOf } from '../core/time.ts';
 import { GOODS_LABEL, OCCUPATIONS } from '../data/tables.ts';
 
 /**
@@ -11,7 +12,10 @@ import { GOODS_LABEL, OCCUPATIONS } from '../data/tables.ts';
 export function restock(e: Engine): void {
   for (const f of e.def.firms) {
     if (f.externalDaily > 0) e.pay(EXT, f.id, f.externalDaily, 'grant', f.kind === 'public' ? '财政拨款' : '外地货款');
-    for (const o of f.offers) {
+    // 停业的店不进货
+    const day = dayOf(e.now);
+    if (e.rules.closed(f.place, day)) continue;
+    for (const o of e.offersAt(f.place, day)) {
       const qty = Math.floor(o.restockTo - (e.state.stock[f.id]?.[o.item] ?? 0));
       if (qty <= 0) continue;
       e.emit({ type: 'stock', holder: f.id, item: o.item, delta: qty, memo: '进货' });
@@ -24,7 +28,7 @@ export function restock(e: Engine): void {
 export function weekly(e: Engine): void {
   for (const h of e.def.households) {
     const acc = householdAccount(h.id);
-    if (h.rentWeekly > 0) e.pay(acc, EXT, h.rentWeekly, 'rent', '房租');
+    if (h.rentWeekly > 0) e.pay(acc, EXT, Math.round(h.rentWeekly * e.rules.rentFactor(dayOf(e.now))), 'rent', '房租');
     e.pay(acc, EXT, e.params.utilitiesBase + e.params.utilitiesPer * h.members.length, 'utilities', '水电燃气');
     for (const m of h.members) {
       const p = e.P[m]!;
@@ -61,8 +65,10 @@ export function payroll(e: Engine): void {
 /** 每月：养老金与补助 */
 export function pensions(e: Engine): void {
   for (const p of e.def.people) {
-    if (p.pension <= 0) continue;
-    e.pay(EXT, p.id, p.pension, 'pension', p.stage === 'retired' ? '养老金' : '补助');
-    e.pay(p.id, householdAccount(p.household), p.pension * e.params.sharePension, 'family', '交给家里');
+    // 被裁的人领失业补助
+    const amount = p.pension > 0 ? p.pension : e.state.people[p.id]!.laidOff ? e.params.joblessAid : 0;
+    if (amount <= 0) continue;
+    e.pay(EXT, p.id, amount, 'pension', p.stage === 'retired' ? '养老金' : '补助');
+    e.pay(p.id, householdAccount(p.household), amount * e.params.sharePension, 'family', '交给家里');
   }
 }

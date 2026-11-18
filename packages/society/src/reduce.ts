@@ -76,6 +76,7 @@ export function initialState(def: CommunityDef, params: RuleParams, seed: number
       workedDays: 0,
       lastWorkDay: 0,
       carrying: false,
+      heard: {},
     };
     state.here[p.home]!.push(p.id);
     state.accounts[p.id] = p.cash;
@@ -242,6 +243,17 @@ export function reduce(state: WorldState, e: DomainEvent, ctx: ReduceCtx): void 
 
     case 'tie_changed':
       state.ties[tieKey(e.a, e.b)]!.kind = e.to;
+      break;
+
+    case 'intervention':
+      break;
+
+    case 'laid_off':
+      person(e.agent).laidOff = true;
+      break;
+
+    case 'heard':
+      person(e.agent).heard[e.topic] = e.t;
       break;
 
     case 'day_summary': {
