@@ -9,4 +9,4 @@
 | [20260929-microcity-v2-calibration](20260929-microcity-v2-calibration.md) | 规则参数化、分支可换参数与换镇；向 Jev 校准的心智（语义拟合、信任面板、经历记忆、缩小挪动） | done |
 | [20260930-microcity-v3-classic-cases-and-sharing](20260930-microcity-v3-classic-cases-and-sharing.md) | 虚惊事件与经历累加、年龄分组与走样指标；先猜再跑、实验清单、实验广场、公开演示站模式、开源与部署 | done |
 | [20260930-microcity-v4-design-language](20260930-microcity-v4-design-language.md) | 放弃像素风：暖色微缩小镇 + 平面地图 + 数据新闻版式；每个工作区只回答一个问题 | done |
-| [20261118-microcity-v5-living-society](20261118-microcity-v5-living-society.md) | 重做为“活的小社会”：需求驱动的生活内核、纯浏览器运行、立体世界与跟随回放、自带密钥直连模型 | confirmed |
+| [20261118-microcity-v5-living-society](20261118-microcity-v5-living-society.md) | 重做为“活的小社会”：需求驱动的生活内核、纯浏览器运行、立体世界与跟随回放、画像与校准、干预与实验台、四个社区、自带密钥直连模型 | confirmed（M0–M5 已落地，待试用） |

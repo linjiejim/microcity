@@ -2,32 +2,37 @@
 
 微缩城 MicroCity：一个可以暂停、倒带、分叉的小社会。
 
-正在按 [v5 方案](docs/specs/20261118-microcity-v5-living-society.md) 重做（D62–D85）：
-- **新版**：`packages/society`（需求驱动的生活内核）+ `apps/studio`（纯浏览器应用，立体世界、跟随、回放）。M0–M2 已落地。
-- **经典版**：`packages/sim` + `apps/server` + `apps/web`，停电通知传播实验室（v0–v4，标签 `v4-classic`）。原样保留到 M4 接替其功能后删除（D63）；公开演示站目前跑的还是它。
+按 [v5 方案](docs/specs/20261118-microcity-v5-living-society.md) 重做（D62–D96）：
+- **新版**：`packages/society`（需求驱动的生活内核、干预、统计与指标、四个社区配方）+ `apps/studio`（纯浏览器应用：世界、画像、实验台）。M0–M5 已落地。
+- **经典版**：`packages/sim` + `apps/server` + `apps/web`，停电通知传播实验室（v0–v4，标签 `v4-classic`）。原样保留到完整的信息传播在新内核里重做之后再删（D63、D89）；公开演示站目前跑的还是它。
 
-先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照方案的决定记录（D1…D85）。新功能只加在新版里；经典版只修会影响演示站的问题。
+先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照方案的决定记录（D1…D96）。新功能只加在新版里；经典版只修会影响演示站的问题。
 
 ## 仓库结构
 
 ```
 packages/society/  新内核：确定性、无 IO、前后端同构
   core/            rng、pq、time、hash
-  model/           def（社区定义，运行期间不变）、state（只由事件改变）、events
+  model/           def（社区定义，运行期间不变）、state（只由事件改变）、events、intervention（干预与传言）
   data/tables.ts   数据表：活动、班次、职业、岗位、兴趣、物品
   params.ts        规则参数与版本号
   world/           map（寻路）、interiors（室内模板与站位，内核与三维层共用）
-  community/       spec（社区规格）、layout（布局）、generate（人口合成）、names
+  community/       spec（社区规格与四个预设）、layout（一个骨架、四个配方）、generate（人口合成）、names
   engine/          时钟、任务队列、发事件、“做完一件选下一件”
-  systems/         commits（固定安排）、choose（候选与效用）、economy、social
+  systems/         commits（固定安排）、choose（候选与效用）、economy、social、rules 与 interventions（干预）
+  metrics/         stats（每日统计与按天推进）、indicators（指标）、experiment（两条世界线的比较与判定）
   reduce.ts        同构 reducer
   checks.ts        不变量
 apps/studio/       新应用：纯静态，没有服务端
   sim/             Web Worker：按天推进内核，按天交数据
   timeline/        cursor（任一时刻的状态）、poses（站位与走位）、segments（一个人的一天）
   world3d/         立体世界（命令式 three.js）；types.ts 是对外契约
-  hud/             顶栏、时间轴、人物卡、居民名单、地点卡
-  llm/ settings/   OpenRouter 直连、预算闸、缓存、用量；设置弹窗
+  hud/             顶栏（三个工作区）、时间轴、人物卡、居民名单、地点卡
+  portrait/        画像：data（纯函数）、charts（SVG 小图）、reference（校准的现实参照）
+  lab/             实验台：presets（影响案例）、worker 与 client（跑两条世界线）、Micro（微观镜头）
+  community/       社区选择、组合器、对话建镇
+  llm/ settings/   OpenRouter 直连、预算闸、缓存、用量；独白、对话建镇、第二意见；设置弹窗
+  share.ts         分享链接：编码与清洗
   theme/ ui/       v4 的颜色、图标、组件
 packages/sim/ apps/server/ apps/web/   经典版（见上）
 e2e/               Playwright 端到端测试
@@ -54,7 +59,14 @@ docs/experiments/  实验记录、模板、汇总数据 results/、实验广场�
 - 钱守恒（D67）：社区外的收支记在 `EXT` 账户；付钱只走 `engine.pay`。
 - 站位由内核分配（D68）：室内模板 `interiorOf(place)` 是内核与三维层共用的一份数据；改模板不得让站位落到占地之外。
 - 路程按真实街区尺度算（D82）：用 `engine.meters` / `travelSec`，不要直接拿 `map.meters` 算时间。
-- 生成器是纯函数：同一规格必须生成同一社区。
+- 生成器是纯函数：同一规格必须生成同一社区。四个配方共用 `layout.ts` 的骨架（D93）：加社区先加配方（`PLANS`、`PRESETS`、经营模板的 `biz` 键），不要另写一套布局。
+- 干预是运行配置里对规则的补丁（D88）：
+  - 有起止的（停业、调价、房租、开伙、天气）只通过 `Rules` 的查询生效；一次性的（发钱、裁员、传言）在 `systems/interventions.ts` 到点发事件；
+  - 不加干预时必须与基线逐事件相同；加了以后不变量、重放、分叉照样要过（`test/interventions.test.ts`）；
+  - 地点用“id 或类型”引用，好让同一份干预用在不同的社区上；
+  - 会改变固定安排的干预要调 `engine.forgetCommits()`。
+- 指标都在 `metrics/indicators.ts`：实验的预测只能指向这里的键；加指标只加一行，并保证在任何社区上都算得出有限的数。
+- 判定规则（D90）在 `metrics/experiment.ts` 的 `judge`，改它要同步改实验记录的说明。
 - 新机制必须带测试：不变量（`checks.ts`）、重放一致、分叉前后一致、典型事实（`test/society.test.ts`）。
 
 ## 新应用规则（apps/studio）
@@ -69,6 +81,12 @@ docs/experiments/  实验记录、模板、汇总数据 results/、实验广场�
   - 语言模型只能复述事实表：独白用 `validateMonologue` 校验，不过就退回模板并说明原因；改提示词升 `MONOLOGUE_TEMPLATE_VERSION`。
 - 视觉语言沿用 v4（暖色纸面 + 深青强调）：颜色只用 `theme/tokens.css` 的变量，canvas 与三维用 `theme/palette.ts`；图标用 `ui/icons.ts`，组件用 `ui/kit.tsx`。
 - 信息减法（D55、D81）：世界是外壳；人物卡先回答“此刻在做什么、为什么”，其余往下排；新增控件先问“它回答的是这一屏的问题吗”。
+- 画像的数字只从 `runtime.aggs`（每日统计，D86）与社区定义算，算法放 `portrait/data.ts`（纯函数、有测试），组件只管画；小图用 SVG / DOM 自己画，不引入图表库。
+- 校准只做对照，不为了对上而调参（D87）；现实参照放 `portrait/reference.ts`，写明出处与口径。
+- 实验在 `lab/` 的 Worker 里跑；影响案例是 `lab/presets.ts` 里的实验清单（D95），它的预测就是实验记录里预注册的假设，改这里要同步改记录。
+- 链接里的东西一律当作不可信的输入（D96）：规格过 `normalizeSpec`，干预与实验过 `share.ts` 的清洗；密钥永远不进链接。
+- 对话建镇只接受白名单字段的补丁（D94）：`llm/builder.ts` 的 `parsePatch` → `applyPatch`；改提示词升 `BUILDER_TEMPLATE_VERSION`。
+- 决策模型目前只做“第二意见”（D92）：`llm/second.ts`，只用来和规则的概率并排比较，不改世界；改提问升 `SECOND_TEMPLATE_VERSION`。
 - 可交互元素加 `data-testid`；不要把按钮嵌在按钮里；界面文字不用“他 / 她”指代居民。
 
 ## 经典版 · 内核规则（packages/sim）
@@ -129,7 +147,8 @@ docs/experiments/  实验记录、模板、汇总数据 results/、实验广场�
 
 ```bash
 pnpm dev:studio   # 新版应用 5320（不需要服务端）
-pnpm probe        # 新内核体检：30 天的耗时、不变量、时间利用
+pnpm probe        # 新内核体检：30 天的耗时、不变量、时间利用（pnpm probe 30 1 village 换社区）
+pnpm e2e:studio   # 只跑新应用的端到端测试
 pnpm dev          # 经典版：服务端 5317 + 前端 5318
 pnpm test         # vitest：两套内核 + 服务端 + 新应用的纯逻辑
 pnpm e2e          # Playwright（离线，独立端口与数据库）
@@ -152,7 +171,9 @@ pnpm lint
   - 只在两种心智下都成立、且对参数不敏感的，才算结论。
 - 跑模型的实验脚本写主库，先停 dev 服务；规则批量用 `scripts/lab/pool.ts`，只在内存里跑。
 - 汇总数据放 `docs/experiments/results/`（不能叫 `data/`，会被 .gitignore 吃掉）。
-- 实验广场的卡片：改 `scripts/lab/gallery.ts` 后重新生成 `docs/experiments/gallery.json`，不要手改 JSON；卡片里的数字要与实验记录一致。
+- 实验广场（经典版）的卡片：改 `scripts/lab/gallery.ts` 后重新生成 `docs/experiments/gallery.json`，不要手改 JSON；卡片里的数字要与实验记录一致。
+- 新版的影响案例：`node --import tsx scripts/lab/impact.ts` 按 `apps/studio/src/lab/presets.ts` 跑，只在内存里；新内核目前只有规则心智，记录里要写明。
+- 种子只换“过法”，不换人：重要的结论要换一批人（规格里的生成种子）再跑一遍（见 v5 影响案例的记录）。
 
 ## 部署
 
