@@ -6,7 +6,14 @@ import type { CameraMode } from './world3d/types.ts';
 export const SPEEDS = [1, 10, 60, 300, 1200] as const;
 export type Speed = (typeof SPEEDS)[number];
 
+/** 三个工作区：看世界、看画像、做实验 */
+export type View = 'world' | 'portrait' | 'lab';
+
 export interface AppState {
+  view: View;
+  /** 换了一个世界（社区、种子或干预变了）就加一 */
+  worldKey: number;
+  communityOpen: boolean;
   phase: 'loading' | 'ready' | 'error';
   error: string | null;
   /** 已经算完的天数 / 目标天数 */
@@ -32,6 +39,9 @@ export interface AppState {
 }
 
 export const useApp = create<AppState>(() => ({
+  view: 'world',
+  worldKey: 0,
+  communityOpen: false,
   phase: 'loading',
   error: null,
   computed: 0,

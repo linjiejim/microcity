@@ -1,11 +1,11 @@
-import type { CommunitySpec } from '@microcity/society';
-import type { DayPack, FromWorker, ToWorker } from './protocol.ts';
+import type { DayAgg } from '@microcity/society';
+import type { DayPack, FromWorker, ToWorker, WorldConfig } from './protocol.ts';
 
 export interface Progress {
   computed: number;
   target: number;
   ms: number;
-  events: number;
+  agg: DayAgg;
 }
 
 /** 主线程这一侧：启动计算、按天取数据（留最近用过的几天） */
@@ -37,10 +37,10 @@ export class SimClient {
     this.worker.postMessage(m);
   }
 
-  start(spec: CommunitySpec, seed: number, days: number): void {
+  start(config: WorldConfig, days: number): void {
     this.cache.clear();
     this.loading.clear();
-    this.send({ type: 'start', spec, seed, days });
+    this.send({ type: 'start', config, days });
   }
 
   extend(days: number): void {

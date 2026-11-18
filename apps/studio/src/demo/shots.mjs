@@ -19,9 +19,9 @@ const SHOTS = {
   'x-apartment': { h: 21, m: 0, mode: 'follow', js: "__demo.world.setFollow('r5_0'); __demo.world.setCameraMode('follow')", wait: 2500 },
   // 第二轮：角色近景、身后视角、白天街景、公交进站
   'p2-character': { h: 6, m: 44, follow: true, js: '__demo.world.debugOrbit({ yaw: 3.25, dist: 9.5, pitch: 0.2 })', wait: 2500 },
-  'p2-pov': { h: 6, m: 43, follow: true, mode: 'pov', wait: 3200 },
-  'p2-street': { h: 9, m: 40, mode: 'street', orbit: { x: 70, z: 74, dist: 42, yaw: 0.25, pitch: 0.3 } },
-  'p2-bus': { h: 7, m: 50, mode: 'street', orbit: { x: 166, z: 70, dist: 44, yaw: 0.5, pitch: 0.4 } },
+  'p2-pov': { h: 6, m: 44, follow: true, mode: 'pov', wait: 3600 },
+  'p2-street': { h: 9, m: 40, mode: 'street', orbit: { x: 64, z: 70.5, dist: 27, yaw: 1.5, pitch: 0.2 } },
+  'p2-bus': { h: 7, m: 50, mode: 'street', orbit: { x: 168, z: 68, dist: 40, yaw: -0.35, pitch: 0.42 } },
   'x-eat': { h: 7, m: 0, follow: true, js: '__demo.world.debugOrbit({ yaw: 0.6, dist: 9, pitch: 0.55 })', wait: 2500 },
   'x-dance2': { h: 19, m: 30, follow: true, js: '__demo.world.debugOrbit({ yaw: 3.0, dist: 16, pitch: 0.3 })', wait: 2500 },
   'x-pov-in': { h: 11, m: 55, follow: true, mode: 'pov', wait: 3200 },

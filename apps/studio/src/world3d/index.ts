@@ -432,7 +432,8 @@ class World3D implements World3DApi {
     const dark = n > 0.35;
     // 没亮灯的玻璃映着天：白天是淡蓝，傍晚带一点暖色，夜里是深蓝
     const day = new THREE.Color('#86A9BF').lerp(this.env.fog.color, 0.35).multiplyScalar(0.5 + 0.3 * (1 - n));
-    day.lerp(new THREE.Color('#1B2440'), n * 0.9);
+    // 夜里没亮灯的窗是一块暗下去的深蓝，不能比墙还亮
+    day.lerp(new THREE.Color('#1B2440'), n * 0.9).multiplyScalar(1 - 0.6 * n);
     const c = new THREE.Color();
     let changed = false;
     for (let i = 0; i < this.glassDefs.length; i++) {
@@ -473,7 +474,6 @@ class World3D implements World3DApi {
         }
         b.cutShown = true;
         if (b.exterior) b.exterior.visible = false;
-        if (b.sign) b.sign.visible = false;
         for (let k = 0; k < b.glassN; k++) this.placeGlass(b.glass0 + k, false);
       }
       const parts = b.cut!;
@@ -503,6 +503,8 @@ class World3D implements World3DApi {
           p.mesh.castShadow = p.alpha > 0.6;
         }
         if (p.alpha < 0.999) done = false;
+        // 招牌挂在门头上：跟着屋顶一起隐去，不抢先消失
+        if (p.kind === 'roof' && b.sign) b.sign.visible = p.alpha > 0.5;
       }
       if (!active && done) {
         for (const p of parts) this.scene.remove(p.mesh);

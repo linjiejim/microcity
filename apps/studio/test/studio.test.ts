@@ -1,10 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { contentHash, DAY, dayStart, DEFAULT_PARAMS, generateCommunity, hm, OLDTOWN, type CommunityDef } from '@microcity/society';
+import { contentHash, DAY, DayRunner, dayStart, DEFAULT_PARAMS, generateCommunity, hm, OLDTOWN, type CommunityDef } from '@microcity/society';
 import { chat, keyInfo, type Deps } from '../src/llm/openrouter.ts';
 import { monologue, templateThought, validateMonologue, type MonologueFacts } from '../src/llm/monologue.ts';
 import { loadLedger, loadPrefs, looksLikeKey, maskKey, savePrefs, DEFAULT_PREFS, type KV } from '../src/llm/prefs.ts';
 import type { DayPack } from '../src/sim/protocol.ts';
-import { DayRunner } from '../src/sim/run.ts';
 import { Cursor } from '../src/timeline/cursor.ts';
 import { computePoses, makeStage } from '../src/timeline/poses.ts';
 import { dayStory } from '../src/timeline/segments.ts';
@@ -14,8 +13,11 @@ let def: CommunityDef;
 let packs: DayPack[];
 beforeAll(() => {
   def = generateCommunity(OLDTOWN);
-  const runner = new DayRunner(def, 1);
-  packs = [runner.next(), runner.next(), runner.next()];
+  const runner = new DayRunner(def, { seed: 1 }, true);
+  packs = [1, 2, 3].map(() => {
+    const r = runner.next();
+    return { day: r.day, snapshot: r.snapshot!, events: r.events! };
+  });
 });
 
 describe('按天取数据与游标', () => {

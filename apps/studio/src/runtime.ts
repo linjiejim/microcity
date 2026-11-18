@@ -1,6 +1,6 @@
-import { dayOf, dayStart, DEFAULT_PARAMS, generateCommunity, hm, timeOfDay, type CommunityDef, type CommunitySpec, type PersonDef } from '@microcity/society';
+import { dayOf, dayStart, DEFAULT_PARAMS, generateCommunity, hm, OLDTOWN, timeOfDay, type CommunityDef, type DayAgg, type PersonDef } from '@microcity/society';
 import { SimClient } from './sim/client.ts';
-import type { DayPack } from './sim/protocol.ts';
+import type { DayPack, WorldConfig } from './sim/protocol.ts';
 import { set, useApp } from './store.ts';
 import { Cursor } from './timeline/cursor.ts';
 import { computePoses, makeStage, type Stage } from './timeline/poses.ts';
@@ -19,6 +19,9 @@ const DAY_PER_MINUTE = 1440;
  * 逐帧变化的东西放在这里，不进 React 状态；界面要的时刻每秒同步几次。
  */
 class Runtime {
+  config: WorldConfig = { spec: OLDTOWN, seed: 1, interventions: [] };
+  /** 已经算完的每一天的统计（画像用） */
+  aggs: DayAgg[] = [];
   def!: CommunityDef;
   stage!: Stage;
   people: Record<string, PersonDef> = {};
@@ -35,22 +38,32 @@ class Runtime {
   private wall = 0;
   private wantDay = 0;
 
-  boot(spec: CommunitySpec, seed: number): void {
-    this.def = generateCommunity(spec);
+  /** 打开一个世界；at 是想停在的时刻（不给就从第一天清晨开始） */
+  boot(config: WorldConfig, at?: number): void {
+    this.config = config;
+    this.aggs = [];
+    this.story = null;
+    this.storyKey = '';
+    this.wantDay = 0;
+    this.poses = [];
+    this.t = at ?? hm(6, 40);
+    this.def = generateCommunity(config.spec);
     this.stage = makeStage(this.def);
     this.people = Object.fromEntries(this.def.people.map((p) => [p.id, p]));
     this.client?.dispose();
     this.cursor = null;
     this.client = new SimClient(
       (p) => {
+        this.aggs[p.agg.day - 1] = p.agg;
         set({ computed: p.computed, target: p.target });
         if (!this.cursor && p.computed >= 1) void this.ensure(dayOf(this.t));
         if (p.computed === FIRST_DAYS) this.client?.extend(TARGET_DAYS);
       },
       (message) => set({ phase: 'error', error: message }),
     );
-    set({ phase: 'loading', error: null, computed: 0, target: FIRST_DAYS, now: this.t });
-    this.client.start(spec, seed, FIRST_DAYS);
+    const s = useApp.getState();
+    set({ phase: 'loading', error: null, computed: 0, target: FIRST_DAYS, now: this.t, follow: null, place: null, waiting: false, worldKey: s.worldKey + 1 });
+    this.client.start(config, FIRST_DAYS);
   }
 
   dispose(): void {

@@ -7,6 +7,7 @@ import { createWorld3D } from '../world3d/index.ts';
 export function WorldCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
   const ready = useApp((s) => s.phase !== 'loading' || s.computed > 0);
+  const worldKey = useApp((s) => s.worldKey);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -49,7 +50,7 @@ export function WorldCanvas() {
       runtime.world = null;
       world.dispose();
     };
-  }, [ready]);
+  }, [ready, worldKey]);
 
   return <canvas ref={ref} className="world" data-testid="world" />;
 }
