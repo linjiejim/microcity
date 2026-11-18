@@ -3,6 +3,7 @@ import { CELL, FLOOR_H, type PlaceDef } from '@microcity/society';
 import { Actors } from './actors.ts';
 import { buildCutParts, buildExterior, drawOpenPlace, makeSign, type CutPart, type GlassDef, type Side } from './buildings.ts';
 import { CameraRig } from './camera.ts';
+import { detailMaterial, detailUniforms } from './detail.ts';
 import { Environment } from './env.ts';
 import { Geo } from './geo.ts';
 import { buildGround, buildProps, type LampDef } from './ground.ts';
@@ -44,7 +45,7 @@ class World3D implements World3DApi {
   private readonly rig: CameraRig;
   private readonly post: Post;
   private readonly actors: Actors;
-  private readonly material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0 });
+  private readonly material = detailMaterial();
   private readonly built: Built[] = [];
   private readonly placeIndex = new Map<string, number>();
   private readonly glassDefs: GlassDef[] = [];
@@ -455,7 +456,7 @@ class World3D implements World3DApi {
       const active = i === this.cutPlace;
       if (!active && !b.cutShown) continue;
       if (active && !b.cutShown) {
-        if (!b.cut) b.cut = buildCutParts(b.place, this.material);
+        if (!b.cut) b.cut = buildCutParts(b.place, detailMaterial);
         for (const p of b.cut) {
           p.alpha = 1;
           this.scene.add(p.mesh);
@@ -543,7 +544,7 @@ class World3D implements World3DApi {
         b.exterior.renderOrder = 0;
       } else {
         if (!b.ghostMat) {
-          b.ghostMat = this.material.clone();
+          b.ghostMat = detailMaterial();
           b.ghostMat.transparent = true;
           b.ghostMat.depthWrite = false;
         }

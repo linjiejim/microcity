@@ -69,6 +69,9 @@ export class Geo {
   private pos: number[] = [];
   private nor: number[] = [];
   private col: number[] = [];
+  private knd: number[] = [];
+  /** 表面种类（见 detail.ts）：之后加入的零件都带上它 */
+  kind = 0;
   /** 当前的局部坐标系：之后加入的零件都先经过它 */
   private frame = new THREE.Matrix4();
   private stack: THREE.Matrix4[] = [];
@@ -104,7 +107,17 @@ export class Geo {
       V.fromBufferAttribute(n, i).applyMatrix3(N3).normalize();
       this.nor.push(V.x, V.y, V.z);
       this.col.push(r, g, b);
+      this.knd.push(this.kind);
     }
+    return this;
+  }
+
+  /** 以某个表面种类画一段，画完恢复 */
+  as(kind: number, draw: () => void): this {
+    const was = this.kind;
+    this.kind = kind;
+    draw();
+    this.kind = was;
     return this;
   }
 
@@ -158,6 +171,7 @@ export class Geo {
           this.pos.push(q.x, q.y, q.z);
           this.nor.push(nn.x, nn.y, nn.z);
           this.col.push(r, g, b);
+          this.knd.push(this.kind);
         }
     };
     emit(w, n);
@@ -182,6 +196,7 @@ export class Geo {
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
+    g.setAttribute('aK', new THREE.Float32BufferAttribute(this.knd, 1));
     g.computeBoundingSphere();
     g.computeBoundingBox();
     return g;

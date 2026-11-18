@@ -17,3 +17,6 @@ export * from './checks.ts';
 export * from './engine/engine.ts';
 export * from './model/intervention.ts';
 export * from './systems/rules.ts';
+export * from './metrics/stats.ts';
+export * from './metrics/indicators.ts';
+export * from './metrics/experiment.ts';

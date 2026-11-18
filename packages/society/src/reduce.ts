@@ -40,6 +40,11 @@ export function needsAt(n: NeedsState, t: SimTime): [number, number, number, num
   return [clamp01(n.v[0] + n.rate[0] * dt), clamp01(n.v[1] + n.rate[1] * dt), clamp01(n.v[2] + n.rate[2] * dt), clamp01(n.v[3] + n.rate[3] * dt)];
 }
 
+/** 心情：四项需求的加权平均，再按当天聊了几次天略微上调 */
+export function moodOf(needs: readonly number[], chats: number): number {
+  return Math.round(Math.min(1, 0.2 * needs[0]! + 0.25 * needs[1]! + 0.25 * needs[2]! + 0.3 * needs[3]! + Math.min(0.1, chats * 0.02)) * 1000) / 1000;
+}
+
 /** 久不见面的淡化：家人与伴侣不淡 */
 export function closenessAt(tie: TieState, t: SimTime, params: RuleParams): number {
   if (tie.kind === 'family' || tie.kind === 'partner' || tie.lastMet < 0) return tie.closeness;

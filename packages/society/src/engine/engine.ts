@@ -8,7 +8,7 @@ import type { Intervention } from '../model/intervention.ts';
 import type { DomainEvent, EventBody, TransferKind } from '../model/events.ts';
 import type { ActState, Intent, PersonState, WorldState } from '../model/state.ts';
 import { DEFAULT_PARAMS, PARAMS_VERSION, POLICY_VERSION, SOCIAL_RULES_VERSION, type RuleParams } from '../params.ts';
-import { initialState, needsAt, reduce, weatherOf } from '../reduce.ts';
+import { initialState, moodOf, needsAt, reduce, weatherOf } from '../reduce.ts';
 import { choose, type Deadline } from '../systems/choose.ts';
 import { commitsFor, habitWake, type Commit, type CommitCtx } from '../systems/commits.ts';
 import { payroll, pensions, restock, weekly } from '../systems/economy.ts';
@@ -201,8 +201,7 @@ export class Engine {
       const bucket = ps.act ? ACT_BUCKET[ps.act.kind] : ps.loc.k === 'move' ? 'travel' : 'other';
       use[bucket] += t - ps.tallyT;
       const n = needsAt(ps.needs, t);
-      // 心情：四项需求的加权平均，再按当天聊了几次天略微上调
-      const mood = Math.round(Math.min(1, 0.2 * n[0] + 0.25 * n[1] + 0.25 * n[2] + 0.3 * n[3] + Math.min(0.1, ps.today.chats * 0.02)) * 1000) / 1000;
+      const mood = moodOf(n, ps.today.chats);
       this.emit({ type: 'day_summary', agent: p.id, day: day - 1, use, spent: ps.today.spent, earned: ps.today.earned, chats: ps.today.chats, mood, needs: n.map((x) => Math.round(x * 1000) / 1000) as [number, number, number, number] });
     }
     this.emit({ type: 'day_started', day, weather: this.rules.weather(day) ?? weatherOf(this.seed, day, rand) });

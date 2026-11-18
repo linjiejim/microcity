@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CELL, FLOOR_H, interiorOf, type Interior, type PlaceDef } from '@microcity/society';
+import { K_BRICK, K_GLASS, K_PLASTER, K_TILE, K_WOOD } from './detail.ts';
 import { Geo, hash01, mix, pickOf, tone } from './geo.ts';
 import { CREAM, DARK, METAL, STONE, WHITE, WOOD, WOOD_D, WOOD_L, drawFurniture } from './furniture.ts';
 
@@ -60,6 +61,8 @@ interface Ctx {
   roof: string;
   trim: string;
   v: number;
+  /** 墙面是砖还是抹灰（见 detail.ts） */
+  wallKind: number;
 }
 
 export interface GlassDef {
@@ -86,20 +89,29 @@ export interface SignDef {
   fg: string;
 }
 
-const ctxOf = (place: PlaceDef): Ctx => ({
-  place,
-  interior: interiorOf(place),
-  ox: place.x * CELL,
-  oz: place.y * CELL,
-  Wm: place.w * CELL,
-  Hm: place.h * CELL,
-  top: place.floors * FH,
+const BRICKS = ['#B9735A', '#A9694F', '#C08A6A', '#9C6B57'];
+
+function ctxOf(place: PlaceDef): Ctx {
   // 住宅的墙带一点门窗色的色相：一条街上不至于全是同一种米色
-  wall: mix(place.style.wall, tone(place.style.trim, 0.24, -0.16), place.kind === 'house' ? 0.38 : place.kind === 'apartment' ? 0.16 : SHOPS.includes(place.kind) ? 0.22 : 0.06),
-  roof: place.style.roof,
-  trim: place.style.trim,
-  v: place.style.variant,
-});
+  let wall = mix(place.style.wall, tone(place.style.trim, 0.24, -0.16), place.kind === 'house' ? 0.38 : place.kind === 'apartment' ? 0.16 : SHOPS.includes(place.kind) ? 0.22 : 0.06);
+  // 一部分院子和车间是清水砖墙
+  const brick = place.kind === 'workshop' || (place.kind === 'house' && hash01(place.id, 'brick') < 0.36);
+  if (brick) wall = mix(wall, pickOf(BRICKS, place.id, 'brickc'), 0.62);
+  return {
+    place,
+    interior: interiorOf(place),
+    ox: place.x * CELL,
+    oz: place.y * CELL,
+    Wm: place.w * CELL,
+    Hm: place.h * CELL,
+    top: place.floors * FH,
+    wall,
+    roof: place.style.roof,
+    trim: place.style.trim,
+    v: place.style.variant,
+    wallKind: brick ? K_BRICK : K_PLASTER,
+  };
+}
 
 function frameOf(c: Ctx, side: Side): Frame {
   const { ox, oz, Wm, Hm } = c;
@@ -180,7 +192,7 @@ function wallSide(g: Geo, c: Ctx, side: Side, floor: number, cut: boolean, glass
   const k = c.place.kind;
   const doorColor = k === 'house' || k === 'apartment' ? tone(c.trim, -0.06, -0.1) : tone(c.trim, -0.02);
   g.push(fr.ox, 0, fr.oz, fr.rot);
-  g.box(L / 2, y0 + FH / 2, -THICK / 2, L, FH, THICK, c.wall);
+  g.as(c.wallKind, () => g.box(L / 2, y0 + FH / 2, -THICK / 2, L, FH, THICK, c.wall));
   if (cut) g.box(L / 2, y0 + FH / 2, -THICK - 0.012, L - 2 * THICK, FH - 0.06, 0.02, INNER);
   if (floor === 0) g.box(L / 2, 0.24, 0.02, L + 0.05, 0.48, 0.05, tone(c.wall, -0.14, -0.04));
   else g.box(L / 2, y0, 0.02, L + 0.05, 0.14, 0.06, tone(c.wall, 0.05));
@@ -192,8 +204,10 @@ function wallSide(g: Geo, c: Ctx, side: Side, floor: number, cut: boolean, glass
       g.box(o.u, y0 + o.sill - 0.08, 0.08, o.w + 0.3, 0.08, 0.16, tone(c.wall, 0.08));
       if (o.kind === 'window' && o.w > 0.95) g.box(o.u, yc, 0.075, 0.05, o.h, 0.02, CREAM);
       if (cut) {
-        g.box(o.u, yc, 0.06, o.w, o.h, 0.03, GLASS_BAKED);
-        g.box(o.u, yc, -THICK - 0.03, o.w, o.h, 0.02, GLASS_BAKED);
+        g.as(K_GLASS, () => {
+          g.box(o.u, yc, 0.06, o.w, o.h, 0.03, GLASS_BAKED);
+          g.box(o.u, yc, -THICK - 0.03, o.w, o.h, 0.02, GLASS_BAKED);
+        });
       } else if (glass) {
         const lx = fr.ox + fr.tx * o.u - c.ox;
         const lz = fr.oz + fr.tz * o.u - c.oz;
@@ -234,8 +248,9 @@ function wallSide(g: Geo, c: Ctx, side: Side, floor: number, cut: boolean, glass
 }
 
 /** 双坡屋顶：局部坐标里屋脊沿 x；hx、hz 是含出檐的半宽 */
-function gable(g: Geo, hx: number, hz: number, y: number, rise: number, color: string, wall: string, wallHz: number, wallHx: number): void {
+function gable(g: Geo, hx: number, hz: number, y: number, rise: number, color: string, wall: string, wallHz: number, wallHx: number, wallKind: number): void {
   const t = 0.16;
+  g.kind = K_TILE;
   const dark = tone(color, -0.07);
   g.slab(
     [
@@ -266,6 +281,7 @@ function gable(g: Geo, hx: number, hz: number, y: number, rise: number, color: s
     g.box(0, y + rise * (1 - k) + 0.035, -hz * k, hx * 2, 0.03, 0.08, tone(color, 0.03), 0, -Math.atan2(rise, hz));
   }
   // 山墙
+  g.kind = wallKind;
   const gy = y - t;
   const gr = (rise * wallHz) / hz;
   for (const s of [-1, 1])
@@ -278,9 +294,11 @@ function gable(g: Geo, hx: number, hz: number, y: number, rise: number, color: s
       wall,
       true,
     );
+  g.kind = 0;
 }
 
 function hip(g: Geo, hx: number, hz: number, y: number, rise: number, color: string): void {
+  g.kind = K_TILE;
   const r = Math.max(0, hx - hz);
   const dark = tone(color, -0.07);
   const A: [number, number, number] = [-hx, y, hz];
@@ -293,6 +311,7 @@ function hip(g: Geo, hx: number, hz: number, y: number, rise: number, color: str
   g.poly([C, D, R1, R2], tone(color, -0.025));
   g.poly([B, C, R2], tone(color, -0.05));
   g.poly([D, A, R1], tone(color, 0.02));
+  g.kind = 0;
   g.poly([D, C, B, A], dark);
   g.box(0, y + rise + 0.02, 0, r * 2 + 0.3, 0.12, 0.26, dark);
 }
@@ -361,10 +380,12 @@ function roof(g: Geo, c: Ctx): void {
   let base = c.top;
   if (BAND_KINDS.includes(k)) {
     // 门头墙
-    for (const s of [-1, 1]) {
-      g.box(cx, c.top + BAND / 2, cz + s * (hz - THICK / 2), hx * 2, BAND, THICK, c.wall);
-      g.box(cx + s * (hx - THICK / 2), c.top + BAND / 2, cz, THICK, BAND, hz * 2, c.wall);
-    }
+    g.as(c.wallKind, () => {
+      for (const s of [-1, 1]) {
+        g.box(cx, c.top + BAND / 2, cz + s * (hz - THICK / 2), hx * 2, BAND, THICK, c.wall);
+        g.box(cx + s * (hx - THICK / 2), c.top + BAND / 2, cz, THICK, BAND, hz * 2, c.wall);
+      }
+    });
     g.box(cx, c.top + 0.02, cz, hx * 2 + 0.08, 0.1, hz * 2 + 0.08, tone(c.wall, 0.07));
     base = c.top + BAND;
     over = 0.22;
@@ -391,7 +412,7 @@ function roof(g: Geo, c: Ctx): void {
   rise = k === 'house' ? rhz * 0.5 + 0.3 : k === 'workshop' ? 1.5 : k === 'market' ? 2.3 : k === 'school' ? 2.6 : BAND_KINDS.includes(k) ? 1.25 : rhz * 0.42 + 0.3;
   g.push(cx, 0, cz, axisX ? 0 : Math.PI / 2);
   if (hipped) hip(g, rhx, rhz, base, rise, color);
-  else gable(g, rhx, rhz, base + 0.12, rise, color, c.wall, axisX ? hz : hx, axisX ? hx : hz);
+  else gable(g, rhx, rhz, base + 0.12, rise, color, c.wall, axisX ? hz : hx, axisX ? hx : hz, c.wallKind);
   if (k === 'eatery') {
     g.cyl(-rhx * 0.5, base + rise * 0.3, -rhz * 0.45, 0.2, 1.3, METAL, 10);
     g.cyl(-rhx * 0.5, base + rise * 0.3 + 1.3, -rhz * 0.45, 0.27, 0.1, DARK, 10);
@@ -562,12 +583,12 @@ export interface CutPart {
 }
 
 /** 剖面用的零件：每层四面墙、楼板、家具，外加屋顶 */
-export function buildCutParts(place: PlaceDef, material: THREE.Material): CutPart[] {
+export function buildCutParts(place: PlaceDef, make: () => THREE.Material): CutPart[] {
   const c = ctxOf(place);
   const parts: CutPart[] = [];
   const add = (g: Geo, kind: CutPart['kind'], floor: number, side?: Side) => {
     if (g.empty) return;
-    const mesh = new THREE.Mesh(g.build(), material.clone());
+    const mesh = new THREE.Mesh(g.build(), make());
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     parts.push({ mesh, kind, floor, side, alpha: 1, target: 1 });
@@ -581,10 +602,8 @@ export function buildCutParts(place: PlaceDef, material: THREE.Material): CutPar
     }
     const slab = new Geo();
     const y = f * FH;
-    slab.box(c.ox + c.Wm / 2, y - 0.04, c.oz + c.Hm / 2, c.Wm - 2 * INSET - 0.02, 0.12, c.Hm - 2 * INSET - 0.02, floorColor);
-    // 地板拼缝：几道深一点的细线
-    const n = Math.round((c.Wm - 1) / 1.2);
-    for (let i = 1; i < n; i++) slab.box(c.ox + INSET + ((c.Wm - 2 * INSET) * i) / n, y + 0.022, c.oz + c.Hm / 2, 0.02, 0.004, c.Hm - 2 * INSET - 2 * THICK, tone(floorColor, -0.05));
+    const wood = place.kind === 'house' || place.kind === 'apartment' || place.kind === 'teahouse' || place.kind === 'center';
+    slab.as(wood ? K_WOOD : 0, () => slab.box(c.ox + c.Wm / 2, y - 0.04, c.oz + c.Hm / 2, c.Wm - 2 * INSET - 0.02, 0.12, c.Hm - 2 * INSET - 0.02, floorColor));
     add(slab, 'slab', f);
 
     const inner = new Geo();
