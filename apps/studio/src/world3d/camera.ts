@@ -25,7 +25,7 @@ const PRESET: Record<CameraMode | 'interior', Orbit> = {
 };
 
 const LIMIT = { minDist: 9, maxDist: 560, minPitch: 0.2, maxPitch: 1.45 };
-const POV = { fov: 56, back: 2.5, minBack: 0.9, maxBack: 7, side: 0.42, up: 0.2, pitch: 0.1, minPitch: -0.7, maxPitch: 0.95 };
+const POV = { fov: 56, back: 2.5, minBack: 0.9, maxBack: 7, side: 0.72, up: 0.3, pitch: 0.1, minPitch: -0.7, maxPitch: 0.95 };
 const TMP = new THREE.Vector3();
 const TMP2 = new THREE.Vector3();
 

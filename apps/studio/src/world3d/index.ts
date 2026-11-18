@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CELL, FLOOR_H, type PlaceDef } from '@microcity/society';
 import { Actors } from './actors.ts';
+import { Bus } from './bus.ts';
 import { buildCutParts, buildExterior, drawOpenPlace, makeSign, type CutPart, type GlassDef, type Side } from './buildings.ts';
 import { CameraRig } from './camera.ts';
 import { detailMaterial, detailUniforms } from './detail.ts';
@@ -45,6 +46,7 @@ class World3D implements World3DApi {
   private readonly rig: CameraRig;
   private readonly post: Post;
   private readonly actors: Actors;
+  private readonly bus: Bus;
   private readonly material = detailMaterial();
   private readonly built: Built[] = [];
   private readonly placeIndex = new Map<string, number>();
@@ -161,6 +163,8 @@ class World3D implements World3DApi {
 
     this.actors = new Actors(opts.looks);
     this.scene.add(this.actors.group);
+    this.bus = new Bus(def, this.material);
+    this.scene.add(this.bus.group);
     this.scene.add(this.roomLight);
 
     // 雨
@@ -190,6 +194,9 @@ class World3D implements World3DApi {
     this.renderer.toneMappingExposure = this.env.exposure;
     this.rain.visible = weather === 'rain';
     const n = this.env.night;
+    this.bus.update(secOfDay, n, this.env.fog.color);
+    detailUniforms.uGlow.value = Math.max(0, (n - 0.3) / 0.7);
+    detailUniforms.uSky.value.copy(this.env.fog.color).multiplyScalar(1 - 0.55 * n);
     (this.lampGlow.material as THREE.MeshBasicMaterial).color.set('#FFF1D8').multiplyScalar(0.85 + 2.2 * n);
     (this.pools.material as THREE.MeshBasicMaterial).opacity = 0.42 * n;
     this.pools.visible = n > 0.02;
@@ -293,6 +300,9 @@ class World3D implements World3DApi {
       this.cutFloor = f.floor;
     } else this.cutPlace = -1;
     this.rig.update(dt);
+    // 地面湿不湿：下雨慢慢湿，雨停慢慢干
+    const wet = detailUniforms.uWet;
+    wet.value += ((this.env.weather === 'rain' ? 1 : 0) - wet.value) * Math.min(1, dt / 1500);
     this.updateCut(dt / 1000);
     this.updateGhosts(dt / 1000, following && f.visible ? f : null);
     this.adapt(dt);

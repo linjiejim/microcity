@@ -54,11 +54,152 @@ function doorOf(x: number, y: number, w: number, h: number, facing: Facing): Cel
   }
 }
 
+type SlotId = 'park' | 'market' | 'eat1' | 'eat2' | 'groc1' | 'clinic' | 'square' | 'tea' | 'center' | 'eat3' | 'groc2' | 'office' | 'school' | 'court' | 'workshop' | 'workshop2' | 'bus';
+
+/** 骨架上的位置：x、y、宽、高（格）与门朝向 */
+const SLOTS: Record<SlotId, [number, number, number, number, Facing]> = {
+  park: [3, 3, 9, 7, 'e'],
+  market: [13, 14, 4, 3, 's'],
+  eat1: [17, 15, 2, 2, 's'],
+  eat2: [19, 15, 2, 2, 's'],
+  groc1: [13, 11, 2, 2, 'n'],
+  clinic: [16, 11, 2, 2, 'n'],
+  square: [23, 11, 6, 6, 's'],
+  tea: [29, 15, 3, 2, 's'],
+  center: [29, 11, 3, 2, 'n'],
+  eat3: [13, 19, 2, 2, 'n'],
+  groc2: [16, 19, 2, 2, 'n'],
+  office: [18, 19, 3, 3, 'n'],
+  school: [23, 19, 6, 4, 'n'],
+  court: [23, 23, 4, 3, 's'],
+  workshop: [33, 27, 5, 3, 'n'],
+  workshop2: [3, 27, 7, 4, 'n'],
+  bus: [42, 15, 2, 2, 's'],
+};
+const SLOT_ORDER = Object.keys(SLOTS) as SlotId[];
+
+interface Site {
+  kind: PlaceKind;
+  name: string;
+  /** 经营模板的键（岗位、商品、营业时间）；不写就按地点类型 */
+  biz?: string;
+  floors?: number;
+  /** 占地（格）与骨架上的默认不同时写 */
+  size?: [number, number];
+}
+
+interface Plan {
+  /** 居民楼几层（每层两户） */
+  aptFloors: number;
+  sites: Partial<Record<SlotId, Site>>;
+}
+
+/** 营业时间：按经营模板的键，没有就按地点类型 */
+const HOURS: Record<string, [number, number]> = {
+  market: [hm(5, 30), hm(13, 0)],
+  eatery: [hm(10, 30), hm(21, 0)],
+  breakfast: [hm(5, 30), hm(14, 0)],
+  noodle: [hm(6, 30), hm(20, 30)],
+  grocery: [hm(7, 30), hm(21, 30)],
+  clinic: [hm(8, 0), hm(17, 30)],
+  teahouse: [hm(9, 0), hm(21, 30)],
+  center: [hm(8, 30), hm(20, 30)],
+  office: [hm(8, 30), hm(18, 0)],
+  school: [hm(7, 20), hm(18, 30)],
+  workshop: [hm(7, 40), hm(17, 30)],
+};
+
 /**
- * 老城街坊的布局：4 × 4 个街块，一条东西向的主街。
- * 主街两侧是菜市场、饭馆、广场、茶馆、学校、街道办；其余街块是住宅，离中心近的先盖。
+ * 四个配方共用一个骨架（D93）：4 × 4 个街块，一条东西向的主街。
+ * 配方决定骨架上的每个位置放什么；没用上的小块位置盖成院子。
  */
-export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout {
+export const PLANS: Record<CommunitySpec['template'], Plan> = {
+  // 老城街坊：菜市场、茶馆、活动中心、街道办，小五金厂
+  oldtown: {
+    aptFloors: 4,
+    sites: {
+      park: { kind: 'park', name: '口袋公园' },
+      market: { kind: 'market', name: '和平里菜市场' },
+      eat1: { kind: 'eatery', name: '顺发小馆' },
+      eat2: { kind: 'eatery', name: '老周早点', biz: 'breakfast' },
+      groc1: { kind: 'grocery', name: '便民超市' },
+      clinic: { kind: 'clinic', name: '社区卫生站' },
+      square: { kind: 'square', name: '文化广场' },
+      tea: { kind: 'teahouse', name: '聚福茶馆' },
+      center: { kind: 'center', name: '街坊活动中心' },
+      eat3: { kind: 'eatery', name: '巷口面馆', biz: 'noodle' },
+      groc2: { kind: 'grocery', name: '好邻居小卖部' },
+      office: { kind: 'office', name: '和平里街道办', floors: 2 },
+      school: { kind: 'school', name: '和平里小学', floors: 2 },
+      court: { kind: 'court', name: '球场' },
+      workshop: { kind: 'workshop', name: '永兴五金加工厂' },
+      bus: { kind: 'busstop', name: '和平里公交站' },
+    },
+  },
+  // 通勤新小区：没有菜市场和茶馆，一家生鲜超市，大多数人白天去城里
+  newtown: {
+    aptFloors: 6,
+    sites: {
+      park: { kind: 'park', name: '中心绿地' },
+      market: { kind: 'grocery', name: '青禾生鲜', biz: 'supermarket' },
+      eat1: { kind: 'eatery', name: '简餐厨房', biz: 'fastfood' },
+      eat2: { kind: 'eatery', name: '早安包子铺', biz: 'breakfast' },
+      groc1: { kind: 'grocery', name: '楼下便利店' },
+      clinic: { kind: 'clinic', name: '社区诊所' },
+      square: { kind: 'square', name: '中心广场' },
+      center: { kind: 'center', name: '邻里中心' },
+      office: { kind: 'office', name: '物业服务中心', biz: 'property' },
+      school: { kind: 'school', name: '青禾小学', floors: 2 },
+      court: { kind: 'court', name: '球场' },
+      bus: { kind: 'busstop', name: '青禾苑公交站' },
+    },
+  },
+  // 城中村：租客多，小店密，一家制衣厂
+  village: {
+    aptFloors: 5,
+    sites: {
+      park: { kind: 'park', name: '村口小公园' },
+      market: { kind: 'market', name: '塘尾菜市场' },
+      eat1: { kind: 'eatery', name: '阿强快餐', biz: 'noodle' },
+      eat2: { kind: 'eatery', name: '肠粉店', biz: 'breakfast' },
+      groc1: { kind: 'grocery', name: '兴旺士多' },
+      clinic: { kind: 'clinic', name: '村卫生站' },
+      square: { kind: 'square', name: '祠堂广场' },
+      tea: { kind: 'teahouse', name: '塘尾棋牌室' },
+      eat3: { kind: 'eatery', name: '老李面馆', biz: 'noodle' },
+      groc2: { kind: 'grocery', name: '巷口士多' },
+      school: { kind: 'school', name: '塘尾小学', floors: 2 },
+      court: { kind: 'court', name: '球场' },
+      workshop: { kind: 'workshop', name: '塘尾制衣厂', biz: 'garment' },
+      bus: { kind: 'busstop', name: '塘尾村公交站' },
+    },
+  },
+  // 工厂镇：两个车间养着大半个镇，食堂、俱乐部、子弟小学一应俱全
+  factory: {
+    aptFloors: 5,
+    sites: {
+      park: { kind: 'park', name: '职工公园' },
+      market: { kind: 'market', name: '红星菜市场' },
+      eat1: { kind: 'eatery', name: '职工食堂', biz: 'canteen' },
+      eat2: { kind: 'eatery', name: '厂门口早点', biz: 'breakfast' },
+      groc1: { kind: 'grocery', name: '红星副食店' },
+      clinic: { kind: 'clinic', name: '厂医务室' },
+      square: { kind: 'square', name: '厂前广场' },
+      tea: { kind: 'teahouse', name: '工人茶社' },
+      center: { kind: 'center', name: '工人俱乐部' },
+      office: { kind: 'office', name: '厂办', biz: 'property', floors: 2 },
+      school: { kind: 'school', name: '子弟小学', floors: 2 },
+      court: { kind: 'court', name: '灯光球场' },
+      workshop: { kind: 'workshop', name: '红星机械厂一车间', biz: 'plant', size: [7, 4] },
+      workshop2: { kind: 'workshop', name: '红星机械厂二车间', biz: 'plant' },
+      bus: { kind: 'busstop', name: '红星厂公交站' },
+    },
+  },
+};
+
+/** 按配方生成布局：公共与商业先落位，住宅按户数由近到远盖 */
+export function layoutFor(spec: CommunitySpec, unitsNeeded: number): Layout {
+  const plan = PLANS[spec.template] ?? PLANS.oldtown;
   const W = 44;
   const H = 36;
   const ground: Ground[] = Array.from({ length: W * H }, () => G_LOT);
@@ -78,7 +219,7 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
   const counters: Partial<Record<PlaceKind, number>> = {};
   const seed = spec.seed;
 
-  const add = (kind: PlaceKind, name: string, x: number, y: number, w: number, h: number, facing: Facing, o: { floors?: number; units?: number; hours?: [number, number] | null } = {}): PlaceDef => {
+  const add = (kind: PlaceKind, name: string, x: number, y: number, w: number, h: number, facing: Facing, o: { floors?: number; units?: number; hours?: [number, number] | null; biz?: string } = {}): PlaceDef => {
     const n = (counters[kind] = (counters[kind] ?? 0) + 1);
     const id = `${kind}${n}`;
     const open = OPEN_KINDS.includes(kind);
@@ -97,6 +238,7 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
       open,
       hours: o.hours ?? null,
       capacity: CAPACITY[kind],
+      ...(o.biz ? { biz: o.biz } : {}),
       style: {
         wall: WALLS[Math.floor(rand(seed, 'wall', id) * WALLS.length)]!,
         roof: ROOFS[Math.floor(rand(seed, 'roof', id) * ROOFS.length)]!,
@@ -113,23 +255,19 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
     return p;
   };
 
-  // 公共与商业
-  add('park', '口袋公园', 3, 3, 9, 7, 'e');
-  add('market', '和平里菜市场', 13, 14, 4, 3, 's', { hours: [hm(5, 30), hm(13, 0)] });
-  add('eatery', '顺发小馆', 17, 15, 2, 2, 's', { hours: [hm(10, 30), hm(21, 0)] });
-  add('eatery', '老周早点', 19, 15, 2, 2, 's', { hours: [hm(5, 30), hm(14, 0)] });
-  add('grocery', '便民超市', 13, 11, 2, 2, 'n', { hours: [hm(7, 30), hm(21, 30)] });
-  add('clinic', '社区卫生站', 16, 11, 2, 2, 'n', { hours: [hm(8, 0), hm(17, 30)] });
-  add('square', '文化广场', 23, 11, 6, 6, 's');
-  add('teahouse', '聚福茶馆', 29, 15, 3, 2, 's', { hours: [hm(9, 0), hm(21, 30)] });
-  add('center', '街坊活动中心', 29, 11, 3, 2, 'n', { hours: [hm(8, 30), hm(20, 30)] });
-  add('eatery', '巷口面馆', 13, 19, 2, 2, 'n', { hours: [hm(6, 30), hm(20, 30)] });
-  add('grocery', '好邻居小卖部', 16, 19, 2, 2, 'n', { hours: [hm(7, 30), hm(21, 30)] });
-  add('office', '和平里街道办', 18, 19, 3, 3, 'n', { floors: 2, hours: [hm(8, 30), hm(18, 0)] });
-  add('school', '和平里小学', 23, 19, 6, 4, 'n', { floors: 2, hours: [hm(7, 20), hm(18, 30)] });
-  add('court', '球场', 23, 23, 4, 3, 's');
-  add('workshop', '永兴五金加工厂', 33, 27, 5, 3, 'n', { hours: [hm(7, 40), hm(17, 30)] });
-  add('busstop', '和平里公交站', 42, 15, 2, 2, 's');
+  // 公共与商业：配方里有的位置落位；没用上的 2 × 2 位置留给院子
+  const spareSlots: Array<[number, number, Facing]> = [];
+  for (const slot of SLOT_ORDER) {
+    const [x, y, w0, h0, facing] = SLOTS[slot];
+    const site = plan.sites[slot];
+    if (!site) {
+      if (w0 === 2 && h0 === 2) spareSlots.push([x, y, facing]);
+      continue;
+    }
+    const [w, h] = site.size ?? [w0, h0];
+    const open = OPEN_KINDS.includes(site.kind);
+    add(site.kind, site.name, x, y, w, h, facing, { floors: site.floors ?? 1, hours: open ? null : (HOURS[site.biz ?? ''] ?? HOURS[site.kind] ?? null), ...(site.biz ? { biz: site.biz } : {}) });
+  }
 
   // 住宅：先列出所有可盖的位置，再按离中心的远近取用
   interface Lot {
@@ -154,6 +292,7 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
     [33, 31, 's'],
     [36, 31, 's'],
     [39, 31, 's'],
+    ...spareSlots,
   ];
   const BX: Array<[number, number]> = [
     [3, 11],
@@ -197,19 +336,26 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
   }
   rows.sort((a, b) => a.dist - b.dist || (a.key < b.key ? -1 : 1));
 
-  const UNITS_PER_APT = 8;
+  const UNITS_PER_APT = plan.aptFloors * 2;
   const nApt = Math.min(rows.length, Math.round((unitsNeeded * spec.apartments) / UNITS_PER_APT));
-  const lots: Lot[] = fixed.map(([x, y, f]) => ({ apt: false, x, y, facing: f, dist: dist(x, y, 2), key: `f${x}_${y}` }));
-  rows.forEach((r, i) => {
+  // 被公共建筑占掉的位置不能再盖
+  const free = (x: number, y: number, w: number) => {
+    for (let yy = y; yy < y + 2; yy++) for (let xx = x; xx < x + w; xx++) if (taken[yy * W + xx]) return false;
+    return true;
+  };
+  const lots: Lot[] = fixed.filter(([x, y]) => free(x, y, 2)).map(([x, y, f]) => ({ apt: false, x, y, facing: f, dist: dist(x, y, 2), key: `f${x}_${y}` }));
+  let aptRows = 0;
+  rows.forEach((r) => {
     const mirror = rand(seed, 'mirror', r.key) < 0.5;
     const at = (off: number, bw: number) => r.x0 + (mirror ? r.w - off - bw : off);
-    if (i < nApt) {
+    const house = (o: number, k: number) => {
+      if (free(at(o, 2), r.y, 2)) lots.push({ apt: false, x: at(o, 2), y: r.y, facing: r.facing, dist: dist(at(o, 2), r.y, 2), key: `${r.key}h${k}` });
+    };
+    if (aptRows < nApt && free(at(0, 4), r.y, 4)) {
+      aptRows++;
       lots.push({ apt: true, x: at(0, 4), y: r.y, facing: r.facing, dist: r.dist - 100, key: `${r.key}a` });
-      const offs = r.w >= 9 ? [5, 7] : [4, 6];
-      offs.forEach((o, k) => lots.push({ apt: false, x: at(o, 2), y: r.y, facing: r.facing, dist: dist(at(o, 2), r.y, 2), key: `${r.key}h${k}` }));
-    } else {
-      [0, 3, 6].forEach((o, k) => lots.push({ apt: false, x: at(o, 2), y: r.y, facing: r.facing, dist: dist(at(o, 2), r.y, 2), key: `${r.key}h${k}` }));
-    }
+      (r.w >= 9 ? [5, 7] : [4, 6]).forEach(house);
+    } else [0, 3, 6].forEach(house);
   });
   lots.sort((a, b) => a.dist - b.dist || (a.key < b.key ? -1 : 1));
 
@@ -224,7 +370,7 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
       continue;
     }
     if (lot.apt) {
-      const p = add('apartment', `${++aptNo} 号楼`, lot.x, lot.y, 4, 2, lot.facing, { floors: UNITS_PER_APT / 2, units: UNITS_PER_APT });
+      const p = add('apartment', `${++aptNo} 号楼`, lot.x, lot.y, 4, 2, lot.facing, { floors: plan.aptFloors, units: UNITS_PER_APT });
       for (let u = 0; u < UNITS_PER_APT; u++) homes.push({ place: p.id, unit: u, apartment: true });
     } else {
       const p = add('house', `${++houseNo} 号院`, lot.x, lot.y, 2, 2, lot.facing, { floors: rand(seed, 'floors', lot.key) < 0.55 ? 2 : 1, units: 1 });
@@ -276,3 +422,6 @@ export function layoutOldtown(spec: CommunitySpec, unitsNeeded: number): Layout 
 }
 
 const r2 = (x: number): number => Math.round(x * 100) / 100;
+
+/** 旧名字（样片页在用） */
+export const layoutOldtown = layoutFor;

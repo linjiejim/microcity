@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CELL, G_GREEN, G_LOT, G_PLAZA, G_STREET, type MapDef } from '@microcity/society';
+import { withWetness } from './detail.ts';
 import { Geo, hash01, pickOf, tone } from './geo.ts';
 import { DARK, LEAVES, WOOD_D, bush, tree } from './furniture.ts';
 
@@ -10,6 +11,8 @@ import { DARK, LEAVES, WOOD_D, bush, tree } from './furniture.ts';
  */
 
 const PX = 32;
+/** 贴图的放大倍数：一格 4 米画成 PX × SCALE 个像素，近看路沿与石缝才清楚 */
+const SCALE = 2;
 const GRASS = '#B4CB8C';
 const GRASS_2 = '#A9C283';
 const STREET = '#D6CDBE';
@@ -37,15 +40,19 @@ function speckle(g: CanvasRenderingContext2D, x: number, y: number, w: number, h
 
 export function buildGroundTexture(map: MapDef): THREE.CanvasTexture {
   const cv = document.createElement('canvas');
-  cv.width = map.w * PX;
-  cv.height = map.h * PX;
+  cv.width = map.w * PX * SCALE;
+  cv.height = map.h * PX * SCALE;
   const g = cv.getContext('2d')!;
+  g.scale(SCALE, SCALE);
+  const LW = map.w * PX;
+  const LH = map.h * PX;
   const at = (x: number, y: number) => (x < 0 || y < 0 || x >= map.w || y >= map.h ? G_LOT : map.ground[y * map.w + x]!);
   const main = (y: number) => y === 17 || y === 18;
 
   g.fillStyle = GRASS;
-  g.fillRect(0, 0, cv.width, cv.height);
-  speckle(g, 0, 0, cv.width, cv.height, [GRASS_2, '#C0D49A', '#A3BD7E'], 5200, 'grass', 5);
+  g.fillRect(0, 0, LW, LH);
+  speckle(g, 0, 0, LW, LH, [GRASS_2, '#C0D49A', '#A3BD7E'], 5200, 'grass', 5);
+  speckle(g, 0, 0, LW, LH, ['#9DB877', '#C6D9A2'], 9000, 'grass2', 1.4);
 
   // 建筑脚下的铺地
   for (const p of map.places) {
@@ -234,7 +241,7 @@ export function buildGround(map: MapDef): THREE.Group {
   const W = map.w * CELL;
   const H = map.h * CELL;
   const tex = buildGroundTexture(map);
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: tex, roughness: 1, metalness: 0 }));
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(W, H), withWetness(new THREE.MeshStandardMaterial({ map: tex, roughness: 1, metalness: 0 })));
   plane.rotation.x = -Math.PI / 2;
   plane.position.set(W / 2, 0, H / 2);
   plane.receiveShadow = true;
@@ -246,7 +253,7 @@ export function buildGround(map: MapDef): THREE.Group {
   far.receiveShadow = true;
   group.add(far);
   // 主街通往城里的两段路
-  const roadMat = new THREE.MeshStandardMaterial({ color: STREET_MAIN, roughness: 1 });
+  const roadMat = withWetness(new THREE.MeshStandardMaterial({ color: STREET_MAIN, roughness: 1 }));
   for (const s of [-1, 1]) {
     const road = new THREE.Mesh(new THREE.PlaneGeometry(600, 2 * CELL), roadMat);
     road.rotation.x = -Math.PI / 2;
@@ -321,6 +328,38 @@ export function buildProps(g: Geo, map: MapDef): LampDef[] {
       }
     }
   });
+  // 电线杆与电线：沿两条次街各立一排，杆间的线微微下垂
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x >= map.w || y >= map.h ? G_LOT : map.ground[y * map.w + x]!);
+  for (const row of [10, 26]) {
+    if (row >= map.h) continue;
+    const xs: number[] = [];
+    for (let x = 3; x < map.w - 2; x += 3) if (at(x, row) === G_STREET && at(x, row - 1) !== G_STREET) xs.push(x);
+    const z = row * CELL + 0.28;
+    xs.forEach((x, i) => {
+      const px = (x + 0.5) * CELL;
+      g.cyl(px, 0, z, 0.09, 6.4, '#8A7460', 6, 0.75);
+      g.box(px, 6.0, z, 0.08, 0.08, 1.5, '#7A6654');
+      g.box(px, 5.55, z, 0.07, 0.07, 1.0, '#7A6654');
+      if (hash01('pole', row, i) < 0.4) g.block(px, 4.3, z + 0.16, 0.4, 0.55, 0.3, '#9AA1A5');
+      const next = xs[i + 1];
+      if (next === undefined || next - x > 6) return;
+      const nx = (next + 0.5) * CELL;
+      for (const [dz, y0] of [
+        [-0.65, 6.02],
+        [0.65, 6.02],
+        [0, 5.57],
+      ] as const) {
+        const seg = 5;
+        for (let k = 0; k < seg; k++) {
+          const a = k / seg;
+          const b = (k + 1) / seg;
+          const sag = (u: number) => -0.55 * 4 * u * (1 - u);
+          g.rod(px + (nx - px) * a, y0 + sag(a), z + dz, px + (nx - px) * b, y0 + sag(b), z + dz, 0.012, '#3B3A3C', 3);
+        }
+      }
+    });
+  }
+
   // 地图外围再撒一圈远树，给画面收边
   const W = map.w * CELL;
   const H = map.h * CELL;

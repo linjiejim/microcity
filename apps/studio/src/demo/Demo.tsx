@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CELL, OLDTOWN, WorldMap, alongRoute, anchorWorld, interiorOf, layoutOldtown, type AnchorKind, type CommunityDef, type PlaceDef, type PlaceKind } from '@microcity/society';
+import { CELL, OLDTOWN, WorldMap, alongRoute, anchorWorld, interiorOf, layoutFor, type AnchorKind, type CommunityDef, type PlaceDef, type PlaceKind } from '@microcity/society';
 import { createWorld3D } from '../world3d/index.ts';
 import type { ActorLook, ActorPose, Anim, CameraMode, Weather, World3DApi } from '../world3d/types.ts';
 
@@ -70,7 +70,7 @@ interface Person {
 const blank = (): ActorPose => ({ visible: false, x: 0, y: 0, h: 0, face: 0, anim: 'idle', place: null, floor: 0, unit: -1, carry: false, emote: null });
 
 function buildWorld(extra: number) {
-  const { map, homes } = layoutOldtown(OLDTOWN, 72);
+  const { map, homes } = layoutFor(OLDTOWN, 72);
   const def: CommunityDef = { id: 'demo', name: OLDTOWN.name, spec: 'demo', blurb: OLDTOWN.blurb, map, people: [], households: [], firms: [], ties: [] };
   const wm = new WorldMap(map);
   const used = new Map<string, number>();

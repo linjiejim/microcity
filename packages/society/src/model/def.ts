@@ -71,6 +71,8 @@ export interface PlaceDef {
   style: PlaceStyle;
   /** 经营它的单位 */
   firm?: string;
+  /** 经营模板的键（岗位、商品）；不写就按地点类型 */
+  biz?: string;
 }
 
 export interface PropDef {

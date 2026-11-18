@@ -16,7 +16,7 @@ import {
   type TieDef,
   type TieKind,
 } from '../model/def.ts';
-import { layoutOldtown, type HomeSlot } from './layout.ts';
+import { layoutFor, type HomeSlot } from './layout.ts';
 import { givenFor, surnameFor } from './names.ts';
 import { normalizeSpec, specHash, type CommunitySpec } from './spec.ts';
 
@@ -141,7 +141,7 @@ export function generateCommunity(input: CommunitySpec): CommunityDef {
   const { spec } = normalizeSpec(input);
   const s = spec.seed;
   const drafts = draftHouseholds(spec);
-  const { map, homes } = layoutOldtown(spec, drafts.length);
+  const { map, homes } = layoutFor(spec, drafts.length);
   const placeById = Object.fromEntries(map.places.map((p) => [p.id, p])) as Record<string, PlaceDef>;
 
   // ── 分房：大家庭住院子；其余按偏好分楼房或院子
@@ -163,8 +163,9 @@ export function generateCommunity(input: CommunitySpec): CommunityDef {
   const people: PersonDef[] = [];
   const households: HouseholdDef[] = [];
   const usedNames = new Set<string>();
-  const school = map.places.find((p) => p.kind === 'school')!;
   const bus = map.places.find((p) => p.kind === 'busstop')!;
+  // 没有小学的社区，孩子也坐车去城里上学
+  const school = map.places.find((p) => p.kind === 'school');
   const rentTotal = drafts.reduce((a, d) => a + RENT_PREF[d.type], 0) / drafts.length;
 
   drafts.forEach((d, i) => {
@@ -202,7 +203,7 @@ export function generateCommunity(input: CommunitySpec): CommunityDef {
         cash: 0,
         look: { skin: '', hair: '', hairStyle: 'short', top: '', bottom: '' },
         bio: '',
-        ...(stage === 'child' ? { school: { place: school.id, away: false } } : stage === 'student' ? { school: { place: bus.id, away: true } } : {}),
+        ...(stage === 'child' && school ? { school: { place: school.id, away: false } } : stage === 'child' || stage === 'student' ? { school: { place: bus.id, away: true } } : {}),
       });
       memberIds.push(id);
     });
@@ -250,7 +251,7 @@ export function generateCommunity(input: CommunitySpec): CommunityDef {
   }
   const slots: Slot[] = [];
   for (const place of map.places) {
-    const tpl = firmTemplateFor(place.kind, place.name);
+    const tpl = firmTemplateFor(place.kind, place.biz);
     if (!tpl) continue;
     const firm: FirmDef = {
       id: `f_${place.id}`,
@@ -275,7 +276,7 @@ export function generateCommunity(input: CommunitySpec): CommunityDef {
   slots.sort((a, b) => a.prio - b.prio || (a.firm.id < b.firm.id ? -1 : a.firm.id > b.firm.id ? 1 : a.idx - b.idx));
 
   const pool = [...wantsWork].sort((a, b) => rand(s, 'job-order', a.id) - rand(s, 'job-order', b.id));
-  const localQuota = Math.round(pool.length * 0.74);
+  const localQuota = Math.round(pool.length * (1 - spec.cityShare));
   const ELDER_OK = new Set(['vendor', 'shopkeeper', 'tea_staff', 'center_staff', 'cook']);
   const fits = (p: PersonDef, post: Post): boolean => {
     if (p.age >= 60) return ELDER_OK.has(post.occupation);

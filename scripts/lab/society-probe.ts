@@ -2,14 +2,15 @@
  * 新内核的体检（v5，M0 的性能探针 + M1 的典型事实）：
  *   pnpm probe            # 默认 30 天、种子 1
  *   pnpm probe 14 3       # 14 天、种子 3
+ *   pnpm probe 30 1 village  # 换一个社区：oldtown / newtown / village / factory
  * 只在内存里跑，不写任何文件。
  */
-import { BUCKETS, BUCKET_LABEL, checkInvariants, contentHash, DAY, DEFAULT_PARAMS, Engine, generateCommunity, initialState, OLDTOWN, rand, reduce, totalMoney, type DomainEvent } from '@microcity/society';
+import { BUCKETS, BUCKET_LABEL, checkInvariants, contentHash, DAY, DEFAULT_PARAMS, Engine, generateCommunity, initialState, PRESETS, rand, reduce, totalMoney, type CommunitySpec, type DomainEvent } from '@microcity/society';
 
 const DAYS = Number(process.argv[2] ?? 30);
 const SEED = Number(process.argv[3] ?? 1);
 const t0 = performance.now();
-const def = generateCommunity(OLDTOWN);
+const def = generateCommunity(PRESETS[(process.argv[4] ?? 'oldtown') as CommunitySpec['template']] ?? PRESETS.oldtown);
 const t1 = performance.now();
 const events: DomainEvent[] = [];
 const e = Engine.create(def, { seed: SEED, onEvent: (ev) => events.push(ev) });
@@ -23,7 +24,9 @@ const t2 = performance.now();
 const st = initialState(def, DEFAULT_PARAMS, SEED, rand);
 for (const ev of events) reduce(st, ev, { params: DEFAULT_PARAMS });
 
-console.log(`${def.name}：${def.people.length} 人，${def.households.length} 户，${def.firms.length} 家单位，${def.ties.length} 条关系`);
+const local = def.people.filter((p) => p.job && p.job.firm !== 'city').length;
+const city = def.people.filter((p) => p.job?.firm === 'city').length;
+console.log(`${def.name}：${def.people.length} 人，${def.households.length} 户，${def.firms.length} 家单位，${def.ties.length} 条关系；本地上班 ${local} 人，去城里 ${city} 人`);
 console.log(`生成 ${Math.round(t1 - t0)} ms；${DAYS} 天用了 ${Math.round(t2 - t1)} ms，${events.length} 个事件（每天 ${Math.round(events.length / DAYS)}）`);
 console.log(`不变量：${bad.length ? bad.join('；') : '通过'}；重放一致：${contentHash(st) === e.stateHash() ? '是' : '否'}`);
 

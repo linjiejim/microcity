@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CELL, FLOOR_H, interiorOf, type Interior, type PlaceDef } from '@microcity/society';
 import { K_BRICK, K_GLASS, K_PLASTER, K_TILE, K_WOOD } from './detail.ts';
 import { Geo, hash01, mix, pickOf, tone } from './geo.ts';
-import { CREAM, DARK, METAL, STONE, WHITE, WOOD, WOOD_D, WOOD_L, drawFurniture } from './furniture.ts';
+import { CREAM, DARK, METAL, STONE, WHITE, WOOD, WOOD_D, WOOD_L, basket, drawFurniture, parkedEbike, steamers } from './furniture.ts';
 
 /**
  * 建筑套件：外观（墙、门窗、屋顶、雨棚、阳台、招牌）与剖面用的分层零件。
@@ -526,6 +526,36 @@ function decorate(g: Geo, c: Ctx): SignDef | null {
     sign = signAt(fr.L / 2, c.top + 0.62, 0.42, textW(h), h, '#4E6470', '#FBF6EA');
     g.box(fr.L / 2, c.top + 0.2, 0.4, textW(h) + 0.3, 0.12, 0.14, '#5E6F77');
     for (let i = 0; i < 3; i++) g.block(1.2 + i * 1.1, 0, 0.8, 0.9, 0.7 + (i % 2) * 0.5, 0.9, pickOf([WOOD, WOOD_L, '#8FA3AB'], id, i), hash01(id, i) * 0.4);
+  }
+  // 门口停的电动车：楼前多，店前少，院子门口偶尔一辆
+  const EB = ['#4B7EAD', '#C2553A', '#5C9E6E', '#E3A13A', '#8A6A9A', '#E9E2D0', '#6B6B6B'];
+  const nBikes = k === 'apartment' ? 3 + Math.floor(hash01(id, 'eb') * 3) : SHOPS.includes(k) || k === 'market' ? Math.floor(hash01(id, 'eb') * 3) : k === 'house' ? (hash01(id, 'eb') < 0.35 ? 1 : 0) : k === 'office' || k === 'workshop' || k === 'school' ? 2 + Math.floor(hash01(id, 'eb') * 3) : 0;
+  for (let i = 0; i < nBikes; i++) {
+    const side = hash01(id, 'ebs', i) < 0.5 ? -1 : 1;
+    const u = Math.max(0.8, Math.min(fr.L - 0.8, du + side * (2.1 + i * 0.72)));
+    if (Math.abs(u - du) < 1.4) continue;
+    parkedEbike(g, u, 1.15, Math.PI / 2 + (hash01(id, 'ebr', i) - 0.5) * 0.5 + (side > 0 ? 0 : Math.PI), pickOf(EB, id, 'ebc', i));
+  }
+  if (k === 'eatery' && c.place.name.includes('早点')) steamers(g, Math.min(fr.L - 1.0, du + 1.9), 0.75, 0);
+  if (k === 'market') for (let i = 0; i < 5; i++) basket(g, fr.L - 1.0 - i * 0.8, 0.9 + (i % 2) * 0.5, `${id}:b${i}`);
+  if (k === 'house') {
+    // 院子：侧墙上的空调、墙根的水缸或柴垛
+    if (hash01(id, 'hac') < 0.6) g.box(fr.L - 1.0, 2.0, 0.2, 0.8, 0.5, 0.34, '#E6E9E7');
+    if (hash01(id, 'jar') < 0.5) {
+      g.cyl(0.6, 0, 0.5, 0.3, 0.55, '#7A5B49', 10, 0.8);
+      g.cyl(0.6, 0.55, 0.5, 0.25, 0.04, '#5E4638', 10);
+    } else if (hash01(id, 'jar') < 0.8) for (let i = 0; i < 4; i++) g.rod(0.25, 0.1 + i * 0.16, 0.45, 1.05, 0.1 + i * 0.16, 0.45, 0.075, pickOf([WOOD, WOOD_D, WOOD_L], id, 'log', i), 6);
+    // 晾衣绳：从门廊拉到墙角
+    if (hash01(id, 'line') < 0.45) {
+      const a = du + 1.1;
+      const b = fr.L - 0.3;
+      if (b - a > 1.6) {
+        g.rod(a, 2.1, 0.7, b, 2.1, 0.7, 0.012, METAL, 4);
+        g.rod(b, 0, 0.7, b, 2.2, 0.7, 0.03, WOOD_D, 5);
+        const n = Math.floor((b - a) / 0.6);
+        for (let i = 0; i < n; i++) if (hash01(id, 'cl', i) < 0.75) g.box(a + 0.35 + i * 0.6, 1.78, 0.7, 0.42, 0.6, 0.02, pickOf(FABRIC, id, 'clc', i));
+      }
+    }
   }
   g.pop();
 

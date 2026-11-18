@@ -432,9 +432,11 @@ const TEMPLATES: Record<PlaceDef['kind'], Template> = {
   },
 
   workshop(b) {
-    for (const v of [3.4, 7.8])
-      for (let i = 0; i < 7; i++) {
-        const u = ((2.0 + 2.6 * i) / 20) * b.W;
+    // 工位随占地变：进深够就多排一行，宽了就多几列
+    const cols = Math.round((b.W - 2) / 2.6);
+    for (const v of b.D >= 15 ? [3.4, 7.8, 12.2] : [3.4, 7.8])
+      for (let i = 0; i < cols; i++) {
+        const u = 2.0 + ((b.W - 4) / (cols - 1)) * i;
         b.furn('machine', u, v, { rot: 0, w: 1.6, d: 1.0 });
         b.anchor('machine', u, v + 1.05, { face: PI });
       }

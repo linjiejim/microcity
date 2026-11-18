@@ -251,3 +251,53 @@ export function drawFurniture(g: Geo, f: Furniture, y0: number, key: string): vo
   }
   g.pop();
 }
+
+/** 停着的电动车（陈设）：车头朝 rot 方向 */
+export function parkedEbike(g: Geo, x: number, z: number, rot: number, color: string): void {
+  g.push(x, 0, z, rot);
+  for (const wz of [0.6, -0.58]) {
+    g.push(0, 0.27, wz, 0);
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2;
+      const b = ((k + 1) / 8) * Math.PI * 2;
+      g.rod(0, Math.cos(a) * 0.24, Math.sin(a) * 0.24, 0, Math.cos(b) * 0.24, Math.sin(b) * 0.24, 0.05, DARK, 5);
+    }
+    g.pop();
+  }
+  g.box(0, 0.34, 0.02, 0.28, 0.08, 0.6, DARK);
+  g.box(0, 0.5, -0.4, 0.27, 0.3, 0.6, color);
+  g.box(0, 0.69, -0.36, 0.26, 0.08, 0.54, '#2B2A2C');
+  g.box(0, 0.6, 0.4, 0.3, 0.52, 0.08, color, 0, -0.28);
+  g.rod(0, 0.74, 0.44, 0, 1.18, 0.3, 0.028, '#55565A', 6);
+  g.box(0, 1.18, 0.3, 0.54, 0.04, 0.04, '#2B2A2C');
+  g.ball(0, 0.86, 0.5, 0.055, '#F4EDD8');
+  // 支脚：车身略微歪着
+  g.rod(-0.1, 0.3, -0.1, -0.2, 0, -0.14, 0.015, '#55565A', 4);
+  g.pop();
+}
+
+/** 早点铺门口的蒸笼架：一张案子，上面摞着几屉 */
+export function steamers(g: Geo, x: number, z: number, rot: number): void {
+  g.push(x, 0, z, rot);
+  g.block(0, 0, 0, 1.5, 0.78, 0.6, '#B9B4AA');
+  g.box(0, 0.8, 0, 1.56, 0.04, 0.66, '#D9D4CA');
+  for (const [dx, n] of [
+    [-0.42, 4],
+    [0.15, 3],
+  ] as const) {
+    for (let i = 0; i < n; i++) {
+      g.cyl(dx, 0.82 + i * 0.11, 0, 0.24, 0.1, i % 2 ? '#D9B77E' : '#C9A56C', 12);
+      g.cyl(dx, 0.905 + i * 0.11, 0, 0.245, 0.012, '#A9844F', 12);
+    }
+    g.cyl(dx, 0.82 + n * 0.11, 0, 0.25, 0.03, '#E3C48E', 12, 0.86);
+  }
+  g.cyl(0.58, 0.82, 0.05, 0.13, 0.2, '#8A8F93', 10);
+  g.pop();
+}
+
+/** 一筐菜 */
+export function basket(g: Geo, x: number, z: number, key: string): void {
+  g.cyl(x, 0, z, 0.3, 0.3, '#B98F62', 10, 1.18);
+  const c = pickOf(['#7FA56A', '#D9776A', '#E3A13A', '#8FB27A', '#C7B26A', '#B5654A'], key);
+  for (let i = 0; i < 5; i++) g.ball(x + (hash01(key, i, 'x') - 0.5) * 0.36, 0.33, z + (hash01(key, i, 'z') - 0.5) * 0.36, 0.1, c);
+}
