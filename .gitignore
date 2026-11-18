@@ -14,3 +14,6 @@ playwright-report/
 # 部署：PM2 日志与依赖锁哈希
 logs/
 .deploy-lock-hash
+
+# v5 样片截图：脚本拍的是 PNG，入库的是转好的 JPG
+docs/assets/v5/*.png

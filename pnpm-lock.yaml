@@ -11,6 +11,9 @@ importers:
       '@microcity/sim':
         specifier: workspace:*
         version: link:packages/sim
+      '@microcity/society':
+        specifier: workspace:*
+        version: link:packages/society
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
@@ -41,6 +44,40 @@ importers:
       fastify:
         specifier: ^5.12.5
         version: 5.12.5
+
+  apps/studio:
+    dependencies:
+      '@microcity/society':
+        specifier: workspace:*
+        version: link:../../packages/society
+      react:
+        specifier: ~19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: ~19.3.0
+        version: 19.3.0(react@19.3.0)
+      three:
+        specifier: ^0.186.1
+        version: 0.186.1
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
+    devDependencies:
+      '@types/react':
+        specifier: ~19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ~19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@types/three':
+        specifier: ^0.186.0
+        version: 0.186.0
+      '@vitejs/plugin-react':
+        specifier: ^6.1.1
+        version: 6.1.1(vite@8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(tsx@4.23.15))
+      vite:
+        specifier: ^8.3.1
+        version: 8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(tsx@4.23.15)
 
   apps/web:
     dependencies:
@@ -83,6 +120,8 @@ importers:
         version: 8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(tsx@4.23.15)
 
   packages/sim: {}
+
+  packages/society: {}
 
 packages:
 

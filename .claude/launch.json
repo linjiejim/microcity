@@ -4,8 +4,20 @@
     {
       "name": "microcity",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeArgs": [
+        "dev"
+      ],
       "port": 5318
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@microcity/studio",
+        "dev"
+      ],
+      "port": 5320
     }
   ]
 }
