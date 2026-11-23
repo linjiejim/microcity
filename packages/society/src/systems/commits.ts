@@ -158,15 +158,32 @@ export function commitsFor(ctx: CommitCtx, p: PersonDef, day: number): Commit[] 
       if (!eaters.some((m) => m.id === p.id)) return;
       if (cook === p.id) add(`${key}-cook`, { kind: 'cook', place: p.home, start: t0 - prep, end: t0, label: `做${name}`, anchors: ['stove'] });
       add(key, { kind: 'eat_home', place: p.home, start: t0, end: t0 + len, label: `一家人吃${name}`, anchors: ['dine'], family: true });
+      // 饭后洗碗：做饭的人以外、年纪够的那一个；没有就还是做饭的人（D97）
+      const washer = eaters.find((m) => m.id !== cook && m.age >= 14) ?? eaters.find((m) => m.id === cook);
+      if (washer?.id === p.id) add(`${key}-dishes`, { kind: 'chores', place: p.home, start: t0 + len, end: t0 + len + params.dishes, label: '洗碗收拾', anchors: ['stove', 'free'] });
     };
     plan('lunch', meals.lunch, LUNCH_LEN, 30 * MIN, '午饭');
     plan('dinner', meals.dinner, DINNER_LEN, 40 * MIN, '晚饭');
   }
 
-  // 作业：晚饭后
-  if (schoolOn(p, day)) {
-    const start = d0 + Math.max(hm(19, 20), hh.dinnerAt + DINNER_LEN + 10 * MIN);
-    add('homework', { kind: 'study', place: p.home, start, end: start + (p.stage === 'child' ? 45 : 75) * MIN, label: '写作业', anchors: ['desk', 'dine'] });
+  // 作业：晚饭、洗碗之后
+  const homeworkAt = d0 + Math.max(hm(19, 20), hh.dinnerAt + DINNER_LEN + 15 * MIN);
+  if (schoolOn(p, day)) add('homework', { kind: 'study', place: p.home, start: homeworkAt, end: homeworkAt + (p.stage === 'child' ? 45 : 75) * MIN, label: '写作业', anchors: ['desk', 'dine'] });
+  // 陪小学生写作业（D97）：负责接送的人，没有就是这个时候有空的大人里排在前面的
+  const pupils = members.filter((m) => m.stage === 'child' && schoolOn(m, day) && !m.school!.away);
+  if (pupils.length > 0 && p.age >= 18) {
+    const end = homeworkAt + 45 * MIN;
+    const freeThen = (m: PersonDef) => m.age >= 18 && !overlaps(busy(m, day, works), homeworkAt - 30 * MIN, end);
+    const order = [...members].filter(freeThen).sort((a, b) => (a.id === hh.escort ? -1 : b.id === hh.escort ? 1 : 0) || (a.job ? 1 : 0) - (b.job ? 1 : 0) || (a.id < b.id ? -1 : 1));
+    if (order[0]?.id === p.id) add('homework-care', { kind: 'care', place: p.home, start: homeworkAt, end, label: pupils.length > 1 ? '陪孩子们写作业' : `陪${pupils[0]!.name}写作业`, anchors: ['dine', 'sofa', 'free'] });
+  }
+
+  // 操持家务（D97）：家里做饭的那个人，上午有空的日子收拾屋子、洗衣服
+  if (p.id === hh.cook && p.age >= 18) {
+    const start = d0 + hm(9) + Math.round(rand(seed, 'housework', p.id, day) * 12) * 5 * MIN;
+    const [a, b] = params.housework;
+    const end = start + (a + Math.floor(rand(seed, 'housework-len', p.id, day) * (b - a + 1))) * MIN;
+    if (!overlaps(busy(p, day, works), start - 30 * MIN, end + 15 * MIN)) add('housework', { kind: 'chores', place: p.home, start, end, label: '收拾屋子、洗衣服', anchors: ['free', 'stove'] });
   }
 
   // 一部分老人每周固定一天去卫生站

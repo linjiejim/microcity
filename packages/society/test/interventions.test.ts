@@ -156,3 +156,25 @@ describe('干预（D88）', () => {
     expect(contentHash(forked)).toBe(contentHash(events.slice(cut)));
   });
 });
+
+describe('预算感与处境（D98）', () => {
+  it('被裁之后：更省着花，心情里多了一笔处境分；房租涨了也更紧', async () => {
+    const { budgetOf } = await import('../src/index.ts');
+    const fired: string[] = [];
+    const e = Engine.create(def, { seed: 1, interventions: [{ kind: 'layoff', place: 'workshop', fraction: 0.5, day: 2 }, { kind: 'rent', factor: 1.6, from: 3 }], onEvent: (ev) => ev.type === 'laid_off' && fired.push(ev.agent) });
+    const base = Engine.create(def, { seed: 1 });
+    e.advance(2 * DAY + 10 * 3600);
+    base.advance(2 * DAY + 10 * 3600);
+    expect(fired.length).toBeGreaterThan(0);
+    for (const id of fired) {
+      const p = def.people.find((x) => x.id === id)!;
+      const a = budgetOf(e, p, 3);
+      const b = budgetOf(base, p, 3);
+      expect(a.tight).toBeGreaterThan(b.tight);
+      expect(a.stress).toBeGreaterThan(b.stress);
+      expect(a.disposable).toBeLessThan(b.disposable);
+    }
+    const renter = def.people.find((p) => def.households.find((h) => h.id === p.household)!.rentWeekly > 0 && !fired.includes(p.id))!;
+    expect(budgetOf(e, renter, 3).disposable).toBeLessThan(budgetOf(e, renter, 2).disposable);
+  });
+});

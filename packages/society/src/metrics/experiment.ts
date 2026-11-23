@@ -26,6 +26,11 @@ export interface Experiment {
   interventions: Intervention[];
   /** 指标从第几天起算；不给就从最早的那条干预开始 */
   from?: number;
+  /**
+   * 每个种子都换一批人（D99）：第 i 个种子用生成种子 spec.seed + i 重新生成社区。
+   * 不换的话，种子只换“过法”，结论可能只是这一批人的性格。第一个种子永远是规格里那一批人。
+   */
+  resample?: boolean;
   predictions: Prediction[];
 }
 
@@ -48,6 +53,11 @@ export function validateExperiment(x: Experiment): string[] {
   else if (firstDay(x.interventions) > x.days) bad.push('干预开始的那天已经超出了实验的天数');
   for (const p of x.predictions ?? []) if (!isIndicatorKey(p.metric)) bad.push(`没有这个指标：${p.metric}`);
   return bad;
+}
+
+/** 第 i 个种子用的社区规格 */
+export function specFor(x: Pick<Experiment, 'spec' | 'resample'>, index: number): CommunitySpec {
+  return x.resample && index > 0 ? { ...x.spec, seed: x.spec.seed + index } : x.spec;
 }
 
 /** 跑一条世界线，返回每天的统计 */
@@ -107,11 +117,13 @@ export function dayDistance(a: DayAgg['people'][number], b: DayAgg['people'][num
   return hours / 2 + Math.abs(a.spent - b.spent) / 25 + Math.abs(a.mood - b.mood) * 8 + Math.abs(a.chats - b.chats) * 0.3;
 }
 
-/** base[i]、treat[i] 是第 i 个种子的两条线 */
-export function compare(def: CommunityDef, x: Experiment, base: DayAgg[][], treat: DayAgg[][]): ExperimentResult {
+/** base[i]、treat[i] 是第 i 个种子的两条线；defs[i] 是它用的社区（不换人时都是同一个） */
+export function compare(defs: CommunityDef | CommunityDef[], x: Experiment, base: DayAgg[][], treat: DayAgg[][]): ExperimentResult {
+  const defOf = (i: number): CommunityDef => (Array.isArray(defs) ? (defs[i] ?? defs[0]!) : defs);
+  const def = defOf(0);
   const from = x.from ?? firstDay(x.interventions);
   const win = (days: DayAgg[]) => days.filter((d) => d.day >= from);
-  const metrics: MetricResult[] = Object.values(INDICATORS).map((ind) => ({ key: ind.key, base: base.map((days) => ind.compute(def, win(days))), treat: treat.map((days) => ind.compute(def, win(days))) }));
+  const metrics: MetricResult[] = Object.values(INDICATORS).map((ind) => ({ key: ind.key, base: base.map((days, i) => ind.compute(defOf(i), win(days))), treat: treat.map((days, i) => ind.compute(defOf(i), win(days))) }));
   const byKey = Object.fromEntries(metrics.map((m) => [m.key, m]));
   const predictions = x.predictions.map((p) => ({ ...p, ...judge(p.expect, byKey[p.metric]!.base, byKey[p.metric]!.treat) }));
   const a = base[0] ?? [];

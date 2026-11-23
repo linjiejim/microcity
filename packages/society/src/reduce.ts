@@ -1,6 +1,6 @@
 import { clamp01 } from './core/rng.ts';
-import { DAY, HOUR, type SimTime } from './core/time.ts';
-import { ACT_BUCKET, HOBBIES } from './data/tables.ts';
+import { DAY, HOUR, overlap, type SimTime } from './core/time.ts';
+import { ACT_BUCKET, HOBBIES, type Bucket } from './data/tables.ts';
 import { EXT, householdAccount, tieKey, type CommunityDef } from './model/def.ts';
 import type { DomainEvent } from './model/events.ts';
 import { emptyTally, type ActState, type NeedsState, type PersonState, type TieState, type Weather, type WorldState } from './model/state.ts';
@@ -40,9 +40,35 @@ export function needsAt(n: NeedsState, t: SimTime): [number, number, number, num
   return [clamp01(n.v[0] + n.rate[0] * dt), clamp01(n.v[1] + n.rate[1] * dt), clamp01(n.v[2] + n.rate[2] * dt), clamp01(n.v[3] + n.rate[3] * dt)];
 }
 
-/** 心情：四项需求的加权平均，再按当天聊了几次天略微上调 */
-export function moodOf(needs: readonly number[], chats: number): number {
-  return Math.round(Math.min(1, 0.2 * needs[0]! + 0.25 * needs[1]! + 0.25 * needs[2]! + 0.3 * needs[3]! + Math.min(0.1, chats * 0.02)) * 1000) / 1000;
+/** 心情：四项需求的加权平均，按当天聊了几次天略微上调，再扣掉处境（被裁、没有余钱，D98） */
+export function moodOf(needs: readonly number[], chats: number, stress = 0): number {
+  return Math.round(Math.max(0, Math.min(1, 0.2 * needs[0]! + 0.25 * needs[1]! + 0.25 * needs[2]! + 0.3 * needs[3]! + Math.min(0.1, chats * 0.02)) - stress) * 1000) / 1000;
+}
+
+/**
+ * 把 [from, to) 这段时间记进当天的时间利用。
+ * 去城里上班、上学的那段，首尾各 awayCommute 算在路上（D97）：人在画面外，但这段路是真的。
+ */
+export function tallyInto(use: Record<Bucket, number>, act: ActState | null, moving: boolean, from: SimTime, to: SimTime, params: RuleParams): void {
+  const dt = to - from;
+  if (dt <= 0) return;
+  if (moving) {
+    use.travel += dt;
+    return;
+  }
+  if (!act) {
+    use.other += dt;
+    return;
+  }
+  const bucket = ACT_BUCKET[act.kind];
+  if (!act.away) {
+    use[bucket] += dt;
+    return;
+  }
+  const c = Math.floor(Math.min(params.awayCommute, (act.t1 - act.t0) / 2));
+  const travel = overlap(from, to, act.t0, act.t0 + c) + overlap(from, to, act.t1 - c, act.t1);
+  use.travel += travel;
+  use[bucket] += dt - travel;
 }
 
 /** 久不见面的淡化：家人与伴侣不淡 */
@@ -147,7 +173,7 @@ export function reduce(state: WorldState, e: DomainEvent, ctx: ReduceCtx): void 
       const p = person(e.agent);
       settle(p.needs, e.t);
       p.needs.rate = ctx.params.rates.wait;
-      p.today.use.travel += e.t - p.tallyT;
+      tallyInto(p.today.use, null, true, p.tallyT, e.t, ctx.params);
       p.tallyT = e.t;
       p.loc = { k: 'in', place: e.place };
       state.here[e.place]!.push(e.agent);
@@ -163,7 +189,7 @@ export function reduce(state: WorldState, e: DomainEvent, ctx: ReduceCtx): void 
       p.carrying = false;
       if (e.act.anchor >= 0) state.occupied[e.act.place]![e.act.anchor] = e.agent;
       if (e.act.commit) p.done[e.act.commit] = 1;
-      const key = e.act.kind === 'hobby' ? e.act.hobby : e.act.kind === 'chores' ? 'chores' : undefined;
+      const key = e.act.kind === 'hobby' ? e.act.hobby : e.act.kind === 'chores' || e.act.kind === 'wash' ? e.act.kind : undefined;
       if (key) p.hobbyToday[key] = (p.hobbyToday[key] ?? 0) + 1;
       if (e.act.kind === 'work' && p.lastWorkDay !== state.day) {
         p.lastWorkDay = state.day;
@@ -178,7 +204,7 @@ export function reduce(state: WorldState, e: DomainEvent, ctx: ReduceCtx): void 
       if (!act || act.id !== e.actId) throw new Error(`活动对不上: ${e.agent} ${e.actId}`);
       settle(p.needs, e.t);
       p.needs.rate = ctx.params.rates.wait;
-      p.today.use[ACT_BUCKET[act.kind]] += e.t - p.tallyT;
+      tallyInto(p.today.use, act, false, p.tallyT, e.t, ctx.params);
       p.tallyT = e.t;
       if (act.anchor >= 0) delete state.occupied[act.place]![act.anchor];
       if (act.kind === 'shop') p.carrying = true;

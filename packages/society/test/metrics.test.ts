@@ -121,3 +121,27 @@ describe('实验（D90）', () => {
     expect(same.affected[0]!.score).toBe(0);
   });
 });
+
+describe('每个种子换一批人（D99）', () => {
+  it('第一个种子永远是规格里那一批人；其余种子各是一批不同的人', async () => {
+    const { specFor } = await import('../src/index.ts');
+    const x = { spec: OLDTOWN, resample: true };
+    expect(specFor(x, 0)).toBe(OLDTOWN);
+    expect(specFor(x, 2).seed).toBe(OLDTOWN.seed + 2);
+    expect(specFor({ spec: OLDTOWN }, 3)).toBe(OLDTOWN);
+    const a = generateCommunity(specFor(x, 1));
+    const b = generateCommunity(specFor(x, 2));
+    expect(a.id).not.toBe(b.id);
+    expect(a.people.map((p) => p.name)).not.toEqual(b.people.map((p) => p.name));
+  });
+
+  it('比较时每个种子用自己的社区算指标', () => {
+    const x: Experiment = { name: 'r', question: '', spec: OLDTOWN, seeds: [1, 2], days: 4, resample: true, interventions: [{ kind: 'grant', amount: 500, day: 2 }], predictions: [{ id: 'P1', text: '', metric: 'hh.balance', expect: 'higher' }] };
+    const defs = [def, generateCommunity({ ...OLDTOWN, seed: OLDTOWN.seed + 1 })];
+    const base = defs.map((d, i) => runLine(d, x.seeds[i]!, [], x.days));
+    const treat = defs.map((d, i) => runLine(d, x.seeds[i]!, x.interventions, x.days));
+    const r = compare(defs, x, base, treat);
+    expect(r.predictions[0]!.verdict).toBe('支持');
+    expect(r.metrics.find((m) => m.key === 'hh.balance')!.base[0]).not.toBe(r.metrics.find((m) => m.key === 'hh.balance')!.base[1]);
+  });
+});

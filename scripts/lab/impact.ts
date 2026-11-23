@@ -5,7 +5,7 @@
  * 只在内存里跑；汇总写到 docs/experiments/results/v5-impact.json。
  */
 import { writeFileSync } from 'node:fs';
-import { compare, generateCommunity, INDICATORS, runLine } from '@microcity/society';
+import { compare, generateCommunity, INDICATORS, runLine, specFor } from '@microcity/society';
 import { CASES } from '../../apps/studio/src/lab/presets.ts';
 
 const only = process.argv.slice(2);
@@ -22,18 +22,19 @@ for (const c of CASES) {
   if (only.length && !only.includes(c.id)) continue;
   const x = c.experiment;
   const t0 = performance.now();
-  const def = generateCommunity(x.spec);
-  const base = x.seeds.map((s) => runLine(def, s, [], x.days));
-  const treat = x.seeds.map((s) => runLine(def, s, x.interventions, x.days));
-  const r = compare(def, x, base, treat);
+  const defs = x.seeds.map((_, i) => generateCommunity(specFor(x, i)));
+  const def = defs[0]!;
+  const base = x.seeds.map((s, i) => runLine(defs[i]!, s, [], x.days));
+  const treat = x.seeds.map((s, i) => runLine(defs[i]!, s, x.interventions, x.days));
+  const r = compare(defs, x, base, treat);
   const pkey = `${def.id}:${x.days}`;
-  if (!placeboCache.has(pkey)) placeboCache.set(pkey, x.seeds.map((s) => runLine(def, s, [{ kind: 'grant', amount: 1, day: 4 }], x.days)));
-  const placebo = compare(def, { ...x, from: r.from }, base, placeboCache.get(pkey)!);
+  if (!placeboCache.has(pkey)) placeboCache.set(pkey, x.seeds.map((s, i) => runLine(defs[i]!, s, [{ kind: 'grant', amount: 1, day: 4 }], x.days)));
+  const placebo = compare(defs, { ...x, from: r.from }, base, placeboCache.get(pkey)!);
   const noise = (key: string) => {
     const m = placebo.metrics.find((k) => k.key === key)!;
     return median(m.treat.map((b, i) => Math.abs(b - m.base[i]!)));
   };
-  console.log(`\n## ${c.title}（${def.name}，${x.seeds.length} 个种子 × ${x.days} 天，指标自第 ${r.from} 天起；${Math.round(performance.now() - t0)} ms）\n`);
+  console.log(`\n## ${c.title}（${def.name}，${x.seeds.length} 个种子 × ${x.days} 天${x.resample ? '，每个种子换一批人' : ''}，指标自第 ${r.from} 天起；${Math.round(performance.now() - t0)} ms）\n`);
   console.log('| 假设 | 指标 | 基线（中位数） | 干预（中位数） | 配对差的中位数 | 安慰剂的差 | 同向的种子 | 判定 |\n| --- | --- | --- | --- | --- | --- | --- | --- |');
   for (const p of r.predictions) {
     const m = r.metrics.find((k) => k.key === p.metric)!;

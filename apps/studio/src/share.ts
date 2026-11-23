@@ -80,6 +80,7 @@ export function cleanExperiment(raw: unknown): Experiment | undefined {
     days: num(r.days, 1, 60) ? Math.round(r.days) : 0,
     interventions: cleanInterventions(r.interventions),
     ...(day(r.from) ? { from: r.from } : {}),
+    ...(r.resample === true ? { resample: true } : {}),
     predictions: Array.isArray(r.predictions)
       ? r.predictions
           .filter((p): p is Record<string, unknown> => !!p && typeof p === 'object')

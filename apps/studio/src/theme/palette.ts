@@ -24,6 +24,7 @@ export const PAL = {
 /** 时间利用分桶的颜色：时间轴、作息、图例统一 */
 export const BUCKET_HEX: Record<Bucket, string> = {
   sleep: '#5b6b8c',
+  rest: '#9aa6bd',
   work: '#1f5f63',
   study: '#4b7ead',
   meal: '#e3a13a',

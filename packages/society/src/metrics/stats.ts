@@ -1,12 +1,13 @@
 import { DAY, dayStart, HOUR } from '../core/time.ts';
-import { ACT_BUCKET, BUCKETS } from '../data/tables.ts';
+import { BUCKETS } from '../data/tables.ts';
 import { EXT, householdAccount, type CommunityDef, type PlaceKind, type TieKind } from '../model/def.ts';
 import type { DomainEvent } from '../model/events.ts';
 import type { Intervention } from '../model/intervention.ts';
 import type { PersonState, Weather, WorldState } from '../model/state.ts';
 import type { RuleParams } from '../params.ts';
 import { rand } from '../core/rng.ts';
-import { initialState, moodOf, needsAt } from '../reduce.ts';
+import { initialState, moodOf, needsAt, tallyInto } from '../reduce.ts';
+import { budgetOf } from '../systems/budget.ts';
 import { Engine, mergeParams } from '../engine/engine.ts';
 
 /**
@@ -63,12 +64,11 @@ export interface DayAgg {
   marks: string[];
 }
 
-/** 一个人截至 t 的当天小结（含还没结束的那一段） */
-export function daySumOf(ps: PersonState, t: number): DaySum {
-  const use = BUCKETS.map((b) => ps.today.use[b]);
-  const bucket = ps.act ? ACT_BUCKET[ps.act.kind] : ps.loc.k === 'move' ? 'travel' : 'other';
-  use[BUCKETS.indexOf(bucket)]! += t - ps.tallyT;
-  return { use, spent: ps.today.spent, earned: ps.today.earned, chats: ps.today.chats, mood: moodOf(needsAt(ps.needs, t), ps.today.chats) };
+/** 一个人截至 t 的当天小结（含还没结束的那一段）；stress 是处境要扣的心情（D98） */
+export function daySumOf(ps: PersonState, t: number, params: RuleParams, stress: number): DaySum {
+  const use = { ...ps.today.use };
+  tallyInto(use, ps.act, ps.loc.k === 'move', ps.tallyT, t, params);
+  return { use: BUCKETS.map((b) => use[b]), spent: ps.today.spent, earned: ps.today.earned, chats: ps.today.chats, mood: moodOf(needsAt(ps.needs, t), ps.today.chats, stress) };
 }
 
 const round2 = (x: number): number => Math.round(x * 100) / 100;
@@ -150,8 +150,8 @@ export class StatsCollector {
     this.cur.occupancy.push(row);
   }
 
-  /** 一天结束（午夜前一秒）时收尾 */
-  closeDay(state: WorldState, day: number): DayAgg {
+  /** 一天结束（午夜前一秒）时收尾；stressOf 给出每个人这一天的处境分 */
+  closeDay(state: WorldState, day: number, params: RuleParams, stressOf: (id: string) => number): DayAgg {
     const t = dayStart(day + 1);
     const ties: Partial<Record<TieKind, number>> = {};
     for (const k in state.ties) {
@@ -170,7 +170,7 @@ export class StatsCollector {
     const agg: DayAgg = {
       day,
       weather: state.weather,
-      people: this.def.people.map((p) => daySumOf(state.people[p.id]!, t)),
+      people: this.def.people.map((p) => daySumOf(state.people[p.id]!, t, params, stressOf(p.id))),
       ...this.cur,
       ties,
       wallets: this.def.people.map((p) => state.accounts[p.id] ?? 0),
@@ -242,7 +242,8 @@ export class DayRunner {
       this.stats.sampleHour(this.engine.state);
     }
     this.engine.advance(d0 + DAY - 1);
-    const agg = this.stats.closeDay(this.engine.state, day);
+    const e = this.engine;
+    const agg = this.stats.closeDay(e.state, day, e.params, (id) => budgetOf(e, e.P[id]!, day).stress);
     const events = this.buffer;
     this.buffer = [];
     this.day = day;

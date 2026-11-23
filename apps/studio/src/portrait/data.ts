@@ -148,7 +148,7 @@ export interface CalRow {
   reference: number;
 }
 
-const CATEGORY_OF: Record<Bucket, RefCategory> = { sleep: '生理必需', meal: '生理必需', other: '生理必需', work: '有酬劳动', chores: '无酬劳动', leisure: '自由支配', study: '学习培训', travel: '交通' };
+const CATEGORY_OF: Record<Bucket, RefCategory> = { sleep: '生理必需', rest: '生理必需', meal: '生理必需', other: '生理必需', work: '有酬劳动', chores: '无酬劳动', leisure: '自由支配', study: '学习培训', travel: '交通' };
 
 /** 校准：15 岁以上居民的时间利用（分钟/天），与参照并排 */
 export function calibration(def: CommunityDef, aggs: DayAgg[]): CalRow[] {

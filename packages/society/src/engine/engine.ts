@@ -2,13 +2,14 @@ import { contentHash } from '../core/hash.ts';
 import { MinHeap, type Keyed } from '../core/pq.ts';
 import { rand, type RngKey } from '../core/rng.ts';
 import { DAY, dayOf, dayStart, hm, MIN, timeOfDay, type SimTime } from '../core/time.ts';
-import { ACT_BUCKET, GOODS_LABEL, HOBBIES, SHIFTS } from '../data/tables.ts';
+import { GOODS_LABEL, HOBBIES, SHIFTS } from '../data/tables.ts';
 import { EXT, householdAccount, type CommunityDef, type FirmDef, type HouseholdDef, type OfferDef, type PersonDef, type PlaceDef } from '../model/def.ts';
 import type { Intervention } from '../model/intervention.ts';
 import type { DomainEvent, EventBody, TransferKind } from '../model/events.ts';
 import type { ActState, Intent, PersonState, WorldState } from '../model/state.ts';
 import { DEFAULT_PARAMS, PARAMS_VERSION, POLICY_VERSION, SOCIAL_RULES_VERSION, type RuleParams } from '../params.ts';
-import { initialState, moodOf, needsAt, reduce, weatherOf } from '../reduce.ts';
+import { initialState, moodOf, needsAt, reduce, tallyInto, weatherOf } from '../reduce.ts';
+import { budgetOf } from '../systems/budget.ts';
 import { choose, type Deadline } from '../systems/choose.ts';
 import { commitsFor, habitWake, type Commit, type CommitCtx } from '../systems/commits.ts';
 import { payroll, pensions, restock, weekly } from '../systems/economy.ts';
@@ -198,10 +199,9 @@ export class Engine {
     for (const p of this.def.people) {
       const ps = this.state.people[p.id]!;
       const use = { ...ps.today.use };
-      const bucket = ps.act ? ACT_BUCKET[ps.act.kind] : ps.loc.k === 'move' ? 'travel' : 'other';
-      use[bucket] += t - ps.tallyT;
+      tallyInto(use, ps.act, ps.loc.k === 'move', ps.tallyT, t, this.params);
       const n = needsAt(ps.needs, t);
-      const mood = moodOf(n, ps.today.chats);
+      const mood = moodOf(n, ps.today.chats, budgetOf(this, p, day - 1).stress);
       this.emit({ type: 'day_summary', agent: p.id, day: day - 1, use, spent: ps.today.spent, earned: ps.today.earned, chats: ps.today.chats, mood, needs: n.map((x) => Math.round(x * 1000) / 1000) as [number, number, number, number] });
     }
     this.emit({ type: 'day_started', day, weather: this.rules.weather(day) ?? weatherOf(this.seed, day, rand) });
@@ -370,7 +370,12 @@ export class Engine {
     if (!act || act.id !== actId) return;
     this.emit({ type: 'act_ended', agent, actId, outcome: 'done' });
     const p = this.P[agent]!;
-    if (act.kind === 'sleep') return this.begin(p, ps, { kind: 'wash', dur: (10 + Math.floor(this.rand('wash', agent, dayOf(this.now)) * 6)) * MIN, label: '洗漱', anchors: ['free'] });
+    if (act.kind === 'sleep') {
+      const [a, b] = this.params.washMorning;
+      return this.begin(p, ps, { kind: 'wash', dur: (a + Math.floor(this.rand('wash', agent, dayOf(this.now)) * (b - a + 1))) * MIN, label: '洗漱', anchors: ['free'] });
+    }
+    // 接着做的事（做完饭吃饭、洗漱完睡觉）
+    if (act.next) return this.begin(p, ps, act.next);
     this.step(p, ps);
   }
 
@@ -469,9 +474,11 @@ export class Engine {
   }
 
   /** 开始做一件事（人已经在地方了）。买东西、付钱、占站位都在这里。 */
-  begin(p: PersonDef, ps: PersonState, intent: Intent): void {
+  begin(p: PersonDef, ps: PersonState, intentIn: Intent): void {
     if (ps.loc.k !== 'in' || ps.act) return;
     const t = this.now;
+    // 睡多久要按真正躺下的时刻算（前面可能先洗漱了）
+    const intent = intentIn.kind === 'sleep' && !intentIn.commit ? { ...this.sleepIntent(p, t), ...(intentIn.next ? { next: intentIn.next } : {}) } : intentIn;
     const place = ps.loc.place;
     const dur = Math.round(intent.until ? intent.until - t : intent.dur);
     if (dur < 30) return this.step(p, ps);
@@ -560,6 +567,7 @@ export class Engine {
       ...(intent.commit ? { commit: intent.commit } : {}),
       ...(intent.away ? { away: true } : {}),
       ...(intent.family ? { family: true } : {}),
+      ...(intent.next ? { next: intent.next } : {}),
     };
     this.emit({ type: 'act_started', agent: p.id, act });
     this.schedule(act.t1, { k: 'end', agent: p.id, actId: act.id });

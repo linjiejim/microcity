@@ -1,13 +1,14 @@
-import { clamp, clamp01, r3 } from '../core/rng.ts';
+import { clamp, r3 } from '../core/rng.ts';
 import { dayOf, hm, HOUR, MIN, timeOfDay, type SimTime } from '../core/time.ts';
 import { HOBBIES, type Hobby } from '../data/tables.ts';
-import { householdAccount, tieKey, type PersonDef, type PlaceKind } from '../model/def.ts';
+import { tieKey, type PersonDef, type PlaceKind } from '../model/def.ts';
 import type { OptionTrace } from '../model/events.ts';
 import type { Intent, PersonState } from '../model/state.ts';
 import { mealAt, NEEDS, type Rates } from '../params.ts';
 import { closenessAt, needsAt, ratesFor } from '../reduce.ts';
 import type { Engine } from '../engine/engine.ts';
 import { habitBed } from './commits.ts';
+import { budgetOf } from './budget.ts';
 
 /**
  * 自由选择（D64）：候选 → 效用（各项因子相加）→ softmax 抽样 → 写成 decision 事件。
@@ -45,13 +46,21 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
   const pantry = e.state.households[hh.id]!;
   const members = hh.members.length;
   const wallet = e.balance(p.id);
-  const tight = clamp01(1 - (wallet + 0.3 * Math.max(0, e.balance(householdAccount(hh.id)))) / 1500);
+  // 手头紧不紧（D98）：余钱撑几周、每周可支配的收入、是不是刚被裁
+  const tight = budgetOf(e, p, dayOf(t)).tight;
   const out: Option[] = [];
   const u01 = (...key: Array<string | number>) => e.rand('opt', p.id, ps.choiceN, ...key);
 
   // 过了平时睡觉的点，其他事越来越不想做
   const night = sod < hm(5) ? dayOf(t) - 1 : dayOf(t);
-  const lateH = (t - habitBed(e.seed, p, night)) / HOUR;
+  // 睡前还要洗漱的话，得提前这么久收拾（D97）：“到点”指的是躺下的时刻
+  const [wa, wb] = P.washNight;
+  const washPending = sod >= hm(19, 30) && (ps.hobbyToday.wash ?? 0) < 2;
+  const washDur = washPending ? (wa + Math.floor(u01('wash-night') * (wb - wa + 1))) * MIN : 0;
+  // 平时几点睡；第二天要早起的，按要睡够的时长往前提（早班的人早早就躺下）
+  const need8 = (p.age < 13 ? P.sleepNeed[0] : p.age < 18 ? P.sleepNeed[1] : P.sleepNeed[2]) * HOUR;
+  const bedBy = Math.min(habitBed(e.seed, p, night), e.wakeDue(p, t) - need8);
+  const lateH = (t + washDur - bedBy) / HOUR;
   const late = lateH > 0 ? -P.latePenalty * lateH : 0;
 
   /** 需求项：越缺的需求权重越大；会消耗某项需求的活动按同样的权重扣分 */
@@ -106,7 +115,9 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
   // 离该起床不到一个半小时就不再睡（否则早起的人洗漱完又躺回去，上班迟到）
   const bedAt = t + e.travelSec(p, cur, home);
   if ((sod >= hm(19, 30) || sod < hm(5) || n[1] < 0.08) && e.wakeDue(p, bedAt) - bedAt >= 90 * MIN) {
-    const intent = e.sleepIntent(p, bedAt);
+    const sleep = e.sleepIntent(p, bedAt);
+    // 睡前先洗漱（D97）：今天早上洗过一次，晚上还没洗；过了午夜就直接睡
+    const intent: Intent = washPending ? { kind: 'wash', dur: washDur, label: '洗漱，准备睡觉', anchors: ['free'], next: sleep } : sleep;
     push('sleep', '睡觉', home, intent, { need: need(P.rates.sleep, Math.min(intent.dur, 8 * HOUR)), habit: 4 * clamp(lateH, -2.5, 2), base: -1 });
   }
   // 午睡
@@ -121,8 +132,17 @@ export function options(e: Engine, p: PersonDef, ps: PersonState, t: SimTime, de
     const habit = meal ? P.mealWindowBonus : 0;
     const name = meal ?? '东西';
     if (pantry.food >= 1) {
-      const d = fit(home, (25 + Math.floor(u01('eat-home') * 11)) * MIN, 15 * MIN, false);
-      if (d) push('eat_home', `在家吃${name}`, home, { kind: 'eat_home', dur: d, label: `在家吃${name}`, anchors: ['dine'] }, { need: need(P.rates.eat_home, d), habit, base: -P.cookEffort * (1.4 - p.traits.order), cost: costTerm(foodPrice) });
+      // 大人自己在家吃，得先做（D97）；孩子由家里人顺手弄好
+      const [ca, cb] = meal === '早饭' ? P.cookBreakfast : P.cookMeal;
+      const cook = p.age >= 16 ? (ca + Math.floor(u01('cook') * (cb - ca + 1))) * MIN : 0;
+      const eat = (25 + Math.floor(u01('eat-home') * 11)) * MIN;
+      const total = fit(home, cook + eat, cook + 15 * MIN, false);
+      if (total) {
+        const d = total - cook;
+        const eatIntent: Intent = { kind: 'eat_home', dur: d, label: `在家吃${name}`, anchors: ['dine'] };
+        const intent: Intent = cook > 0 ? { kind: 'cook', dur: cook, label: `做${name}`, anchors: ['stove'], next: eatIntent } : eatIntent;
+        push('eat_home', `在家吃${name}`, home, intent, { need: need(P.rates.eat_home, d), habit, base: -P.cookEffort * (1.4 - p.traits.order), cost: costTerm(foodPrice) });
+      }
     }
     const job = p.job;
     if (job && cur === job.place && deadline?.place === cur && pantry.food >= 1) {

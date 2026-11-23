@@ -674,3 +674,13 @@
 .pcard > .btn {
   align-self: flex-start;
 }
+.iv-field.check-field {
+  width: auto;
+  align-content: start;
+}
+.iv-field.check-field input {
+  width: 18px;
+  height: 18px;
+  margin-top: 6px;
+  accent-color: var(--teal);
+}

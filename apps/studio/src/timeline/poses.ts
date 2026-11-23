@@ -174,6 +174,8 @@ export function animFor(act: ActState, anchor: Anchor | undefined, chatting: boo
       return chatting ? 'stand_talk' : 'wait';
     case 'clinic':
       return sit ? 'sit' : 'wait';
+    case 'care':
+      return sit ? 'sit_talk' : 'stand_talk';
     case 'rest':
       return sit ? (chatting ? 'sit_talk' : 'sit') : 'idle';
     case 'hobby':

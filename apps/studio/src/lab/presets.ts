@@ -13,6 +13,8 @@ export interface Case {
 }
 
 const SEEDS = [1, 2, 3, 4, 5];
+/** 影响案例都换人重复（D99）：每个种子一批不同的人 */
+const RESAMPLE = true;
 
 export const CASES: Case[] = [
   {
@@ -24,6 +26,7 @@ export const CASES: Case[] = [
       question: '菜市场关门以后，老人的日子会怎样？',
       spec: OLDTOWN,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 14,
       interventions: [{ kind: 'close', place: 'market', from: 4 }],
       predictions: [
@@ -43,6 +46,7 @@ export const CASES: Case[] = [
       question: '社区食堂会让老人少一些“一整天没说上话”的日子吗？',
       spec: OLDTOWN,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 14,
       interventions: [{ kind: 'canteen', place: 'center', price: 9, from: 4 }],
       predictions: [
@@ -62,6 +66,7 @@ export const CASES: Case[] = [
       question: '一条涨价的传言，能不能自己把菜买空？',
       spec: OLDTOWN,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 12,
       interventions: [{ kind: 'rumor', topic: 'price_up', seeds: 6, day: 4 }],
       from: 4,
@@ -81,6 +86,7 @@ export const CASES: Case[] = [
       question: '一周的雨，会让老人更孤单吗？',
       spec: OLDTOWN,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 12,
       interventions: [{ kind: 'weather', weather: 'rain', from: 4, to: 10 }],
       predictions: [
@@ -100,6 +106,7 @@ export const CASES: Case[] = [
       question: '一个车间裁员，镇上的小店会跟着冷清吗？',
       spec: FACTORY,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 21,
       interventions: [{ kind: 'layoff', place: 'workshop', fraction: 0.5, day: 4 }],
       predictions: [
@@ -119,6 +126,7 @@ export const CASES: Case[] = [
       question: '发钱之后，人们会多下馆子吗？',
       spec: VILLAGE,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 14,
       interventions: [{ kind: 'grant', amount: 500, day: 4 }],
       predictions: [
@@ -137,6 +145,7 @@ export const CASES: Case[] = [
       question: '房租涨了，租客会少下馆子吗？',
       spec: VILLAGE,
       seeds: SEEDS,
+      resample: RESAMPLE,
       days: 21,
       interventions: [{ kind: 'rent', factor: 1.3, from: 1 }],
       from: 8,

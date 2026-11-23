@@ -72,6 +72,7 @@ const LIST: Indicator[] = [
   { key: 'time.sleep', label: '睡觉', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ALL, hours('sleep')) },
   { key: 'time.work', label: '上班的人的工作时间', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, WORKER, hours('work')) },
   { key: 'time.leisure', label: '休闲', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ALL, hours('leisure')) },
+  { key: 'time.rest', label: '歇着', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ALL, hours('rest')) },
   { key: 'time.leisure.elder', label: '老人的休闲', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ELDER, hours('leisure')) },
   { key: 'time.chores', label: '家务与采购', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ALL, hours('chores')) },
   { key: 'time.travel', label: '在路上', unit: '小时/天', group: '过日子', digits: 2, compute: (def, days) => perPerson(def, days, ALL, hours('travel')) },

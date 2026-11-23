@@ -7,10 +7,14 @@ import type { ActKind } from './data/tables.ts';
  *
  * life_v1 的依据：让“典型事实检查”成立（人均睡眠 6.5–9.5 小时、在职者工作日工作 6–10 小时、
  * 三餐规律、月末极少有家庭入不敷出），尚未对照真实的时间利用调查（M3 的校准页会做）。
+ *
+ * life_v2（2026-11-23，D97–D99）：校准页显示模型里的人家务、个人护理做得太少，空出的时间都成了休闲；
+ * 补上的是缺的活动（晚上洗漱、自己做饭、饭后洗碗、陪孩子写作业、去城里路上的时间），不是调参去凑调查的数。
+ * 另加“手头紧不紧”的预算感与心情里的处境（失业、没有余钱）；常数取整，依据写在 D98。
  */
-export const PARAMS_VERSION = 'life_v1';
+export const PARAMS_VERSION = 'life_v2';
 /** 候选的生成或效用公式变了就升 */
-export const POLICY_VERSION = 'life_policy_v1';
+export const POLICY_VERSION = 'life_policy_v2';
 /** 关系变化的规则变了就升 */
 export const SOCIAL_RULES_VERSION = 'ties_v1';
 
@@ -106,6 +110,35 @@ export interface RuleParams {
   /** 被裁后每月的失业补助（元） */
   joblessAid: number;
 
+  /** 去城里上班、上学：单程路上的时间（秒），从“在城里”的那段首尾各扣出来算在路上 */
+  awayCommute: number;
+  /** 早上与睡前洗漱多久（分钟，区间） */
+  washMorning: [number, number];
+  washNight: [number, number];
+  /** 一个人在家吃饭前自己做饭多久（分钟，区间）：早饭、午晚饭 */
+  cookBreakfast: [number, number];
+  cookMeal: [number, number];
+  /** 饭后洗碗收拾多久（秒） */
+  dishes: number;
+  /** 做饭的那个人上午收拾屋子、洗衣服多久（分钟，区间） */
+  housework: [number, number];
+  /** 要睡够几个小时：小学生、中学生、大人；第二天早起就按它往前提睡觉的点 */
+  sleepNeed: [number, number, number];
+
+  /** 预算感（D98）：每人每周的日常开销（元）与每周买菜的钱 */
+  personalWeekly: number;
+  foodWeekly: number;
+  /** 余钱撑得过几周算宽裕 */
+  runwayComfort: number;
+  /** 每人每周可支配收入（收入减去房租水电买菜）到多少算不紧 */
+  incomeRef: number;
+  /** 收入低、被裁对“手头紧”的加成 */
+  incomeWeight: number;
+  laidOffTight: number;
+  /** 心情里的处境：被裁、余钱撑不过两周各扣多少（0–1 的心情上） */
+  stressJobless: number;
+  stressBroke: number;
+
   /** 聊天让亲密度涨多少（随现有亲密度递减） */
   chatCloseness: number;
   /** 陌生人同场聊过几次成为熟人；亲密度过多少成为朋友 */
@@ -135,6 +168,7 @@ export const DEFAULT_PARAMS: RuleParams = {
     rest: [-0.11, 0.03, -0.07, -0.05],
     wait: [-0.12, -0.04, -0.07, -0.08],
     escort: [-0.12, -0.06, 0.08, 0.02],
+    care: [-0.12, -0.06, 0.06, -0.02],
     clinic: [-0.12, -0.04, 0.03, -0.03],
     move: [-0.14, -0.075, -0.06, -0.06],
     away: [-0.045, -0.065, -0.01, -0.07],
@@ -189,6 +223,24 @@ export const DEFAULT_PARAMS: RuleParams = {
   schoolLunch: 8,
   allowance: 30,
   joblessAid: 900,
+
+  awayCommute: 35 * 60,
+  washMorning: [15, 25],
+  washNight: [20, 30],
+  cookBreakfast: [8, 15],
+  cookMeal: [20, 35],
+  dishes: 12 * 60,
+  housework: [40, 60],
+  sleepNeed: [9.5, 8.5, 7.25],
+
+  personalWeekly: 120,
+  foodWeekly: 100,
+  runwayComfort: 6,
+  incomeRef: 400,
+  incomeWeight: 0.6,
+  laidOffTight: 0.3,
+  stressJobless: 0.08,
+  stressBroke: 0.08,
 
   chatCloseness: 0.03,
   acquaintAfter: 3,

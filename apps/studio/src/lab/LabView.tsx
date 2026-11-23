@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { compare, describeIntervention, EXPERIMENT_LIMITS, generateCommunity, INDICATOR_LIST, INDICATORS, PRESETS, RUMORS, TEMPLATE_LABEL, validateExperiment, type Affected, type CommunityDef, type CommunitySpec, type DayAgg, type Experiment, type ExperimentResult, type Intervention, type InterventionKind, type Prediction } from '@microcity/society';
+import { compare, describeIntervention, specFor, EXPERIMENT_LIMITS, generateCommunity, INDICATOR_LIST, INDICATORS, PRESETS, RUMORS, TEMPLATE_LABEL, validateExperiment, type Affected, type CommunityDef, type CommunitySpec, type DayAgg, type Experiment, type ExperimentResult, type Intervention, type InterventionKind, type Prediction } from '@microcity/society';
 import { Avatar } from '../hud/Avatar.tsx';
 import { roleOf } from '../hud/format.ts';
 import { runtime } from '../runtime.ts';
@@ -159,7 +159,8 @@ export function LabView({ initial }: { initial?: Experiment }) {
     try {
       const { base, treat } = await lab.run(x, (done, total) => mine === token.current && setProgress(done / total));
       if (mine !== token.current) return;
-      setRun({ x, def, base, treat, result: compare(def, x, base, treat) });
+      const defs = x.seeds.map((_, i) => (i === 0 ? def : generateCommunity(specFor(x, i))));
+      setRun({ x, def, base, treat, result: compare(defs, x, base, treat) });
     } catch (e) {
       if (mine === token.current) setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -220,6 +221,10 @@ export function LabView({ initial }: { initial?: Experiment }) {
               <label className="iv-field">
                 <span className="dim">看几天</span>
                 <input className="input num" type="number" min={EXPERIMENT_LIMITS.days[0]} max={EXPERIMENT_LIMITS.days[1]} value={x.days} onChange={(e) => edit({ days: Math.round(Number(e.target.value) || 0) })} data-testid="lab-days" />
+              </label>
+              <label className="iv-field check-field">
+                <span className="dim">每个种子换一批人</span>
+                <input type="checkbox" checked={!!x.resample} onChange={(e) => edit({ resample: e.target.checked })} data-testid="lab-resample" />
               </label>
               <label className="iv-field">
                 <span className="dim">几个种子</span>
@@ -311,7 +316,7 @@ export function LabView({ initial }: { initial?: Experiment }) {
               <section className="pcard surface wide" data-testid="lab-result">
                 <h3 className="serif">结果：{run.x.name}</h3>
                 <p className="pcard-lead">
-                  {run.def.name}，{run.x.seeds.length} 个种子，指标取第 {run.result.from} 天之后。空心点是没有这件事，实心点是有。
+                  {run.def.name}，{run.x.seeds.length} 个种子{run.x.resample ? '（每个种子换一批人）' : '（同一批人，只换过法）'}，指标取第 {run.result.from} 天之后。空心点是没有这件事，实心点是有。
                 </p>
                 <div className="verdicts">
                   {run.result.predictions.map((p) => {
@@ -365,7 +370,7 @@ export function LabView({ initial }: { initial?: Experiment }) {
 
               <section className="pcard surface wide" data-testid="lab-affected">
                 <h3 className="serif">谁的日子变得最不一样？</h3>
-                <p className="pcard-lead">按第一个种子里两条世界线的差排的：时间怎么花、花了多少钱、聊了几次天、心情。点一个人，看这个人最不一样的那一天。</p>
+                <p className="pcard-lead">按第一个种子（{run.def.name}原本的那一批人）里两条世界线的差排的：时间怎么花、花了多少钱、聊了几次天、心情。点一个人，看这个人最不一样的那一天。</p>
                 <div className="tiegrid">
                   {run.result.affected
                     .filter((a) => a.score > 0)

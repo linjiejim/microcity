@@ -277,9 +277,11 @@ describe('生活的典型事实（14 天）', () => {
       expect(d.options.reduce((a, o) => a + o.p, 0)).toBeLessThanOrEqual(1.01);
       for (const o of d.options) expect(Math.abs(Object.values(o.f).reduce((a, b) => a + b, 0) - o.u)).toBeLessThan(0.02);
     }
-    // 不是固定安排、也不是等待和洗漱的活动，前面都有一次选择
-    const free = events.filter((x) => x.type === 'act_started' && !x.act.commit && x.act.kind !== 'wait' && x.act.kind !== 'wash' && x.t > 0).length;
-    expect(decisions.length).toBeGreaterThanOrEqual(free);
+    // 不是固定安排、也不是等待和洗漱的活动，前面都有一次选择；接着做的那一件（做完饭吃饭）跟着前一件，不另选
+    const started = events.filter((x): x is Extract<DomainEvent, { type: 'act_started' }> => x.type === 'act_started' && x.t > 0);
+    const free = started.filter((x) => !x.act.commit && x.act.kind !== 'wait' && x.act.kind !== 'wash').length;
+    const chained = started.filter((x) => x.act.next).length;
+    expect(decisions.length).toBeGreaterThanOrEqual(free - chained);
   });
 
   it('生活有节律：工作日白天街上的人比深夜多；晚上有人跳广场舞', () => {

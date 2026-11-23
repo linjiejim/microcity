@@ -1,4 +1,4 @@
-import type { DayAgg, Experiment } from '@microcity/society';
+import { specFor, type DayAgg, type Experiment } from '@microcity/society';
 import type { DayPack, WorldConfig } from '../sim/protocol.ts';
 import type { LabIn, LabOut } from './protocol.ts';
 
@@ -69,8 +69,8 @@ export class Lab {
     const total = x.seeds.length * 2 * x.days;
     let done = 0;
     const tick = () => onProgress(++done, total);
-    const base = x.seeds.map((seed) => this.line({ spec: x.spec, seed, interventions: [] }, x.days, tick));
-    const treat = x.seeds.map((seed) => this.line({ spec: x.spec, seed, interventions: x.interventions }, x.days, tick));
+    const base = x.seeds.map((seed, i) => this.line({ spec: specFor(x, i), seed, interventions: [] }, x.days, tick));
+    const treat = x.seeds.map((seed, i) => this.line({ spec: specFor(x, i), seed, interventions: x.interventions }, x.days, tick));
     return { base: await Promise.all(base), treat: await Promise.all(treat) };
   }
 

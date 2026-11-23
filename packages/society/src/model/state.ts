@@ -34,6 +34,8 @@ export interface Intent {
   away?: boolean;
   /** 一家人一起吃 */
   family?: boolean;
+  /** 做完马上接着做的事（做饭之后吃饭、洗漱之后睡觉） */
+  next?: Intent;
 }
 
 export interface MoveState {
@@ -68,6 +70,8 @@ export interface ActState {
   family?: boolean;
   /** 这一段里已经聊过天 */
   chatted?: boolean;
+  /** 做完马上接着做的事 */
+  next?: Intent;
 }
 
 export interface DayTally {
@@ -137,4 +141,4 @@ export interface WorldState {
   here: Record<string, string[]>;
 }
 
-export const emptyTally = (): DayTally => ({ use: { sleep: 0, work: 0, study: 0, meal: 0, chores: 0, leisure: 0, travel: 0, other: 0 }, spent: 0, earned: 0, chats: 0 });
+export const emptyTally = (): DayTally => ({ use: { sleep: 0, rest: 0, work: 0, study: 0, meal: 0, chores: 0, leisure: 0, travel: 0, other: 0 }, spent: 0, earned: 0, chats: 0 });
