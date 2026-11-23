@@ -2,11 +2,11 @@
 
 微缩城 MicroCity：一个可以暂停、倒带、分叉的小社会。
 
-按 [v5 方案](docs/specs/20261118-microcity-v5-living-society.md) 重做（D62–D96）：
+按 [v5 方案](docs/specs/20261118-microcity-v5-living-society.md) 重做（D62–D100）：
 - **新版**：`packages/society`（需求驱动的生活内核、干预、统计与指标、四个社区配方）+ `apps/studio`（纯浏览器应用：世界、画像、实验台）。M0–M5 已落地。
-- **经典版**：`packages/sim` + `apps/server` + `apps/web`，停电通知传播实验室（v0–v4，标签 `v4-classic`）。原样保留到完整的信息传播在新内核里重做之后再删（D63、D89）；公开演示站目前跑的还是它。
+- **经典版**：`packages/sim` + `apps/server` + `apps/web`，停电通知传播实验室（v0–v4，标签 `v4-classic`）。原样保留到完整的信息传播在新内核里重做之后再删（D63、D89）；演示站上它在 `/classic/`。
 
-先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照方案的决定记录（D1…D96）。新功能只加在新版里；经典版只修会影响演示站的问题。
+先读 [README](README.md)、[docs/specs](docs/specs/README.md) 与 [docs/experiments](docs/experiments/README.md)；改动前对照方案的决定记录（D1…D100）。新功能只加在新版里；经典版只修会影响演示站的问题。
 
 ## 仓库结构
 
@@ -34,9 +34,11 @@ apps/studio/       新应用：纯静态，没有服务端
   llm/ settings/   OpenRouter 直连、预算闸、缓存、用量；独白、对话建镇、第二意见；设置弹窗
   share.ts         分享链接：编码与清洗
   theme/ ui/       v4 的颜色、图标、组件
-packages/sim/ apps/server/ apps/web/   经典版（见上）
+apps/landing/      落地页（纯静态，中英双语）：content.ts 是全部文字，img/ 是压缩过的截图；视频从 docs/assets/v5/video 引入
+packages/sim/ apps/server/ apps/web/   经典版（见上）；apps/server 也负责上线时按路径提供三份前端（static.ts）
 e2e/               Playwright 端到端测试
-scripts/           开发脚本；lab/ 是实验脚本，lab/society-probe.ts 是新内核的体检
+scripts/           开发脚本；lab/ 是实验脚本，lab/society-probe.ts 是新内核的体检，lab/impact.ts 跑影响案例
+docs/video/        介绍视频的合成源与脚本（成片在 docs/assets/v5/video/，中间文件在 .work/，不进仓库）
 docs/specs/        方案（日期前缀文件名 + 索引）
 docs/experiments/  实验记录、模板、汇总数据 results/、实验广场内容 gallery.json
 ```
@@ -88,6 +90,12 @@ docs/experiments/  实验记录、模板、汇总数据 results/、实验广场�
 - 对话建镇只接受白名单字段的补丁（D94）：`llm/builder.ts` 的 `parsePatch` → `applyPatch`；改提示词升 `BUILDER_TEMPLATE_VERSION`。
 - 决策模型目前只做“第二意见”（D92）：`llm/second.ts`，只用来和规则的概率并排比较，不改世界；改提问升 `SECOND_TEMPLATE_VERSION`。
 - 可交互元素加 `data-testid`；不要把按钮嵌在按钮里；界面文字不用“他 / 她”指代居民。
+
+## 落地页规则（apps/landing）
+
+- 页上的每个数字都来自实验记录（影响案例取最近一次运行）；改数字先改实验记录，再改 `content.ts`，中英两份一起改。
+- 不写记录里没有的结论；站不住的结果和边界要和站得住的放在同一屏的分量上。
+- 文字里不用破折号，不用“他 / 她”指代居民；英文用美式拼写。
 
 ## 经典版 · 内核规则（packages/sim）
 
@@ -147,6 +155,8 @@ docs/experiments/  实验记录、模板、汇总数据 results/、实验广场�
 
 ```bash
 pnpm dev:studio   # 新版应用 5320（不需要服务端）
+pnpm dev:landing  # 落地页 5330
+pnpm build:site   # 上线用：三份前端各按自己的路径构建
 pnpm probe        # 新内核体检：30 天的耗时、不变量、时间利用（pnpm probe 30 1 village 换社区）
 pnpm e2e:studio   # 只跑新应用的端到端测试
 pnpm dev          # 经典版：服务端 5317 + 前端 5318
@@ -177,7 +187,7 @@ pnpm lint
 
 ## 部署
 
-公开演示站（目前是经典版）：推送到 main 后由 GitHub Actions 部署到作者的服务器，见 [DEPLOY.md](DEPLOY.md)。新版是纯静态站，换上线的时机与方式另定（D80）。
+公开演示站：推送到 main 后由 GitHub Actions 部署到作者的服务器，见 [DEPLOY.md](DEPLOY.md)。同一个域名挂三份前端（D100）：`/` 落地页、`/app/` 新版、`/classic/` 经典版；构建用 `pnpm build:site`。推送前先问作者。
 
 ## 数据
 

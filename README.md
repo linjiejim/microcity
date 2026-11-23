@@ -2,21 +2,20 @@
 
 **中文** · [English](README.en.md)
 
-一座 30–60 人的微缩小镇，用来做社会实验。
+一个可以暂停、倒带、分叉的小社会：约两百个居民在浏览器里过日子，往里放一件事，同一个种子跑两遍，看日子怎么变。
 
-发一条停电通知进去：
-- 看每个居民怎样得知、怎样理解、信不信、改不改安排、又告诉了谁；
-- 过几天再看，每个人的想法变了没有，人与人、人与官方之间的信任怎样变化。
+[![介绍视频：微缩城的由来、功能和实验结果（点开在落地页播放）](docs/assets/v5/video/microcity-intro-poster-play.jpg)](https://microcity.linjiejim.com/#video)
 
-点任何一个人，都能看到他**为什么知道、为什么这样选、没选的是什么**。每条结论都要在多个随机种子、两种“心智”（规则 / Jev）下成立才算数。
-
-> **已经重做（v5）**：从“一条通知的传播实验室”变成“一个可以暂停、倒带、分叉的小社会”。
-> 新版在 `packages/society` 与 `apps/studio`：打开就是一个在过日子的社区，可以跟着一个人看完一天、看这个社区的画像、往里放一件事做对照实验。
-> 下面先介绍新版，[再往下](#用它做过什么)是仍在演示站上运行的经典版。方案见 [v5](docs/specs/20261118-microcity-v5-living-society.md)。
+- **打开就能用**：<https://microcity.linjiejim.com/app/>（不用注册，不需要服务器和密钥）
+- **介绍与视频**：<https://microcity.linjiejim.com>
+- **经典版**（停电通知实验室）：<https://microcity.linjiejim.com/classic/>
+- **做过的实验**：[docs/experiments](docs/experiments/README.md) · **来历**：[社会能被模拟吗](https://jimlin.me/writing/microcity-can-society-be-simulated)
 
 ## 新版：活的小社会
 
 ![跟着一位居民回家吃晚饭：墙让开了，右边是此刻在做什么、为什么](docs/assets/v5/app-dinner.jpg)
+
+在本机跑：
 
 ```bash
 pnpm install
@@ -45,7 +44,7 @@ pnpm dev:studio
 - 往社区里放一件事：停业、调价、发钱、裁员、涨房租、办食堂、连日下雨、一条传言。
 - 同一个种子跑两遍，一遍没有这件事，一遍有；先猜，再看逐种子配对的判定。
 - 自动找出日子过得最不一样的人，把同一个人同一天在两条世界线里的时间轴并排放；还可以直接走进那条世界线去看。
-- 七个现成的影响案例，对应的[实验记录](docs/experiments/20261119-v5-impact-cases.md)写下了事先的假设、两次运行的结果，和哪些结论换一批人就站不住。
+- 七个现成的影响案例，对应的[实验记录](docs/experiments/20261119-v5-impact-cases.md)写下了事先的假设、三次运行的结果，和哪些结论换一批人就站不住。
 
 **四个社区**：老城街坊、通勤新小区、城中村、工厂镇。也可以拖参数自己配，或者用一句话让语言模型来配。
 
@@ -61,7 +60,18 @@ pnpm probe
 
 ## 经典版
 
-- **演示站**：<https://microcity.linjiejim.com>（先猜，再跑；访客只开放规则模式）
+一座 30–60 人的微缩小镇，用来做社会实验。
+
+发一条停电通知进去：
+- 看每个居民怎样得知、怎样理解、信不信、改不改安排、又告诉了谁；
+- 过几天再看，每个人的想法变了没有，人与人、人与官方之间的信任怎样变化。
+
+点任何一个人，都能看到这个人**为什么知道、为什么这样选、没选的是什么**。每条结论都要在多个随机种子、两种“心智”（规则 / Jev）下成立才算数。
+
+经典版在 `packages/sim`、`apps/server`、`apps/web`，演示站上的地址是 `/classic/`。
+
+
+- **演示站**：<https://microcity.linjiejim.com/classic/>（先猜，再跑；访客只开放规则模式）
 - **做过的实验**：[docs/experiments](docs/experiments/README.md)
 - **参与**：[CONTRIBUTING.md](CONTRIBUTING.md)
 

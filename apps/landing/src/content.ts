@@ -113,7 +113,7 @@ export const COPY: Record<Lang, Copy> = {
     hero: {
       eyebrow: 'MicroCity',
       title: 'A small society you can<br />pause, rewind and fork',
-      lead: 'A neighbourhood that lives its days in your browser. Every resident has work and rest, family and friends, hobbies, belongings and a wallet. Drop one event in, run the same seed twice, and see how life changes.',
+      lead: 'A neighborhood that lives its days in your browser. Every resident has work and rest, family and friends, hobbies, belongings and a wallet. Drop one event in, run the same seed twice, and see how life changes.',
       open: 'Open MicroCity',
       watch: 'Watch the video',
       meta: 'Open source · free · no sign-up, no server',
@@ -124,7 +124,7 @@ export const COPY: Record<Lang, Copy> = {
       paras: [
         'In September 2026 TypeSafe released Jev, a fast-thinking model that writes no text and only answers multiple-choice questions you set. A community project, jev-town, had 50 AI residents respond to one broadcast. It raised a question: can a society be simulated?',
         'If it can, you can run social experiments in a miniature society. Experiments that are slow, expensive or impossible in real life can be rerun a hundred times here, changing one condition at a time.',
-        'The first version was a town of 30 to 60 people and a power-outage notice, built to watch how news spreads and whether people believe it. It was later rebuilt as a neighbourhood that lives its days: not one notice, but what happens to the numbers and to individual people when an event lands in everyday life.',
+        'The first version was a town of 30 to 60 people and a power-outage notice, built to watch how news spreads and whether people believe it. It was later rebuilt as a neighborhood that lives its days: not one notice, but what happens to the numbers and to individual people when an event lands in everyday life.',
       ],
     },
     features: {
@@ -133,10 +133,10 @@ export const COPY: Record<Lang, Copy> = {
       items: [
         { img: 'follow', kicker: 'Follow anyone', title: 'Click a resident, spend the day together', text: 'The camera follows; walk indoors and the walls step aside. The side panel says what they are doing and why: the options, how much each reason added or subtracted, and the probability of the choice.', link: { href: `${APP}?t=D02%2018:40&who=p001`, label: 'Follow someone home for dinner' } },
         { img: 'pov', kicker: 'Over the shoulder', title: 'See it from right behind them', text: 'The people eating at the breakfast stall, riding to work, dancing in the square are all people the model actually put there. A window is lit because someone at home is awake.' },
-        { img: 'street', kicker: 'A day in a minute', title: 'Replay any day', text: 'The timeline is coloured by activity; drag to any moment. "A day in a minute" fast-forwards through sleep and work and slows down on the road, in conversation and at the till.' },
+        { img: 'street', kicker: 'A day in a minute', title: 'Replay any day', text: 'The timeline is colored by activity; drag to any moment. "A day in a minute" fast-forwards through sleep and work and slows down on the road, in conversation and at the till.' },
         { img: 'portrait', kicker: 'Portrait', title: 'What kind of community is this', text: 'Population pyramid, household types, where everyone is through the day, where money comes from and goes, who knows whom. Plus a daily community paper where every line comes from that day’s statistics.', link: { href: `${APP}?v=portrait`, label: 'See the portrait' } },
         { img: 'calibration', kicker: 'Calibration', title: 'A model day next to a surveyed day', text: 'Residents’ time use sits next to China’s 2018 national time-use survey, gaps stated plainly. The gaps are shown, not tuned away.' },
-        { img: 'lab', kicker: 'Experiment bench', title: 'Drop an event in, guess, then look', text: 'Closures, price changes, cash grants, layoffs, rent rises, a canteen, a week of rain, a rumour. The same seed runs twice, with and without the event; the bench finds the residents whose days changed most and lays the two timelines side by side.', link: { href: `${APP}?v=lab`, label: 'Open the bench' } },
+        { img: 'lab', kicker: 'Experiment bench', title: 'Drop an event in, guess, then look', text: 'Closures, price changes, cash grants, layoffs, rent rises, a canteen, a week of rain, a rumor. The same seed runs twice, with and without the event; the bench finds the residents whose days changed most and lays the two timelines side by side.', link: { href: `${APP}?v=lab`, label: 'Open the bench' } },
         { img: 'community', kicker: 'Four communities', title: 'Old town, commuter estate, urban village, factory town', text: 'Pick one, drag the sliders to make your own, or describe it in a sentence and let a language model set it up. A link always opens the same world at the same moment.', link: { href: `${APP}?c=factory`, label: 'Visit the factory town' } },
       ],
     },
@@ -154,7 +154,7 @@ export const COPY: Record<Lang, Copy> = {
       lead: 'Seven everyday events, 5 seeds each with a different population per seed, run three times. What held up, and what did not.',
       findings: [
         { big: '−41%', unit: 'daily chats among older residents', text: 'A week of rain empties the park and the square. Older residents’ daily chats fall from 5.5 to 3.2, and the share who talk to nobody all day rises from 2% to 7%. The teahouse absorbs only 15% more visits.', tone: 'ok' },
-        { big: '+80%', unit: 'food stored at home', text: 'A rumour that food prices will rise starts with 6 people and reaches 80% of residents in nine days. Food at home goes from 5.9 to 10.6 portions per person; the market’s takings rise by about a quarter.', tone: 'ok' },
+        { big: '+80%', unit: 'food stored at home', text: 'A rumor that food prices will rise starts with 6 people and reaches 80% of residents in nine days. Food at home goes from 5.9 to 10.6 portions per person; the market’s takings rise by about a quarter.', tone: 'ok' },
         { big: '−15%', unit: 'restaurant takings', text: 'A 9-yuan community canteen at the activity centre mostly replaces meals at home, and it also takes business from the small restaurants.', tone: 'ok' },
         { big: '~2%', unit: 'restaurant takings lost after a 30% rent rise', text: 'Money barely moves spending: a 500-yuan grant per household hardly changes eating out, and after half a workshop is laid off, workers’ mood does not drop. Idle time is too pleasant in this model; something is missing.', tone: 'warn' },
       ],
@@ -176,8 +176,8 @@ export const COPY: Record<Lang, Copy> = {
         'Information is only "heard / not heard"; the classic version’s model of distortion and trust has not been ported yet.',
       ],
     },
-    cta: { title: 'Try it', text: 'It opens on a neighbourhood already living its day. No sign-up, no key. To hear a resident’s inner voice, add your own OpenRouter key in settings; it stays in your browser.', open: 'Open MicroCity', github: 'Code and experiment records', blog: 'The story behind it (Chinese)' },
-    footer: 'MicroCity · MIT licence · built by Jim Lin with coding agents',
+    cta: { title: 'Try it', text: 'It opens on a neighborhood already living its day. No sign-up, no key. To hear a resident’s inner voice, add your own OpenRouter key in settings; it stays in your browser.', open: 'Open MicroCity', github: 'Code and experiment records', blog: 'The story behind it (Chinese)' },
+    footer: 'MicroCity · MIT license · built by Jim Lin with coding agents',
   },
 };
 

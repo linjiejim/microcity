@@ -2,7 +2,28 @@
 
 [中文](README.md) · **English**
 
-> **Rebuilt (v5).** MicroCity has turned from a lab for one notice spreading through a town into a small society you can pause, rewind and fork: need-driven daily life, jobs and shifts, money, changing relationships; a 3D world you can follow one resident through; community portraits with a calibration page; an experiment bench that runs the same seed with and without an intervention; four communities. The new code lives in `packages/society` and `apps/studio` (`pnpm dev:studio`, no server or API key needed). See the [v5 spec](docs/specs/20261118-microcity-v5-living-society.md) (Chinese). Everything below describes the classic version, which still runs the demo site.
+A small society you can pause, rewind and fork: about two hundred residents live their days in your browser. Drop one event in, run the same seed twice, and see how life changes.
+
+[![Intro video: where MicroCity came from, what it does, and what the experiments found (plays on the landing page; Chinese narration)](docs/assets/v5/video/microcity-intro-poster-play.jpg)](https://microcity.linjiejim.com/#video)
+
+- **Open it**: <https://microcity.linjiejim.com/app/> (no sign-up, no server, no API key)
+- **Introduction and video**: <https://microcity.linjiejim.com/?lang=en>
+- **Classic version** (the outage-notice lab): <https://microcity.linjiejim.com/classic/>
+- **Experiments**: [docs/experiments](docs/experiments/README.md) · **The story behind it**: [Can society be simulated?](https://jimlin.me/en/writing/microcity-can-society-be-simulated)
+
+## The new version (v5): a living society
+
+Need-driven daily life, jobs and shifts, money and household budgets, changing relationships; a 3D world you can follow one resident through, with a replayable timeline; community portraits with a calibration page against China's 2018 time-use survey; an experiment bench that runs the same seed with and without an intervention and finds the people whose days changed most; four communities. The code lives in `packages/society` and `apps/studio`:
+
+```bash
+pnpm install && pnpm dev:studio
+```
+
+Then open http://127.0.0.1:5320. See the [v5 spec](docs/specs/20261118-microcity-v5-living-society.md) and the [impact-case record](docs/experiments/20261119-v5-impact-cases.md) (both in Chinese).
+
+## The classic version
+
+Everything below describes the classic version, now served at `/classic/` on the demo site.
 
 A miniature town of 30–60 residents, built for social experiments.
 
@@ -12,7 +33,7 @@ Send a power-outage notice into it, then watch:
 
 Click on anyone to see **why they know, why they chose what they chose, and what they didn't choose**. A finding only counts if it holds across many random seeds and under two different "minds" (a rule-based mind and Jev).
 
-- **Live demo**: <https://microcity.linjiejim.com> (guess first, then run; visitors get the rule-based mind only)
+- **Live demo**: <https://microcity.linjiejim.com/classic/> (guess first, then run; visitors get the rule-based mind only)
 - **Experiments so far**: [docs/experiments](docs/experiments/README.md)
 - **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
 
