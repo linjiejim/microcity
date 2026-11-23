@@ -4,6 +4,8 @@ dist/
 .env.*
 !.env.example
 data/
+# 新内核的数据表（职业、班次、兴趣……）是源码，不是运行数据
+!packages/society/src/data/
 *.sqlite
 *.sqlite-*
 test-results/
