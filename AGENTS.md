@@ -38,7 +38,7 @@ apps/landing/      落地页（纯静态，中英双语）：content.ts 是全�
 packages/sim/ apps/server/ apps/web/   经典版（见上）；apps/server 也负责上线时按路径提供三份前端（static.ts）
 e2e/               Playwright 端到端测试
 scripts/           开发脚本；lab/ 是实验脚本，lab/society-probe.ts 是新内核的体检，lab/impact.ts 跑影响案例
-docs/video/        介绍视频的合成源与脚本（成片在 docs/assets/v5/video/，中间文件在 .work/，不进仓库）
+docs/video/        介绍视频的合成源与脚本（中英两版，见其 README；念好的旁白 vo/ 进仓库；成片在 docs/assets/v5/video/，中间文件在 .work/，不进仓库）
 docs/specs/        方案（日期前缀文件名 + 索引）
 docs/experiments/  实验记录、模板、汇总数据 results/、实验广场内容 gallery.json
 ```

@@ -1,4 +1,4 @@
-// 渲染：node docs/video/render.mjs [--workers 6] [--from 0 --to 100]
+// 渲染：node docs/video/render.mjs [--workers 6] [--from 0 --to 100] [--lang en]
 // 每个工人一个 Chromium，按帧 seek（快门里多取样的帧由页面自己平均），截成 JPEG，最后用 ffmpeg 编码。
 import { createRequire } from 'node:module';
 import { mkdirSync, existsSync } from 'node:fs';
@@ -9,10 +9,11 @@ const require = createRequire(resolve(HERE, '../../package.json'));
 const { chromium } = require('@playwright/test');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? Number(process.argv[i + 1]) : d; };
 const WORKERS = arg('--workers', 6), FPS = 30;
+const QS = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'en' ? '?lang=en' : '';
 const OUT = resolve(HERE, '.work/frames'); mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
 const probe = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-await probe.goto('file://' + resolve(HERE, 'comp.html'));
+await probe.goto('file://' + resolve(HERE, 'comp.html') + QS);
 const dur = await probe.evaluate(async () => { await window.__ready; return window.__meta.dur; });
 await probe.close();
 const N = Math.round(dur * FPS);
@@ -23,7 +24,7 @@ const chunk = Math.ceil((f1 - f0) / WORKERS);
 await Promise.all([...Array(WORKERS)].map(async (_, w) => {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   page.on('pageerror', (e) => console.log(`[w${w}] page error:`, e.message));
-  await page.goto('file://' + resolve(HERE, 'comp.html'));
+  await page.goto('file://' + resolve(HERE, 'comp.html') + QS);
   await page.evaluate(() => window.__ready);
   for (let f = f0 + w * chunk; f < Math.min(f1, f0 + (w + 1) * chunk); f++) {
     samples += await page.evaluate((t) => window.__seek(t), f / FPS);

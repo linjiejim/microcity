@@ -1,13 +1,23 @@
 import './style.css';
 import { COPY, LINKS, type Copy, type Lang } from './content.ts';
 
-// 图片：构建时带哈希；视频：有就放，还没做好就显示一句说明
+// 图片：构建时带哈希；视频：中英各一份（英文版没有就退回中文），都没有就显示一句说明
 const IMGS = import.meta.glob<string>('./img/*.webp', { eager: true, query: '?url', import: 'default' });
-const MEDIA = import.meta.glob<string>(['../../../docs/assets/v5/video/microcity-intro.mp4', '../../../docs/assets/v5/video/microcity-intro-poster.jpg'], { eager: true, query: '?url', import: 'default' });
+const MEDIA = import.meta.glob<string>(
+  [
+    '../../../docs/assets/v5/video/microcity-intro.mp4',
+    '../../../docs/assets/v5/video/microcity-intro-poster.jpg',
+    '../../../docs/assets/v5/video/microcity-intro-en.mp4',
+    '../../../docs/assets/v5/video/microcity-intro-en-poster.jpg',
+  ],
+  { eager: true, query: '?url', import: 'default' },
+);
 const img = (name: string): string => IMGS[`./img/${name}.webp`] ?? '';
-const media = (suffix: string): string | undefined => Object.entries(MEDIA).find(([k]) => k.endsWith(suffix))?.[1];
-const VIDEO = media('microcity-intro.mp4');
-const POSTER = media('microcity-intro-poster.jpg') ?? img('hero');
+const media = (name: string): string | undefined => Object.entries(MEDIA).find(([k]) => k.endsWith(`/${name}`))?.[1];
+const film = (lang: Lang): { video?: string; poster: string } => {
+  const suf = lang === 'en' && media('microcity-intro-en.mp4') ? '-en' : '';
+  return { video: media(`microcity-intro${suf}.mp4`), poster: media(`microcity-intro${suf}-poster.jpg`) ?? img('hero') };
+};
 
 // 开发时新版应用在另一个端口
 const appUrl = (href: string): string => (import.meta.env.DEV && href.startsWith('/app/') ? `http://127.0.0.1:5320/${href.slice(5)}` : href);
@@ -20,6 +30,7 @@ const GH = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><
 function render(lang: Lang): string {
   const c: Copy = COPY[lang];
   const other: Lang = lang === 'zh' ? 'en' : 'zh';
+  const { video: VIDEO, poster: POSTER } = film(lang);
   const btn = (href: string, label: string, kind: 'primary' | 'ghost' = 'primary', icon = ARROW) => `<a class="btn ${kind}" href="${esc(appUrl(href))}">${label}${icon}</a>`;
   return `
   <header class="nav">

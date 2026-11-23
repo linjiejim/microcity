@@ -118,7 +118,7 @@ export const COPY: Record<Lang, Copy> = {
       watch: 'Watch the video',
       meta: 'Open source · free · no sign-up, no server',
     },
-    video: { title: 'MicroCity in one short film', lead: 'Where it came from, what it does, and what the experiments found. Narration is in Chinese with Chinese subtitles.', missing: 'The video is still being made.' },
+    video: { title: 'MicroCity in one short film', lead: 'Where it came from, what it does, and what the experiments found. The app itself is in Chinese; the film is narrated and subtitled in English.', missing: 'The video is still being made.' },
     story: {
       title: 'Origin',
       paras: [

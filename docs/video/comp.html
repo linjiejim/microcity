@@ -10,6 +10,7 @@
 <script src="lib.js"></script>
 <script src="content.js"></script>
 <script src="timing.js"></script>
+<script src="timing.en.js"></script>
 <script src=".work/footage/index.js"></script>
 </head>
 <body>
@@ -17,14 +18,30 @@
 <script>
 // 一张画布、一个 draw(t)：同一个 t 永远画出同一帧（渲染时按帧 seek）。
 // 文字与数字都来自 content.js（NUMBERS 那一块），时间来自 timing.js（旁白每一句的起止）。
+// 英文版是同一个片子：?lang=en。画面仍按中文旁白的时间线编排（下文的 t 都是这条“编排时间”），
+// 片子的时间（英文旁白、字幕、时长、声音事件）经 WARP 映射过来；画面上的字查 content.js 的 UI_EN。
 const W = 1920, H = 1080;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const acc = document.createElement('canvas'); acc.width = W; acc.height = H; const actx = acc.getContext('2d');
 const { clamp, lerp, seg, ease, tw, spring, rise, leave, win, keyed, hash, rrect } = L;
+const EN = new URLSearchParams(location.search).get('lang') === 'en';
 const TM = window.MC_TIMING, NUM = MC.NUMBERS, F = NUM.facts, R = NUM.results;
+const FILM = EN ? window.MC_TIMING_EN : TM; // 片子的时间线
+if (!FILM) throw new Error('缺 timing.en.js：先跑 node docs/video/make_vo.mjs --lang en');
 const C = { paper: '#faf7f2', surface: '#ffffff', line: '#e7e0d5', ink: '#26241f', ink2: '#5e5a52', teal: '#1f5f63', amber: '#e3a13a', good: '#3e8e63', bad: '#c2553a', mute: '#bdb5a8' };
-const SERIF = '"Songti SC", "STSong", serif', SANS = '"PingFang SC", "Hiragino Sans GB", sans-serif';
-const DUR = TM.total;
+const SERIF = EN ? '"Iowan Old Style", "Songti SC", serif' : '"Songti SC", "STSong", serif';
+const SANS = EN ? '"Avenir Next", "PingFang SC", sans-serif' : '"PingFang SC", "Hiragino Sans GB", sans-serif';
+const DUR = FILM.total, ADUR = TM.total;
+// 画面上的字：英文版查表；片名“微缩城”两种语言都保留
+const KEEP = new Set([...MC.END.name].map((_, i, a) => a.slice(0, i + 1).join('')).concat([...MC.END.name])); // 片名逐字落下时也量它的前缀
+const MISSING = new Set();
+function tr(s) {
+  if (!EN || typeof s !== 'string' || KEEP.has(s)) return s;
+  const v = MC.UI_EN[s];
+  if (v !== undefined) return v;
+  if (/[一-鿿]/.test(s) && !MISSING.has(s)) { MISSING.add(s); console.error(`没有英文：${s}`); }
+  return s;
+}
 
 // ─── 时间：每一句的起止、句中某个词的时刻 ───
 const LN = Object.fromEntries(TM.lines.map((l) => [l.id, l]));
@@ -43,6 +60,47 @@ function at(id, word, frac = 0) {
   }
   return l.t1;
 }
+/** 任一条时间线里，某句中某个词的时刻（英文版的锚点用） */
+function atIn(l, word) {
+  const i = l.text.indexOf(word);
+  if (i < 0) throw new Error(`“${word}”不在 ${l.id} 里`);
+  const ci = chars(l.text.slice(0, i));
+  let acc0 = 0;
+  for (const s of l.subs) {
+    const n = chars(s.text) + 1;
+    if (ci <= acc0 + n) return s.t0 + (s.t1 - s.t0) * clamp((ci - acc0) / n);
+    acc0 += n;
+  }
+  return l.t1;
+}
+// ─── 英文版：编排时间 ↔ 片子时间 ───
+// 结点是每句的起止，加上句中意思相同的词（content.js 的 k）；结点之间线性。
+let WARP = null;
+function initWarp() {
+  if (!EN) return;
+  const FL = Object.fromEntries(FILM.lines.map((l) => [l.id, l])), K = Object.fromEntries(MC.LINES_EN.map((l) => [l.id, l.k ?? {}]));
+  const ks = [[0, 0]];
+  for (const a of TM.lines) {
+    const b = FL[a.id];
+    const inner = Object.entries(K[a.id]).map(([zw, ew]) => [at(a.id, zw), atIn(b, ew)]).sort((p, q) => p[0] - q[0]);
+    ks.push([a.t0, b.t0], ...inner, [a.t1, b.t1]);
+  }
+  ks.push([ADUR, DUR]);
+  WARP = [];
+  for (const k of ks) { const p = WARP[WARP.length - 1]; if (!p || (k[0] > p[0] + 0.02 && k[1] > p[1] + 0.02)) WARP.push(k); }
+}
+function pw(x, from, to) {
+  const ks = WARP;
+  if (x <= ks[0][from]) return ks[0][to] + (x - ks[0][from]);
+  for (let i = 1; i < ks.length; i++) {
+    const p = ks[i - 1], q = ks[i];
+    if (x <= q[from]) return p[to] + ((q[to] - p[to]) * (x - p[from])) / (q[from] - p[from]);
+  }
+  const z = ks[ks.length - 1];
+  return z[to] + (x - z[from]);
+}
+const toAuth = (t) => (WARP ? pw(t, 1, 0) : t); // 片子时间 → 编排时间
+const toFilm = (u) => (WARP ? pw(u, 0, 1) : u); // 编排时间 → 片子时间
 
 // ─── 图片：缺的先登记，seek 等它们都到了再画一遍 ───
 const CACHE = new Map();
@@ -70,13 +128,16 @@ const click = (shot, sel) => FOOT[shot].clicks.find((c) => c.sel && c.sel.includ
 function font(size, face = SANS, weight = 400) { ctx.font = `${weight} ${size}px ${face}`; }
 function text(s, x, y, { size = 24, face = SANS, weight = 400, color = C.ink, align = 'left', alpha = 1, base = 'alphabetic' } = {}) {
   if (alpha <= 0.002) return 0;
+  s = tr(s);
   font(size, face, weight);
   ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = base;
   ctx.fillText(s, x, y);
   ctx.globalAlpha = 1;
   return ctx.measureText(s).width;
 }
-function measure(s, size, face = SANS, weight = 400) { font(size, face, weight); return ctx.measureText(s).width; }
+function measure(s, size, face = SANS, weight = 400) { font(size, face, weight); return ctx.measureText(tr(s)).width; }
+/** 字号：放不下 maxW 就按比例缩小（中文的字都放得下，字号不变） */
+function fit(s, size, maxW, face = SANS, weight = 400) { return Math.min(size, (size * maxW) / Math.max(1, measure(s, size, face, weight))); }
 function shadowed(fn, blur = 30, oy = 10, a = 0.1) {
   ctx.save(); ctx.shadowColor = `rgba(38,36,31,${a})`; ctx.shadowBlur = blur; ctx.shadowOffsetY = oy; fn(); ctx.restore();
 }
@@ -141,7 +202,7 @@ function initB1() {
   B1.cardOut = T0('o3') - 0.05;
   B1.split = T0('o3') + 0.35;
   B1.cast = at('o3', '同时') - 0.1;
-  B1.q = T0('o4') - 0.1;
+  B1.q = at('o4', '社会') - 0.1; // 大字在念到“社会”时出来（前面是“我想知道”）
   B1.grid = LN.o5.subs[1].t0 - 0.2;
   B1.tile = B1.grid - 0.75;
   B1.one = at('o5', '每次只改') - 0.1;
@@ -199,7 +260,7 @@ function drawB1(t) {
         const yy = optY(i);
         if (i === 1 && kp > 0) { ctx.globalAlpha = ca * kp * 0.09; ctx.fillStyle = C.teal; rrect(ctx, cx0 + 30, yy - 21, CW - 60, 42, 10); ctx.fill(); ctx.globalAlpha = 1; }
         ctx.globalAlpha = ca; ctx.strokeStyle = i === 1 && kp > 0.5 ? C.teal : C.mute; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx0 + 62, yy, 11, 0, 6.2832); ctx.stroke(); ctx.globalAlpha = 1;
-        text(`${L0}  ${s}`, cx0 + 92, yy + 9, { size: 25, color: i === 1 && kp > 0.5 ? C.teal : C.ink, weight: i === 1 && kp > 0.5 ? 600 : 400, alpha: ca });
+        text(`${L0}  ${tr(s)}`, cx0 + 92, yy + 9, { size: 25, color: i === 1 && kp > 0.5 ? C.teal : C.ink, weight: i === 1 && kp > 0.5 ? 600 : 400, alpha: ca });
       });
       const kt = rise(t, B1.pick + 0.25);
       text('只回答选择题', cx0 + CW - 44, cy0 + 72, { size: 22, color: C.teal, align: 'right', weight: 500, alpha: ca * kt.op });
@@ -551,7 +612,7 @@ function shotAt(t) { return SHOTS3.find((s) => t >= s.a && t < s.b) ?? SHOTS3[SH
 function shotFrameAt(t) { const s = shotAt(t); return s.f(t); }
 function thumbRect() { return { x: 70, y: 150, w: 400, h: 225 }; }
 function drawB3(t) {
-  if (t < B3.iris || t > DUR) return;
+  if (t < B3.iris || t > ADUR) return;
   let c = cam3(t);
   // 收成缩略图（第四段从它里面长出结果卡片）
   const ks = ease.expoIO(seg(t, B3.shrink, B3.shrinkEnd));
@@ -622,6 +683,11 @@ function drawB3(t) {
   }
 }
 function drawChips(t) {
+  if (POSTER && EN) {
+    const w = text(MC.END.en, 192, 58, { size: 44, face: SERIF, weight: 500 });
+    text(MC.END.taglineEn, 192 + w + 22, 56, { size: 26, color: C.ink2 });
+    return;
+  }
   if (POSTER) { // 海报：把功能标签换成片名
     const w = text(MC.END.name, 192, 58, { size: 44, face: SERIF, weight: 500 });
     text(`${MC.END.en} · 一个可以暂停、倒带、分叉的小社会`, 192 + w + 18, 56, { size: 26, color: C.ink2 });
@@ -717,14 +783,14 @@ function strongCard(t, i, t0, o) {
   const x = rr.x + 30, y = rr.y;
   ctx.save(); rrect(ctx, rr.x, rr.y, rr.w, rr.h, 16); ctx.clip();
   chip('站得住', x - 4, y + 26, { alpha: ca, color: C.good, size: 18, fill: 'rgba(62,142,99,0.08)' });
-  text(o.title, x, y + 112, { size: o.title.length > 9 ? 29 : 33, face: SERIF, alpha: ca });
+  text(o.title, x, y + 112, { size: fit(o.title, o.title.length > 9 ? 29 : 33, 360, SERIF), face: SERIF, alpha: ca });
   text(o.metric, x, y + 156, { size: 21, color: C.ink2, alpha: ca });
   const kc = ease.expoOut(seg(t, t0 + 0.55, t0 + 1.9));
   if (o.big) {
     const s = `${o.before} → ${fmtCount(o.before, o.after, kc)}`;
     const w = text(s, x, y + 238, { size: 62, face: SERIF, alpha: ca });
     text(o.unit, x + w + 8, y + 238, { size: 22, color: C.ink2, alpha: ca });
-  } else text(o.bigText, x, y + 236, { size: 52, face: SERIF, color: o.color, alpha: ca * clamp(kc * 2) });
+  } else text(o.bigText, x, y + 236, { size: fit(o.bigText, 52, 360, SERIF), face: SERIF, color: o.color, alpha: ca * clamp(kc * 2) });
   const kb = rise(t, Math.max(t0 + 1.0, B4.count[i] - 0.2));
   if (o.badge) {
     const bw = measure(o.badge, 24, SANS, 600) + 32;
@@ -756,7 +822,9 @@ function mutedCard(t, i, t0, o) {
 }
 function wrap(s, size, maxW) {
   const out = []; let cur = '';
-  for (const ch of [...s]) { if (measure(cur + ch, size) > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; }
+  s = tr(s);
+  const units = EN ? s.split(/(?<= )/) : [...s]; // 英文按词断行，中文按字
+  for (const ch of units) { if (measure(cur + ch, size) > maxW && cur) { out.push(cur.trimEnd()); cur = ch; } else cur += ch; }
   if (cur) out.push(cur);
   return out;
 }
@@ -837,7 +905,7 @@ function drawB4(t) {
 const HIDE_SUBS = new Set(['o4', 'c3']); // 画面上已经有同一句大字
 const SUBS = [];
 function initSubs() {
-  TM.lines.forEach((l) => { if (!HIDE_SUBS.has(l.id)) l.subs.forEach((s, i) => SUBS.push({ ...s, last: i === l.subs.length - 1 })); });
+  FILM.lines.forEach((l) => { if (!HIDE_SUBS.has(l.id)) l.subs.forEach((s, i) => SUBS.push({ ...s, last: i === l.subs.length - 1 })); });
   // 每段字幕留到下一段开始，但句末最多多留 0.35 秒
   SUBS.forEach((s, i) => { const n = SUBS[i + 1]; s.hold = s.last ? Math.min(s.t1 + 0.35, n ? n.t0 : s.t1 + 0.35) : n ? n.t0 : s.t1; });
 }
@@ -854,7 +922,8 @@ function drawSubs(t) {
 }
 
 // ═══════════════════════════════ 总装 ═══════════════════════════════
-function draw(t) {
+function draw(tf) {
+  const t = toAuth(tf); // 画面按编排时间画；字幕按片子时间
   TRACK = [];
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
@@ -868,8 +937,8 @@ function draw(t) {
   if (c4) ctx.restore();
   drawChips(t);
   drawCursor(cursorAt(t));
-  if (!NOSUBS) drawSubs(t);
-  if (HUD) text(`${t.toFixed(2)} s`, 20, 1066, { size: 18, color: '#c00' });
+  if (!NOSUBS) drawSubs(tf);
+  if (HUD) text(`${tf.toFixed(2)} s${EN ? ` (编排 ${t.toFixed(2)})` : ''}`, 20, 1066, { size: 18, color: '#c00' });
 }
 async function seek1(t) {
   for (let pass = 0; pass < 5; pass++) {
@@ -892,7 +961,8 @@ function motionAt(t, h = 1 / 60) {
   return m;
 }
 const HUD = /hud/.test(location.search), NOSUBS = /nosubs|poster/.test(location.search), POSTER = /poster/.test(location.search);
-window.__meta = { dur: DUR, fps: 30 };
+window.__meta = { dur: DUR, fps: 30, lang: EN ? 'en' : 'zh' };
+window.MC_FILM = FILM;
 const SHUTTER = 0.34; // 快门 120°：界面里字多，糊得太狠就读不出来
 window.__motion = (t) => motionAt(t);
 /** 快门：一帧里走得多就多取几次样，在画布里平均 */
@@ -913,9 +983,11 @@ window.__events = () => [
   { t: B2.gal, kind: 'whoosh-soft' }, { t: B3.iris, kind: 'whoosh' }, { t: B3.shrink, kind: 'whoosh' },
   { t: B4.c1, kind: 'tick' }, { t: B4.c2, kind: 'tick' }, { t: B4.c3, kind: 'tick' }, { t: B4.m1, kind: 'tick-soft' }, { t: B4.m2, kind: 'tick-soft' }, { t: B4.m3, kind: 'tick-soft' },
   { t: B4.gather, kind: 'whoosh-soft' }, { t: B4.flip + 0.25, kind: 'flip' }, { t: B4.mark, kind: 'land' },
-].sort((a, b) => a.t - b.t);
+].map((e) => ({ ...e, t: toFilm(e.t) })).sort((a, b) => a.t - b.t);
 window.__ready = (async () => {
-  await Promise.all([document.fonts.load(`500 80px ${SERIF}`, '微缩城社会'), document.fonts.load(`500 38px ${SANS}`, '微缩城社会')]);
+  const sample = EN ? 'MicroCity society 微缩城' : '微缩城社会';
+  await Promise.all([600, 500, 400].flatMap((w) => [document.fonts.load(`${w} 80px ${SERIF}`, sample), document.fonts.load(`${w} 38px ${SANS}`, sample)]));
+  initWarp();
   initB1(); initB2(); initB3(); initB4(); initSubs();
   await seek1(0);
   return true;

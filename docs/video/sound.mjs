@@ -1,5 +1,6 @@
 // 声音：全部本地合成，不用任何外部素材。
-//   node docs/video/sound.mjs   → .work/music.wav（铺底）、.work/sfx.wav（点击与衔接），再混成 .work/mix.wav
+//   node docs/video/sound.mjs [--lang en]   → .work/music.wav（铺底）、.work/sfx.wav（点击与衔接），再混成 .work/mix.wav
+//   （英文版的文件名带 .en：读 vo.en.wav，写 mix.en.wav）
 // 铺底是 F 大调的四个和弦循环（Fmaj7 → Dm9 → B♭maj7 → C6/9），柔和的长音加一点木琴似的拨音；
 // 效果音只放在点击和几次大的衔接上，和铺底共用一个混响。人声出现时铺底自动压低（sidechaincompress）。
 import { createRequire } from 'node:module';
@@ -12,14 +13,16 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(resolve(HERE, '../../package.json'));
 const { chromium } = require('@playwright/test');
 const SR = 48000;
+const EN = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'en';
+const SUF = EN ? '.en' : '';
 
 // 时间与事件从片子里读
 const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-await page.goto('file://' + resolve(HERE, 'comp.html'));
+await page.goto('file://' + resolve(HERE, 'comp.html') + (EN ? '?lang=en' : ''));
 const { dur, events, beats } = await page.evaluate(async () => {
   await window.__ready;
-  const L = window.MC_TIMING.lines, at = (id) => L.find((l) => l.id === id).t0;
+  const L = window.MC_FILM.lines, at = (id) => L.find((l) => l.id === id).t0;
   return { dur: window.__meta.dur, events: window.__events(), beats: { b2: at('c1'), b3: at('v1'), b4: at('r1'), outro: at('r6'), end: at('r7') } };
 });
 await browser.close();
@@ -184,15 +187,15 @@ function writeWav(path, ch) {
   return peak;
 }
 const W = (p) => resolve(HERE, '.work', p);
-console.log('music peak', writeWav(W('music.wav'), music).toFixed(3), 'sfx peak', writeWav(W('sfx.wav'), sfx).toFixed(3));
+console.log('music peak', writeWav(W(`music${SUF}.wav`), music).toFixed(3), 'sfx peak', writeWav(W(`sfx${SUF}.wav`), sfx).toFixed(3));
 
 // 混音：人声为主；铺底在人声下面压低；最后整体到 -16 LUFS
 const MUSIC_DB = Number(process.env.MUSIC_DB ?? -13), SFX_DB = Number(process.env.SFX_DB ?? -6);
-execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', W('vo.wav'), '-i', W('music.wav'), '-i', W('sfx.wav'), '-filter_complex', [
+execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', W(`vo${SUF}.wav`), '-i', W(`music${SUF}.wav`), '-i', W(`sfx${SUF}.wav`), '-filter_complex', [
   `[0]highpass=f=80,acompressor=threshold=-22dB:ratio=2.5:attack=5:release=90:makeup=2,aformat=channel_layouts=stereo,asplit=2[vo][key]`,
   `[1]volume=${MUSIC_DB}dB[m]`,
   `[m][key]sidechaincompress=threshold=0.015:ratio=5:attack=25:release=380:makeup=1[md]`,
   `[2]volume=${SFX_DB}dB[s]`,
   `[vo][md][s]amix=inputs=3:normalize=0,loudnorm=I=-16:TP=-2:LRA=9[out]`,
-].join(';'), '-map', '[out]', '-ar', '48000', '-ac', '2', W('mix.wav')]);
-console.log('mix →', W('mix.wav'));
+].join(';'), '-map', '[out]', '-ar', '48000', '-ac', '2', W(`mix${SUF}.wav`)]);
+console.log('mix →', W(`mix${SUF}.wav`));

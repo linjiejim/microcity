@@ -9,6 +9,7 @@ test('落地页：首屏、入口、视频、结果；切到英文再切回来',
   await expect(page.locator('.hero .btn.primary')).toHaveAttribute('href', /5320\/|\/app\//);
   await expect(page.locator('a[href="/classic/"]')).toHaveCount(1);
   await expect(page.locator('#video .video-frame')).toBeVisible();
+  await expect(page.locator('#video video')).toHaveAttribute('src', /microcity-intro(\.|-[a-zA-Z0-9_]{6,}\.)mp4/); // 中文页放中文版（开发时原名，构建后带哈希）
   expect(await page.locator('.feature').count()).toBeGreaterThanOrEqual(6);
   expect(await page.locator('.finding').count()).toBe(4);
   await expect(page.locator('.finding').first()).toContainText('%');
@@ -18,6 +19,8 @@ test('落地页：首屏、入口、视频、结果；切到英文再切回来',
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('.hero h1')).toContainText('pause, rewind and fork');
   await expect(page.locator('#results')).toContainText('held in all three runs');
+  // 英文页放英文版的片子
+  await expect(page.locator('#video video')).toHaveAttribute('src', /microcity-intro-en/);
   // 选过的语言会记住（链接里没有 lang 的时候）
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');

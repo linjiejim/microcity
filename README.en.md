@@ -4,7 +4,7 @@
 
 A small society you can pause, rewind and fork: about two hundred residents live their days in your browser. Drop one event in, run the same seed twice, and see how life changes.
 
-[![Intro video: where MicroCity came from, what it does, and what the experiments found (plays on the landing page; Chinese narration)](docs/assets/v5/video/microcity-intro-poster-play.jpg)](https://microcity.linjiejim.com/#video)
+[![Intro video: where MicroCity came from, what it does, and what the experiments found (plays on the landing page)](docs/assets/v5/video/microcity-intro-en-poster-play.jpg)](https://microcity.linjiejim.com/?lang=en#video)
 
 - **Open it**: <https://microcity.linjiejim.com/app/> (no sign-up, no server, no API key)
 - **Introduction and video**: <https://microcity.linjiejim.com/?lang=en>
