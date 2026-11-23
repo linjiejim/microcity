@@ -13,7 +13,8 @@ module.exports = {
         MICROCITY_HOST: '127.0.0.1',
         MICROCITY_PORT: '18908',
         MICROCITY_PUBLIC: '1',
-        MICROCITY_STATIC_DIR: 'apps/web/dist',
+        // 落地页在根路径，新版在 /app/，经典版在 /classic/（D100）；构建见 pnpm build:site
+        MICROCITY_STATIC_DIR: '/=apps/landing/dist;/app/=apps/studio/dist;/classic/=apps/web/dist',
         MICROCITY_DATA: 'data',
         // 模型调用（建镇对话、报告、独白）的总预算上限；密钥放服务器上的 .env.local，不进仓库
         MICROCITY_GLOBAL_BUDGET: '1',

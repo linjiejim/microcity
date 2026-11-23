@@ -18,6 +18,16 @@
         "dev"
       ],
       "port": 5320
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@microcity/landing",
+        "dev"
+      ],
+      "port": 5330
     }
   ]
 }

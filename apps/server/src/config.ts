@@ -35,8 +35,11 @@ export const config = {
   jevConcurrency: num(process.env.MICROCITY_JEV_CONCURRENCY, 6),
   /** 测试时关掉真实模型调用 */
   offline: process.env.MICROCITY_OFFLINE === '1',
-  /** 生产环境：由服务端直接提供构建好的前端（例如 apps/web/dist）；开发时由 Vite 提供 */
-  staticDir: process.env.MICROCITY_STATIC_DIR ? resolve(ROOT, process.env.MICROCITY_STATIC_DIR) : '',
+  /**
+   * 生产环境：由服务端直接提供构建好的前端；开发时由 Vite 提供。
+   * 一个目录（挂在根路径），或者 `前缀=目录;…`（例如 `/=apps/landing/dist;/app/=apps/studio/dist`，见 static.ts）
+   */
+  staticDir: process.env.MICROCITY_STATIC_DIR ?? '',
   /**
    * 公开演示站（v3）：访客只能跑规则模式；种子数、并发实验、每个 IP 每小时的次数有上限；
    * 在线运行不自动生成对话台词；访客的实验与运行 48 小时后清理；闲置的运行从内存卸下。

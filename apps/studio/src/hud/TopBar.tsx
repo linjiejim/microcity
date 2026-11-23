@@ -107,6 +107,11 @@ export function TopBar() {
           </>
         )}
         <Button icon="sliders" onClick={() => set({ settingsOpen: true })} testId="settings-open" title="模型与用量" />
+        {location.pathname.startsWith('/app') && (
+          <a className="btn icon" href="/" title="关于微缩城：由来、视频、实验结果" aria-label="关于微缩城" data-testid="about">
+            <Icon name="question" size={16} />
+          </a>
+        )}
       </div>
     </header>
   );

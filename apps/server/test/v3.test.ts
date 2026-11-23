@@ -205,3 +205,54 @@ describe('生产模式：服务端提供构建好的前端', () => {
     }
   });
 });
+
+describe('生产模式：同一个域名挂几份前端（D100）', () => {
+  it('按前缀找到各自的 index.html；/app 补斜杠；旧的 ?ws= 链接转到 /classic/；视频支持按字节范围取', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'mc-mounts-'));
+    for (const [name, title] of [
+      ['landing', 'landing'],
+      ['studio', 'studio'],
+      ['web', 'classic'],
+    ] as const) {
+      mkdirSync(join(root, name, 'assets'), { recursive: true });
+      writeFileSync(join(root, name, 'index.html'), `<!doctype html><title>${title}</title>`);
+    }
+    writeFileSync(join(root, 'studio', 'assets', 'App-x1.js'), 'console.log(2)');
+    const video = Buffer.alloc(1000, 7);
+    mkdirSync(join(root, 'landing', 'video'));
+    writeFileSync(join(root, 'landing', 'video', 'intro.mp4'), video);
+    const saved = config.staticDir;
+    config.staticDir = `/=${join(root, 'landing')};/app/=${join(root, 'studio')};/classic/=${join(root, 'web')}`;
+    const web = await buildApi(runs, makeServices(runs));
+    try {
+      expect((await web.inject({ method: 'GET', url: '/' })).body).toContain('<title>landing</title>');
+      expect((await web.inject({ method: 'GET', url: '/app/' })).body).toContain('<title>studio</title>');
+      expect((await web.inject({ method: 'GET', url: '/app/?t=D02%2018:40&who=p001' })).body).toContain('<title>studio</title>');
+      expect((await web.inject({ method: 'GET', url: '/classic/review' })).body).toContain('<title>classic</title>');
+      const bare = await web.inject({ method: 'GET', url: '/app?c=village' });
+      expect(bare.statusCode).toBe(301);
+      expect(bare.headers.location).toBe('/app/?c=village');
+      const legacy = await web.inject({ method: 'GET', url: '/?ws=review' });
+      expect(legacy.statusCode).toBe(302);
+      expect(legacy.headers.location).toBe('/classic/?ws=review');
+      const js = await web.inject({ method: 'GET', url: '/app/assets/App-x1.js' });
+      expect(js.headers['cache-control']).toContain('immutable');
+      expect(js.body).toBe('console.log(2)');
+      const part = await web.inject({ method: 'GET', url: '/video/intro.mp4', headers: { range: 'bytes=100-199' } });
+      expect(part.statusCode).toBe(206);
+      expect(part.headers['content-type']).toBe('video/mp4');
+      expect(part.headers['content-range']).toBe('bytes 100-199/1000');
+      expect(part.rawPayload.length).toBe(100);
+      const whole = await web.inject({ method: 'GET', url: '/video/intro.mp4' });
+      expect(whole.statusCode).toBe(200);
+      expect(whole.headers['accept-ranges']).toBe('bytes');
+      expect(whole.rawPayload.length).toBe(1000);
+      expect((await web.inject({ method: 'GET', url: '/video/intro.mp4', headers: { range: 'bytes=5000-6000' } })).statusCode).toBe(416);
+      expect((await web.inject({ method: 'GET', url: '/app/../../package.json' })).body).not.toContain('"name"');
+      expect((await web.inject({ method: 'GET', url: '/api/health' })).statusCode).toBe(200);
+    } finally {
+      config.staticDir = saved;
+      await web.close();
+    }
+  });
+});

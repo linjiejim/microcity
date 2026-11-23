@@ -1,6 +1,5 @@
 import websocket from '@fastify/websocket';
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, normalize, sep } from 'node:path';
+import { parseMounts, serveStatic } from './static.ts';
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import {
   applyPatches,
@@ -33,7 +32,7 @@ import {
   type Slots,
   type TownMap,
 } from '@microcity/sim';
-import { config, hasModelAccess } from './config.ts';
+import { config, hasModelAccess, ROOT } from './config.ts';
 import { Analysis } from './analysis.ts';
 import { Builder } from './builder.ts';
 import { ExperimentRunner, isMetricKey, type ExperimentResult } from './experiments.ts';
@@ -648,28 +647,8 @@ export async function buildApi(runs: RunManager, services?: Services): Promise<F
     r.addClient(socket);
   });
 
-  // 生产环境：前端静态文件 + 单页应用回落（/api 之外的 GET 都交给 index.html）
-  if (config.staticDir && existsSync(join(config.staticDir, 'index.html'))) {
-    const TYPES: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', '.json': 'application/json', '.ico': 'image/x-icon' };
-    const root = config.staticDir;
-    const index = join(root, 'index.html');
-    const assets = join(root, 'assets') + sep;
-    app.setNotFoundHandler((req, reply) => {
-      if ((req.method !== 'GET' && req.method !== 'HEAD') || req.url.startsWith('/api/')) return reply.code(404).send({ error: 'not found' });
-      let path = '/';
-      try {
-        path = decodeURIComponent(req.url.split('?')[0]!);
-      } catch {
-        // 路由已把畸形的百分号编码拒成 400；这里再兜一层，当作首页
-      }
-      let file = join(root, normalize(path).replace(/^(\.\.[/\\])+/, ''));
-      if (!file.startsWith(root + sep) || !existsSync(file) || statSync(file).isDirectory()) file = index;
-      return reply
-        .header('Content-Type', TYPES[extname(file)] ?? 'application/octet-stream')
-        .header('Cache-Control', file.startsWith(assets) ? 'public, max-age=31536000, immutable' : 'no-cache')
-        .send(readFileSync(file));
-    });
-  }
+  // 生产环境：构建好的前端（一份或几份，按路径挂，D100）
+  serveStatic(app, parseMounts(config.staticDir, ROOT));
 
   return app;
 }

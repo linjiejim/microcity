@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 const api = `http://127.0.0.1:${process.env.MICROCITY_PORT ?? 5317}`;
 
 export default defineConfig({
+  // 上线时挂在 /classic/ 下（D100）：MICROCITY_WEB_BASE=/classic/
+  base: process.env.MICROCITY_WEB_BASE ?? '/',
   plugins: [react()],
   server: {
     port: Number(process.env.MICROCITY_WEB_PORT ?? 5318),

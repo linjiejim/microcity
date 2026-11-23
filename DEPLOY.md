@@ -1,8 +1,18 @@
 # 部署：公开演示站
 
-官方演示站在 <https://microcity.linjiejim.com>，结构很简单：Caddy → PM2 → `127.0.0.1:18908`，一个 Node 进程同时提供接口与构建好的前端。推送到 `main` 后由 GitHub Actions 自动部署（`.github/workflows/deploy.yml`，见下文“推送即部署”）。
+官方演示站在 <https://microcity.linjiejim.com>，结构很简单：Caddy → PM2 → `127.0.0.1:18908`，一个 Node 进程同时提供接口与三份构建好的前端（v5 方案 D100）：
 
-想自己架一个，照下面做；用 nginx、systemd 或别的进程管理器也行，要点只有三个：`MICROCITY_PUBLIC=1`、提供 `apps/web/dist`、`data/` 留在服务器上。
+| 路径 | 内容 | 构建 |
+| --- | --- | --- |
+| `/` | 落地页（介绍、视频、实验结果） | `apps/landing` |
+| `/app/` | 新版：活的小社会（纯静态，全部在浏览器里算） | `apps/studio`，`MICROCITY_STUDIO_BASE=/app/` |
+| `/classic/` | 经典版：停电通知实验室（要用 `/api`） | `apps/web`，`MICROCITY_WEB_BASE=/classic/` |
+
+`pnpm build:site` 一次构建三份；`MICROCITY_STATIC_DIR` 写成 `前缀=目录;…` 就能按路径挂（见 `apps/server/src/static.ts`）。根路径带 `?ws=` 的旧链接会转到 `/classic/`。推送到 `main` 后由 GitHub Actions 自动部署（`.github/workflows/deploy.yml`，见下文“推送即部署”）。
+
+只想要新版的话，它是纯静态的：`MICROCITY_STUDIO_BASE=/ pnpm build:studio`，把 `apps/studio/dist` 放到任何静态托管上即可。
+
+想自己架完整的一套，照下面做；用 nginx、systemd 或别的进程管理器也行，要点只有三个：`MICROCITY_PUBLIC=1`、提供构建好的前端、`data/` 留在服务器上。
 
 | 项 | 值 |
 | --- | --- |
@@ -34,7 +44,7 @@
    ```bash
    git clone https://github.com/linjiejim/microcity.git && cd microcity
    pnpm install --frozen-lockfile
-   pnpm --filter @microcity/web build
+   pnpm build:site
    pm2 start ecosystem.config.cjs && pm2 save
    curl -s localhost:18908/api/health
    ```
@@ -69,4 +79,4 @@
 - 部署：推送到 `main`，或在 Actions 里手动运行 “Deploy demo site”。
 - 日志：`pm2 logs microcity`，或看 `logs/`。
 - 数据库 schema 升级（`SCHEMA_VERSION`）：预发布阶段不做迁移——停进程、删掉 `data/`、重启即可；精选实验会在访客点击时按需重跑。
-- 回滚：`git reset --hard <上一个提交> && pnpm --filter @microcity/web build && pm2 restart microcity`。
+- 回滚：`git reset --hard <上一个提交> && pnpm build:site && pm2 restart microcity --update-env`。
