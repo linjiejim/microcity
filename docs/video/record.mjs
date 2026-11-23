@@ -53,7 +53,7 @@ const SHOTS = {
       125: [{ scrollTo: ['.page', '[data-testid^=verdict-]', 110, 70] }],
       250: [{ scrollTo: ['.page', T('lab-affected'), 90, 70] }],
       330: [{ click: '[data-testid^=affected-] >> nth=0' }],
-      350: [{ scrollTo: ['.page', T('lab-affected'), -20, 80, 'bottom'] }],
+      350: [{ scrollTo: ['.page', T('micro'), 60, 80] }],
     },
   },
   // 四个社区
