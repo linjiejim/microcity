@@ -568,3 +568,14 @@ section {
     transition: none;
   }
 }
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: 32px;
+  }
+  .hero h1 br {
+    display: none;
+  }
+  .hero-text {
+    padding-bottom: 8vh;
+  }
+}
