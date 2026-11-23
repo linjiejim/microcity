@@ -98,11 +98,11 @@ export function Micro({ def, x, who, base, treat, onClose }: { def: CommunityDef
           <div className="micro-diff">
             <div>
               <b>只在“没有这件事”时做了</b>
-              <p>{d!.onlyBase.length ? d!.onlyBase.join('；') : '——'}</p>
+              <p>{d!.onlyBase.length ? d!.onlyBase.join('；') : '没有'}</p>
             </div>
             <div>
               <b>只在“有这件事”时做了</b>
-              <p>{d!.onlyTreat.length ? d!.onlyTreat.join('；') : '——'}</p>
+              <p>{d!.onlyTreat.length ? d!.onlyTreat.join('；') : '没有'}</p>
             </div>
           </div>
         </>

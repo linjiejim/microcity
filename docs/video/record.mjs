@@ -4,7 +4,7 @@
 // 每一帧前进整 1/30 秒再截图，所以镜头和机器快慢无关、每帧都均匀。
 // 输出 docs/video/.work/footage/<镜头>/NNNN.jpg（1920×1080）与 info.json（帧数、点击的位置与帧号）。
 import { createRequire } from 'node:module';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -157,3 +157,9 @@ for (const [name, s] of Object.entries(SHOTS)) {
   await ctx.close();
 }
 await browser.close();
+
+// 给 comp.html 的索引：每个镜头的帧数与点击
+const index = {};
+for (const d of readdirSync(OUT)) if (existsSync(`${OUT}/${d}/info.json`)) index[d] = JSON.parse(readFileSync(`${OUT}/${d}/info.json`, 'utf8'));
+writeFileSync(`${OUT}/index.js`, `window.FOOTAGE = ${JSON.stringify(index)};\n`);
+console.log('index:', Object.keys(index).join(' '));

@@ -156,7 +156,8 @@ describe('引擎', () => {
       e.advance(d * DAY - 1);
       expect(checkInvariants(def, e.state, total0), `D${d}`).toEqual([]);
     }
-    expect(performance.now() - t0).toBeLessThan(10_000);
+    // 本机约 3.5 秒；CI 的机器慢几倍，留足余量
+    expect(performance.now() - t0).toBeLessThan(30_000);
   });
 
   it('重放一致：事件流经 reducer 重建的状态与引擎内状态相同', () => {

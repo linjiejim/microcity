@@ -6,6 +6,7 @@ const WEB = 5418 + 100;
 const data = '/tmp/microcity-e2e';
 // 新版应用（v5）：纯静态，没有服务端
 const STUDIO = 5520;
+const LANDING = 5530;
 
 export default defineConfig({
   testDir: 'e2e',
@@ -18,6 +19,7 @@ export default defineConfig({
   projects: [
     { name: 'classic', testMatch: 'app.spec.ts', use: { baseURL: `http://127.0.0.1:${WEB}` } },
     { name: 'studio', testMatch: 'studio.spec.ts', use: { baseURL: `http://127.0.0.1:${STUDIO}` } },
+    { name: 'landing', testMatch: 'landing.spec.ts', use: { baseURL: `http://127.0.0.1:${LANDING}` } },
   ],
   use: {
     viewport: { width: 1600, height: 980 },
@@ -41,6 +43,12 @@ export default defineConfig({
     {
       command: `MICROCITY_STUDIO_PORT=${STUDIO} pnpm --filter @microcity/studio exec vite --port ${STUDIO} --strictPort`,
       url: `http://127.0.0.1:${STUDIO}`,
+      reuseExistingServer: false,
+      timeout: 60_000,
+    },
+    {
+      command: `MICROCITY_LANDING_PORT=${LANDING} pnpm --filter @microcity/landing exec vite --port ${LANDING} --strictPort`,
+      url: `http://127.0.0.1:${LANDING}`,
       reuseExistingServer: false,
       timeout: 60_000,
     },

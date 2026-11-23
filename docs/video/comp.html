@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>微缩城 MicroCity · 介绍片</title>
+<style>
+  html, body { margin: 0; background: #faf7f2; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<script src="lib.js"></script>
+<script src="content.js"></script>
+<script src="timing.js"></script>
+<script src=".work/footage/index.js"></script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// 一张画布、一个 draw(t)：同一个 t 永远画出同一帧（渲染时按帧 seek）。
+// 文字与数字都来自 content.js（NUMBERS 那一块），时间来自 timing.js（旁白每一句的起止）。
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const acc = document.createElement('canvas'); acc.width = W; acc.height = H; const actx = acc.getContext('2d');
+const { clamp, lerp, seg, ease, tw, spring, rise, leave, win, keyed, hash, rrect } = L;
+const TM = window.MC_TIMING, NUM = MC.NUMBERS, F = NUM.facts, R = NUM.results;
+const C = { paper: '#faf7f2', surface: '#ffffff', line: '#e7e0d5', ink: '#26241f', ink2: '#5e5a52', teal: '#1f5f63', amber: '#e3a13a', good: '#3e8e63', bad: '#c2553a', mute: '#bdb5a8' };
+const SERIF = '"Songti SC", "STSong", serif', SANS = '"PingFang SC", "Hiragino Sans GB", sans-serif';
+const DUR = TM.total;
+
+// ─── 时间：每一句的起止、句中某个词的时刻 ───
+const LN = Object.fromEntries(TM.lines.map((l) => [l.id, l]));
+const T0 = (id) => LN[id].t0, T1 = (id) => LN[id].t1;
+const chars = (s) => [...s].length;
+function at(id, word, frac = 0) {
+  const l = LN[id], i = l.text.indexOf(word);
+  if (i < 0) throw new Error(`“${word}”不在 ${id} 里`);
+  const ci = chars(l.text.slice(0, i)) + frac * chars(word);
+  // 在对应的字幕段里按字数插值（字幕段的边界已经对齐了句中停顿）
+  let acc0 = 0;
+  for (const s of l.subs) {
+    const n = chars(s.text) + 1;
+    if (ci <= acc0 + n) return s.t0 + (s.t1 - s.t0) * clamp((ci - acc0) / n);
+    acc0 += n;
+  }
+  return l.t1;
+}
+
+// ─── 图片：缺的先登记，seek 等它们都到了再画一遍 ───
+const CACHE = new Map();
+let PENDING = [], NOLOAD = false;
+function img(src) {
+  let e = CACHE.get(src);
+  if (e) { CACHE.delete(src); CACHE.set(src, e); }
+  else {
+    if (NOLOAD) return null;
+    const im = new Image();
+    e = { im, ok: false };
+    e.p = new Promise((r) => { im.onload = () => { e.ok = true; r(); }; im.onerror = () => { e.ok = true; e.bad = true; r(); }; });
+    im.src = src;
+    CACHE.set(src, e);
+    if (CACHE.size > 240) CACHE.delete(CACHE.keys().next().value);
+  }
+  if (!e.ok) PENDING.push(e.p);
+  return e.ok && !e.bad ? e.im : null;
+}
+const FOOT = window.FOOTAGE;
+const frame = (shot, f) => img(`.work/footage/${shot}/${String(clamp(Math.round(f), 0, FOOT[shot].n - 1)).padStart(4, '0')}.jpg`);
+const click = (shot, sel) => FOOT[shot].clicks.find((c) => c.sel && c.sel.includes(sel));
+
+// ─── 画布小工具 ───
+function font(size, face = SANS, weight = 400) { ctx.font = `${weight} ${size}px ${face}`; }
+function text(s, x, y, { size = 24, face = SANS, weight = 400, color = C.ink, align = 'left', alpha = 1, base = 'alphabetic' } = {}) {
+  if (alpha <= 0.002) return 0;
+  font(size, face, weight);
+  ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = base;
+  ctx.fillText(s, x, y);
+  ctx.globalAlpha = 1;
+  return ctx.measureText(s).width;
+}
+function measure(s, size, face = SANS, weight = 400) { font(size, face, weight); return ctx.measureText(s).width; }
+function shadowed(fn, blur = 30, oy = 10, a = 0.1) {
+  ctx.save(); ctx.shadowColor = `rgba(38,36,31,${a})`; ctx.shadowBlur = blur; ctx.shadowOffsetY = oy; fn(); ctx.restore();
+}
+function card(x, y, w, h, { r = 14, fill = C.surface, stroke = C.line, alpha = 1, shadow = 0.1, dash = null } = {}) {
+  if (alpha <= 0.002) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  if (shadow) { ctx.shadowColor = `rgba(38,36,31,${shadow})`; ctx.shadowBlur = 34; ctx.shadowOffsetY = 12; }
+  rrect(ctx, x, y, w, h, r); ctx.fillStyle = fill; ctx.fill();
+  ctx.shadowColor = 'transparent';
+  if (stroke) { if (dash) ctx.setLineDash(dash); ctx.lineWidth = 1.5; ctx.strokeStyle = stroke; ctx.stroke(); }
+  ctx.restore();
+}
+function dot(x, y, r, color, alpha = 1) {
+  if (alpha <= 0.002 || r <= 0) return;
+  ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+}
+/** 标签：白底胶囊，前面一个小圆点 */
+function chip(s, x, y, { alpha = 1, color = C.teal, size = 22, fill = 'rgba(255,255,255,0.94)', ink = C.ink, align = 'left' } = {}) {
+  if (alpha <= 0.002) return 0;
+  const w = measure(s, size, SANS, 500) + 58, h = size + 22;
+  const x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  card(x0, y, w, h, { r: h / 2, fill, alpha, shadow: 0.08 });
+  dot(x0 + 22, y + h / 2, 5.5, color, alpha);
+  text(s, x0 + 38, y + h / 2 + 1, { size, weight: 500, color: ink, alpha, base: 'middle' });
+  return w;
+}
+/** 发光的圆角框：画上、停住、淡出 */
+function glow(x, y, w, h, a, { color = C.teal, r = 12, pad = 8 } = {}) {
+  if (a <= 0.002) return;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.shadowColor = color; ctx.shadowBlur = 22;
+  rrect(ctx, x - pad, y - pad, w + pad * 2, h + pad * 2, r);
+  ctx.lineWidth = 3.5; ctx.strokeStyle = color; ctx.stroke();
+  ctx.shadowBlur = 0; ctx.globalAlpha = a * 0.08; ctx.fillStyle = color; ctx.fill();
+  ctx.restore();
+}
+function pop(tau) { return tau <= 0 ? 0 : 1 + 0.55 * Math.exp(-7 * tau) * Math.sin(17 * tau); }
+
+// ─── 运动量（渲染时按它决定快门里取几次样） ───
+let TRACK = [];
+const track = (x, y, w, h) => TRACK.push([x, y, w, h]);
+
+// ═══════════════════════════════════ 地面 ═══════════════════════════════════
+function ground(t, drift = { x: 0, y: 0, z: 1 }) {
+  ctx.fillStyle = C.paper; ctx.fillRect(0, 0, W, H);
+  // 远处的点阵：随镜头慢慢滑，给运动一个参照
+  const sp = 44 * Math.pow(drift.z, 0.35), ox = ((drift.x * 0.3) % sp + sp) % sp, oy = ((drift.y * 0.3) % sp + sp) % sp;
+  ctx.fillStyle = 'rgba(38,36,31,0.055)';
+  for (let y = oy - sp; y < H + sp; y += sp) for (let x = ox - sp; x < W + sp; x += sp) { ctx.beginPath(); ctx.arc(x, y, 1.3, 0, 6.2832); ctx.fill(); }
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.35, W / 2, H * 0.45, H * 1.05);
+  g.addColorStop(0, 'rgba(250,247,242,0)'); g.addColorStop(1, 'rgba(120,100,70,0.07)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+// ═══════════════════════════════ 1 · 由来 ═══════════════════════════════
+const B1 = {};
+function initB1() {
+  B1.dot = 0.35;
+  B1.date = 0.6;
+  B1.card = at('o1', '测试') - 0.15;
+  B1.pick = at('o1', '只答') + 0.15;
+  B1.cardOut = T0('o3') - 0.05;
+  B1.split = T0('o3') + 0.35;
+  B1.cast = at('o3', '同时') - 0.1;
+  B1.q = T0('o4') - 0.1;
+  B1.grid = LN.o5.subs[1].t0 - 0.2;
+  B1.tile = B1.grid - 0.75;
+  B1.one = at('o5', '每次只改') - 0.1;
+  B1.dive = T1('o5') + 0.1;
+  B1.end = B1.dive + 0.85;
+  const n = F.jevTownResidents;
+  B1.pts = [...Array(n)].map((_, i) => {
+    const r = 255 * Math.sqrt((i + 0.6) / n), a = i * 2.39996 + 0.4;
+    return { x: 960 + r * Math.cos(a) * 1.18, y: 548 + r * Math.sin(a) * 0.92, d: r, ans: hash('ans', i) };
+  });
+  // 100 个小格子（重来一百遍）
+  B1.tiles = [];
+  const ts = 64, gap = 12, x0 = 960 - (10 * ts + 9 * gap) / 2, y0 = 548 - (10 * ts + 9 * gap) / 2;
+  for (let j = 0; j < 10; j++) for (let i = 0; i < 10; i++) B1.tiles.push({ i, j, x: x0 + i * (ts + gap), y: y0 + j * (ts + gap), s: ts });
+  B1.src = B1.tiles[4 * 10 + 4];
+  B1.target = B1.tiles[3 * 10 + 6];
+}
+const OPTS = [['A', '照常出门'], ['B', '先问问邻居'], ['C', '改天再去'], ['D', '告诉家人']];
+function drawB1(t) {
+  if (t > B1.end + 0.05) return;
+  // 推进：钻进一个格子（它会变成第一版的窗口）
+  const kd = ease.expoIO(seg(t, B1.dive, B1.end));
+  const tg = B1.target, Z = Math.exp(Math.log(1280 / tg.s) * kd);
+  const tcx = tg.x + tg.s / 2, tcy = tg.y + tg.s / 2, px = lerp(tcx, 960, kd), py = lerp(tcy, 502, kd);
+  ctx.save();
+  ctx.setTransform(Z, 0, 0, Z, px - Z * tcx, py - Z * tcy);
+  const fadeAll = 1 - seg(t, B1.dive + 0.55, B1.end);
+  const others = 1 - ease.cubicOut(seg(t, B1.dive + 0.02, B1.dive + 0.4)); // 推进时其余格子先退场
+
+  // 开场的点
+  const kd0 = spring(t - B1.dot, 0.5, 15);
+  const center = { x: 960, y: 548 };
+  // 日期
+  const rd = rise(t, B1.date), ld = leave(t, B1.card + 0.35, 0.35);
+
+  // 选择题卡片：从点里长出来
+  const kc = spring(t - B1.card, 0.78, 13), kco = ease.expoIO(seg(t, B1.cardOut, B1.cardOut + 0.45));
+  const CW = 640, CH = 392, cx0 = 960 - CW / 2, cy0 = 352;
+  const optY = (i) => cy0 + 196 + i * 46;
+  const pickPos = { x: cx0 + 62, y: optY(1) };
+  if (t >= B1.card && t < B1.cardOut + 0.5) {
+    const k = kc * (1 - kco);
+    const fromX = kco > 0 ? pickPos.x : center.x, fromY = kco > 0 ? pickPos.y : center.y;
+    const x = lerp(fromX - 8, cx0, k), y = lerp(fromY - 8, cy0, k), w = lerp(16, CW, k), h = lerp(16, CH, k);
+    card(x, y, w, h, { r: lerp(8, 16, k), alpha: clamp(k * 3) });
+    track(x, y, w, h);
+    const ca = clamp((k - 0.55) / 0.35);
+    if (ca > 0) {
+      text('Jev', cx0 + 44, cy0 + 72, { size: 46, face: SERIF, alpha: ca });
+      text('TypeSafe 的快思考模型', cx0 + 128, cy0 + 70, { size: 23, color: C.ink2, alpha: ca });
+      ctx.globalAlpha = ca; ctx.fillStyle = C.line; ctx.fillRect(cx0 + 44, cy0 + 100, CW - 88, 1.5); ctx.globalAlpha = 1;
+      text('听到这条广播，你会怎么做？', cx0 + 44, cy0 + 150, { size: 28, alpha: ca });
+      const kp = ease.expoOut(seg(t, B1.pick, B1.pick + 0.3));
+      OPTS.forEach(([L0, s], i) => {
+        const yy = optY(i);
+        if (i === 1 && kp > 0) { ctx.globalAlpha = ca * kp * 0.09; ctx.fillStyle = C.teal; rrect(ctx, cx0 + 30, yy - 21, CW - 60, 42, 10); ctx.fill(); ctx.globalAlpha = 1; }
+        ctx.globalAlpha = ca; ctx.strokeStyle = i === 1 && kp > 0.5 ? C.teal : C.mute; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx0 + 62, yy, 11, 0, 6.2832); ctx.stroke(); ctx.globalAlpha = 1;
+        text(`${L0}  ${s}`, cx0 + 92, yy + 9, { size: 25, color: i === 1 && kp > 0.5 ? C.teal : C.ink, weight: i === 1 && kp > 0.5 ? 600 : 400, alpha: ca });
+      });
+      const kt = rise(t, B1.pick + 0.25);
+      text('只回答选择题', cx0 + CW - 44, cy0 + 72, { size: 22, color: C.teal, align: 'right', weight: 500, alpha: ca * kt.op });
+    }
+  }
+  // 点：先在中心，卡片打开后飞到 B，再回中心，分成 50 个
+  let dp = { ...center };
+  if (t >= B1.card) {
+    const hop = ease.cubicIO(seg(t, B1.pick - 0.45, B1.pick));
+    const p1 = { x: lerp(center.x, pickPos.x, hop), y: lerp(center.y, pickPos.y, hop) - Math.sin(hop * Math.PI) * 120 };
+    const back = ease.cubicIO(seg(t, B1.cardOut, B1.split));
+    dp = { x: lerp(p1.x, center.x, back), y: lerp(p1.y, center.y, back) };
+  }
+  const visDot = t < B1.split ? 1 : 0;
+  dot(dp.x, dp.y, 11 * (t < B1.card + 0.1 ? kd0 : 1), C.teal, visDot);
+  // 开场：点在呼吸，一圈淡淡的波纹
+  if (t < B1.card + 0.3) for (const off of [0, 1.1]) {
+    const u = ((t - B1.dot - 0.4 - off) % 2.2 + 2.2) % 2.2 / 2.2;
+    if (t - B1.dot - 0.4 - off < 0) continue;
+    ctx.globalAlpha = (1 - u) * 0.35 * (1 - seg(t, B1.card, B1.card + 0.3)); ctx.strokeStyle = C.teal; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(dp.x, dp.y, 11 + 70 * ease.cubicOut(u), 0, 6.2832); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  track(dp.x - 11, dp.y - 11, 22, 22);
+
+  // jev-town：50 个居民
+  if (t >= B1.split - 0.02) {
+    const ql = rise(t, B1.split + 0.25), qlo = leave(t, B1.q + 0.25, 0.3);
+    text(`jev-town · ${F.jevTownResidents} 个 AI 居民`, 960, 196 + ql.dy + qlo.dy, { size: 34, face: SERIF, align: 'center', alpha: ql.op * qlo.op * fadeAll });
+    // 广播：中心的波纹
+    const rings = [0, 0.2, 0.4].map((d) => seg(t, B1.cast + d, B1.cast + d + 1.5));
+    rings.forEach((k) => {
+      if (k <= 0 || k >= 1) return;
+      ctx.globalAlpha = (1 - k) * 0.45 * fadeAll; ctx.strokeStyle = C.teal; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.ellipse(960, 548, 340 * ease.cubicOut(k) * 1.18, 340 * ease.cubicOut(k) * 0.92, 0, 0, 6.2832); ctx.stroke(); ctx.globalAlpha = 1;
+    });
+    const kb = rise(t, B1.cast - 0.15);
+    // 进格子：收拢
+    const kt = ease.expoIO(seg(t, B1.tile, B1.tile + 0.8));
+    const src = B1.src, scx = src.x + src.s / 2, scy = src.y + src.s / 2;
+    // 格子背景（收拢后出现）
+    if (kt > 0) {
+      const s = lerp(560, src.s, kt), a = clamp(kt * 2);
+      card(lerp(960, scx, kt) - s / 2, lerp(548, scy, kt) - s / 2, s, s, { r: lerp(40, 12, kt), alpha: a * fadeAll * (t > B1.dive ? others : 1), shadow: 0.06 });
+    }
+    B1.pts.forEach((p, i) => {
+      const k = spring(t - B1.split - i * 0.013, 0.7, 14);
+      let x = lerp(960, p.x, k), y = lerp(548, p.y, k);
+      // 收进格子
+      x = lerp(x, scx + (p.x - 960) * (src.s * 0.36 / 300), kt); y = lerp(y, scy + (p.y - 548) * (src.s * 0.36 / 250), kt);
+      const reach = B1.cast + (p.d / 340) * 1.1;
+      const resp = t >= reach;
+      const col = !resp ? C.mute : p.ans < 0.62 ? C.teal : p.ans < 0.86 ? C.amber : C.good;
+      const r = lerp(9, 2.6, kt) * (resp ? pop(t - reach) : 1);
+      dot(x, y, r, col, fadeAll * (t > B1.dive ? others : 1));
+    });
+    // 广播图标
+    if (kt < 1) {
+      const a = kb.op * (1 - kt) * fadeAll;
+      dot(960, 548, 9, C.ink, a);
+      ctx.globalAlpha = a; ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5;
+      for (const rr of [18, 28]) { ctx.beginPath(); ctx.arc(960, 548, rr, -0.7, 0.7); ctx.stroke(); ctx.beginPath(); ctx.arc(960, 548, rr, Math.PI - 0.7, Math.PI + 0.7); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    }
+    // 问题
+    const kq = rise(t, B1.q, { dist: 30 }), kqo = leave(t, B1.grid + 0.2, 0.4);
+    text('社会，能被模拟吗？', 960, 200 + kq.dy + kqo.dy, { size: 84, face: SERIF, align: 'center', alpha: kq.op * kqo.op * fadeAll });
+    // 一百遍
+    if (t >= B1.grid - 0.05) {
+      const flip = B1.one + 0.35;
+      const pre = 1 - ease.smooth(seg(t, B1.dive - 0.25, B1.dive + 0.05)); // 推进前先把字和格子里的点收掉
+      B1.tiles.forEach((tl, idx) => {
+        if (tl === B1.src) return;
+        const d = Math.hypot(tl.i - B1.src.i, tl.j - B1.src.j);
+        const k = spring(t - B1.grid - d * 0.04, 0.62, 16);
+        if (k <= 0) return;
+        const s = tl.s * k, cx = tl.x + tl.s / 2, cy = tl.y + tl.s / 2;
+        card(cx - s / 2, cy - s / 2, s, s, { r: 12 * k, alpha: clamp(k * 1.5) * fadeAll * (tl === B1.target ? 1 - ease.smooth(seg(t, B1.dive + 0.3, B1.dive + 0.55)) : others), shadow: 0.05 });
+      });
+      // 每个格子里几个小人；右半边只改了一个条件
+      B1.tiles.forEach((tl, idx) => {
+        const d = Math.hypot(tl.i - B1.src.i, tl.j - B1.src.j);
+        const k = tl === B1.src ? 1 : clamp(spring(t - B1.grid - d * 0.04, 0.62, 16));
+        if (k <= 0 || tl === B1.src) return;
+        const changed = tl.i >= 5 && t >= flip + (tl.i - 5) * 0.05;
+        for (let q = 0; q < 6; q++) {
+          const ox = (hash('tx', idx, q) - 0.5) * tl.s * 0.62, oy = (hash('ty', idx, q) - 0.5) * tl.s * 0.62;
+          dot(tl.x + tl.s / 2 + ox * k, tl.y + tl.s / 2 + oy * k, 2.8 * k, changed && q < 4 ? C.amber : q < 3 ? C.teal : C.mute, fadeAll * (tl === B1.target ? pre : others));
+        }
+      });
+      const kx = rise(t, B1.grid + 0.45);
+      text(`×${F.rerunsN}`, 1366, 470 + kx.dy, { size: 64, face: SERIF, color: C.teal, alpha: kx.op * fadeAll * pre });
+      // 只改一个条件
+      const ko = rise(t, B1.one);
+      if (ko.op > 0) {
+        const x = 1366, y = 540 + ko.dy;
+        text('只改一个条件', x, y, { size: 30, face: SERIF, alpha: ko.op * fadeAll * pre });
+        const kf = ease.expoOut(seg(t, flip - 0.15, flip + 0.15));
+        const sx = x, sy = y + 30;
+        ctx.globalAlpha = ko.op * fadeAll * pre;
+        rrect(ctx, sx, sy, 76, 40, 20); ctx.fillStyle = kf > 0.5 ? C.amber : '#e6e0d6'; ctx.fill();
+        dot(sx + lerp(20, 56, kf), sy + 20, 15, '#fff', ko.op * fadeAll * pre);
+        ctx.globalAlpha = 1;
+        text('左边不变，右边改了', sx + 92, sy + 28, { size: 22, color: C.ink2, alpha: ko.op * fadeAll * pre * clamp((t - flip) * 3) });
+      }
+    }
+  }
+  ctx.restore();
+  if (t >= B1.dive) { const r = { x: px - Z * tcx + Z * tg.x, y: py - Z * tcy + Z * tg.y, s: Z * tg.s }; track(r.x, r.y, r.s, r.s); }
+}
+// B1 结束时目标格子在屏幕上的位置（第一版的窗口从这里长出来）
+function b1TileRect(t) {
+  const kd = ease.expoIO(seg(t, B1.dive, B1.end)), tg = B1.target, Z = Math.exp(Math.log(1280 / tg.s) * kd);
+  const tcx = tg.x + tg.s / 2, tcy = tg.y + tg.s / 2, px = lerp(tcx, 960, kd), py = lerp(tcy, 502, kd);
+  return { x: px - Z * tcx + Z * tg.x, y: py - Z * tcy + Z * tg.y, w: Z * tg.s, h: Z * tg.s, k: kd };
+}
+
+// ═══════════════════════════════ 2 · 第一版 ═══════════════════════════════
+const B2 = {};
+const WIN2 = { x: 320, y: 110, w: 1280, h: 784 };
+function initB2() {
+  B2.a = B1.dive;
+  B2.label = T0('c1') + 0.15;
+  B2.notice = at('c1', '一张停电通知') - 0.15;
+  B2.spread = at('c1', '谁先知道') - 0.1;
+  B2.gal = T0('c2') - 0.3;
+  B2.rings = [at('c2', '狼来了'), at('c2', '知沟'), at('c2', '传话游戏')];
+  B2.quote = T0('c3') - 0.25;
+  B2.close = T1('c3') + 0.2;
+  B2.end = T0('v1') - 0.55;
+  B2.pts = [...Array(38)].map((_, i) => {
+    const a = hash('a', i) * 6.2832, r = Math.sqrt(hash('r', i));
+    const u = (hash('u', i) - 0.5) * 2, w = (hash('w', i) - 0.5) * 2; // 菱形（等轴的小镇）
+    const x = 470 + (u + w) * 0.5 * 330, y = 470 + (w - u) * 0.5 * 250;
+    return { x, y, h: hash('h', i), b: hash('b', i) };
+  });
+}
+function drawWin(im, r, { alpha = 1, radius = 14, shadow = 0.13, sw = 1600, sh = 980 } = {}) {
+  if (alpha <= 0.002) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.shadowColor = `rgba(38,36,31,${shadow})`; ctx.shadowBlur = 50; ctx.shadowOffsetY = 18;
+  rrect(ctx, r.x, r.y, r.w, r.h, radius); ctx.fillStyle = C.surface; ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.clip();
+  if (im) ctx.drawImage(im, r.x, r.y, r.w, r.h);
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = alpha * 0.9; rrect(ctx, r.x, r.y, r.w, r.h, radius); ctx.lineWidth = 1.5; ctx.strokeStyle = C.line; ctx.stroke(); ctx.restore();
+}
+function drawB2(t) {
+  if (t < B2.a || t > B2.end + 0.05) return;
+  const obs = img('../assets/observe.png'), gal = img('../assets/gallery.png');
+  // 窗口从格子长出来
+  const tr = b1TileRect(Math.min(t, B1.end));
+  const kg = ease.cubicOut(seg(t, B1.dive + 0.15, B1.dive + 0.55));
+  let r = t < B1.end ? { x: tr.x, y: tr.y + (tr.h - lerp(tr.h, tr.w * (784 / 1280), tr.k)) / 2, w: tr.w, h: lerp(tr.h, tr.w * (784 / 1280), tr.k) } : { ...WIN2 };
+  // 画廊进场时，观察页退到左后方
+  const kb = ease.expoIO(seg(t, B2.gal, B2.gal + 0.7));
+  const back = { x: 120, y: 200, w: 880, h: 539 };
+  r = { x: lerp(r.x, back.x, kb), y: lerp(r.y, back.y, kb), w: lerp(r.w, back.w, kb), h: lerp(r.h, back.h, kb) };
+  const kq = ease.cubicIO(seg(t, B2.quote, B2.quote + 0.6));
+  const dim = 1 - 0.82 * kq;
+  const fin = 1 - ease.cubicIO(seg(t, B2.close, B2.end));
+  drawWin(obs, r, { alpha: clamp(kg * 1.4) * lerp(1, 0.55, kb) * dim * fin });
+  track(r.x, r.y, r.w, r.h);
+  // 传开：点从灰变成听说了、相信了
+  const sx = r.w / 1600, sy = r.h / 980;
+  const pa = win(t, B2.notice, B2.gal + 0.5, 0.3, 0.5) * dim;
+  if (pa > 0) {
+    B2.pts.forEach((p, i) => {
+      const d = Math.hypot(p.x - 330, p.y - 420);
+      const th = B2.spread + d / 320 + p.h * 0.6, tb = th + 0.5 + p.b * 1.1;
+      const col = t >= tb && p.b < 0.75 ? C.teal : t >= th ? C.amber : '#9e978c';
+      const pr = t >= th ? pop(t - (t >= tb && p.b < 0.75 ? tb : th)) : 1;
+      dot(r.x + p.x * sx, r.y + p.y * sy, 9 * sx / 0.8 * pr + 2, '#fff', pa);
+      dot(r.x + p.x * sx, r.y + p.y * sy, 7 * sx / 0.8 * pr, col, pa);
+    });
+  }
+  // 标签与通知
+  const kl = rise(t, B2.label), klo = leave(t, B2.gal + 0.3, 0.3);
+  chip(`第一版 · ${F.classicMin} 到 ${F.classicMax} 人的小镇`, WIN2.x, 48 + kl.dy + klo.dy, { alpha: kl.op * klo.op });
+  const kn = spring(t - B2.notice, 0.6, 16), kno = leave(t, B2.gal + 0.2, 0.3);
+  if (kn > 0) {
+    const nw = 400, nh = 120, nx = WIN2.x + WIN2.w - nw - 36, ny = WIN2.y + 40 + (1 - kn) * 30;
+    card(nx, ny, nw, nh, { alpha: clamp(kn * 1.6) * kno.op, shadow: 0.14 });
+    dot(nx + 32, ny + 42, 7, C.bad, clamp(kn * 1.6) * kno.op);
+    text('停电通知', nx + 50, ny + 51, { size: 26, weight: 600, alpha: clamp(kn * 1.6) * kno.op });
+    text('明天 14:00 至 16:00 北区停电', nx + 28, ny + 92, { size: 22, color: C.ink2, alpha: clamp(kn * 1.6) * kno.op });
+  }
+  const lg = rise(t, B2.spread + 0.1), lgo = leave(t, B2.gal + 0.3, 0.3);
+  if (lg.op > 0) {
+    let x = WIN2.x + 30;
+    [['还不知道', '#9e978c'], ['听说了', C.amber], ['相信了', C.teal]].forEach(([s, c], i) => {
+      const k = rise(t, B2.spread + 0.1 + i * 0.25);
+      x += chip(s, x, WIN2.y + WIN2.h - 70 + k.dy, { color: c, alpha: k.op * lgo.op, size: 21 }) + 10;
+    });
+  }
+  // 实验广场
+  if (t >= B2.gal) {
+    const kk = spring(t - B2.gal, 0.8, 11);
+    const gr = { x: lerp(1980, 600, kk), y: 140, w: 1200, h: 750 };
+    drawWin(gal, gr, { alpha: dim * fin, sw: 1440, sh: 900 });
+    track(gr.x, gr.y, gr.w, gr.h);
+    const gs = gr.w / 1440;
+    const boxes = [[64, 450, 440, 50], [512, 450, 428, 50], [952, 466, 440, 50]];
+    boxes.forEach((b, i) => {
+      const a = win(t, B2.rings[i] - 0.05, B2.quote + 0.2, 0.18, 0.3) * dim;
+      glow(gr.x + b[0] * gs, gr.y + b[1] * gs, b[2] * gs, b[3] * gs, a);
+    });
+    const kc = rise(t, B2.gal + 0.35), kco = leave(t, B2.quote + 0.2, 0.3);
+    chip('实验广场 · 先猜，再看', gr.x, gr.y - 62 + kc.dy, { alpha: kc.op * kco.op * dim });
+  }
+  // 结论
+  if (t >= B2.quote) {
+    const fade = 1 - ease.cubicIO(seg(t, B2.close, B2.close + 0.35));
+    const k1 = rise(t, B2.quote + 0.1, { dist: 26 }), k2 = rise(t, at('c3', '虚报') - 0.1, { dist: 26 });
+    const kk = rise(t, B2.quote);
+    text('第一版的结论之一', 960, 352 + kk.dy, { size: 26, color: C.ink2, align: 'center', alpha: kk.op * fade });
+    const line = (a, b, colB, y, k) => {
+      const wa = measure(a, 80, SERIF), wb = measure(b, 80, SERIF), x = 960 - (wa + wb) / 2;
+      text(a, x, y + k.dy, { size: 80, face: SERIF, alpha: k.op * fade });
+      text(b, x + wa, y + k.dy, { size: 80, face: SERIF, color: colB, alpha: k.op * fade });
+    };
+    line('漏报伤的是', '当下，', C.bad, 480, k1);
+    line('虚报伤的是', '以后。', C.amber, 600, k2);
+  }
+}
+
+// ═══════════════════════════════ 3 · 活的小社会 ═══════════════════════════════
+// 窗口：素材里的点 (fx, fy) 画在屏幕的 (sx, sy)，放大 s 倍。默认整窗。
+const HOME = { fx: 960, fy: 540, s: 0.8, sx: 960, sy: 512 };
+const B3 = {};
+let SHOTS3 = [], CAM3 = [], RINGS = [], CHIPS = [], CLICKS = [];
+function initB3() {
+  const v = (id) => T0(id);
+  const a1 = v('v1') - 0.75;
+  B3.iris = a1; B3.irisEnd = a1 + 0.85;
+  const mk = (a, b, shot, f, xf = 0.16) => ({ a, b, shot, f, xf });
+  // 素材时间：线性 / 分段
+  const lin = (f0, rate, t0) => (t) => f0 + (t - t0) * 30 * rate;
+  const knots = (ks) => (t) => keyed(t, ks, ease.linear);
+
+  const vcEat = v('v3'), vcOut = at('v3', '闷了') - 0.05, vcKid = at('v3', '到点') - 0.05;
+  const clickPerson = v('v5') + 0.45, inHouse = at('v5', '进屋') - 0.15, pov = at('v5', '贴身') - 0.2;
+  const dirClick = v('v6') + 0.12;
+  const tabPortrait = v('v7') - 0.12, calib = at('v7', '校准') - 0.1, tabLab = v('v8') - 0.12;
+  const lab = {
+    a: v('v8') - 0.08, market: at('v8', '菜市场'), rumor: at('v8', '涨价传言'), rain: at('v8', '连日下雨'),
+    guess: at('v9', '先猜'), run: at('v9', '再看') - 0.12, affected: at('v10', '两条') - 0.35, end: T1('v10') + 0.12,
+  };
+  const comm = { a: lab.end, b: at('v11', '不需要') - 0.1 };
+  const fac = { a: comm.b, b: T1('v11') + 0.4 };
+  B3.shrink = fac.b; B3.shrinkEnd = fac.b + 0.75;
+  B3.lab = lab;
+
+  SHOTS3 = [
+    mk(a1, v('v2') + 0.05, 'dusk', lin(0, 2.5, a1)),
+    mk(v('v2') + 0.05, vcEat, 'pickup', knots([[v('v2') + 0.05, 66], [vcEat, 154]])),
+    mk(vcEat, vcOut, 'director', lin(98, 1, vcEat), 0),
+    mk(vcOut, vcKid, 'pickup', lin(70, 1.2, vcOut), 0),
+    mk(vcKid, v('v4') - 0.05, 'pickup', lin(420, 1.5, vcKid), 0),
+    mk(v('v4') - 0.05, v('v5') - 0.05, 'why', lin(20, 1, v('v4') - 0.05)),
+    mk(v('v5') - 0.05, inHouse, 'pickup', lin(18, 1, clickPerson), 0),
+    mk(inHouse, pov, 'pickup', lin(528, 1.6, inHouse)),
+    mk(pov, v('v6') - 0.12, 'pov', lin(30, 1, pov)),
+    mk(v('v6') - 0.12, tabPortrait + 0.12, 'director', (t) => (t < dirClick ? 15 + (t - dirClick) * 30 : 15 + (t - dirClick) * 30 * 3.2)),
+    mk(tabPortrait + 0.12, calib, 'portrait', knots([[tabPortrait + 0.12, 14], [calib, 236]])),
+    mk(calib, tabLab + 0.12, 'calibration', (t) => 15 + (t - (calib + 0.15)) * 30 * (t < calib + 0.15 ? 1 : 1.6)),
+    mk(tabLab + 0.12, lab.end, 'lab', knots([[tabLab + 0.12, 0], [lab.market, 20], [lab.rumor, 42], [lab.rain, 64], [lab.guess, 95], [lab.run, 115], [lab.run + 0.35, 124], [v('v10') - 0.1, 196], [v('v10') + 0.8, 300], [lab.affected, 338], [lab.affected + 0.75, 432], [lab.end, 470]])),
+    mk(comm.a, comm.b, 'community', knots([[comm.a, 12], [comm.a + 0.35, 15], [comm.b, 160]])),
+    mk(comm.b, B3.shrinkEnd + 60, 'factory', lin(20, 1, comm.b)),
+  ];
+  B3.comm = comm;
+  // 镜头
+  const card = { fx: 1590, fy: 520, s: 1.32, sx: 1215, sy: 522 };
+  const why = { fx: 1660, fy: 680, s: 1.5, sx: 1160, sy: 520 };
+  const whyIn = { fx: 1500, fy: 640, s: 1.15, sx: 1100, sy: 520 };
+  const timebar = { fx: 720, fy: 830, s: 1.02, sx: 960, sy: 560 };
+  const scene = { fx: 820, fy: 520, s: 0.9, sx: 960, sy: 512 };
+  const page = { fx: 960, fy: 520, s: 0.9, sx: 960, sy: 512 };
+  const labL = { fx: 770, fy: 430, s: 1.16, sx: 960, sy: 500 };
+  const labG = { fx: 820, fy: 760, s: 1.16, sx: 960, sy: 500 };
+  const labR = { fx: 1060, fy: 470, s: 1.08, sx: 960, sy: 500 };
+  const labA = { fx: 1010, fy: 600, s: 1.0, sx: 960, sy: 500 };
+  CAM3 = [
+    [a1, HOME], [v('v2') + 0.1, HOME], [v('v2') + 0.95, card, ease.cubicIO], [vcEat - 0.001, card], [vcEat, scene, ease.linear],
+    [v('v4') - 0.051, scene], [v('v4') - 0.05, whyIn, ease.linear], [v('v4') + 0.75, whyIn], [v('v4') + 2.4, why, ease.sineIO], [v('v5') - 0.051, why], [v('v5') - 0.05, HOME, ease.linear],
+    [v('v6') - 0.12, HOME], [v('v6') + 0.25, timebar, ease.quintIO], [tabPortrait - 0.45, timebar], [tabPortrait - 0.15, HOME, ease.quintIO],
+    [tabPortrait + 0.3, HOME], [tabPortrait + 0.9, page, ease.cubicIO], [tabLab - 0.5, page], [tabLab - 0.15, HOME, ease.cubicIO],
+    [lab.market - 0.45, labL, ease.cubicIO], [lab.guess - 0.55, labL], [lab.guess - 0.12, labG, ease.cubicIO], [lab.run + 0.45, labG], [lab.run + 1.0, labR, ease.cubicIO],
+    [v('v10') + 0.25, labR], [v('v10') + 0.85, labA, ease.cubicIO], [lab.end - 0.05, labA], [lab.end + 0.35, HOME, ease.cubicIO],
+    [B3.shrink, HOME],
+  ];
+  // 发光框（素材坐标）
+  RINGS = [
+    { shot: 'pickup', a: at('v2', '工作'), b: at('v2', '兴趣'), r: [1505, 152, 302, 40] },
+    { shot: 'pickup', a: at('v2', '兴趣'), b: at('v2', '钱包'), r: [1432, 582, 458, 136] },
+    { shot: 'pickup', a: at('v2', '钱包') - 0.1, b: vcEat - 0.15, r: [1432, 774, 420, 68] },
+    { shot: 'why', a: at('v4', '问为什么') - 0.3, b: v('v5') - 0.2, r: [1432, 600, 462, 120] },
+    { shot: 'director', a: dirClick + 0.25, b: tabPortrait - 0.4, r: [26, 948, 1352, 50] },
+  ];
+  // 功能标签
+  CHIPS = [
+    { a: v('v1') + 0.15, b: v('v2') + 0.05, s: '俯瞰 · 一天的日与夜' },
+    { a: v('v2') + 0.3, b: v('v4') - 0.1, s: '每个居民：工作、家人、需求、钱包' },
+    { a: v('v4') + 0.2, b: v('v5') - 0.1, s: '为什么 · 每个候选的理由与概率' },
+    { a: v('v5') + 0.1, b: inHouse, s: '点一个人，镜头跟上去' },
+    { a: inHouse, b: pov, s: '进屋，墙会让开' },
+    { a: pov, b: v('v6') - 0.1, s: '贴身视角' },
+    { a: v('v6'), b: tabPortrait + 0.1, s: '时间轴 · 一分钟看完一天' },
+    { a: tabPortrait + 0.15, b: calib, s: (t) => (shotFrameAt(t) < 105 ? '画像 · 人口金字塔' : shotFrameAt(t) < 196 ? '画像 · 一天里人都在哪' : '画像 · 钱从哪来到哪去') },
+    { a: calib + 0.1, b: tabLab + 0.1, s: `校准 · 对照国家统计局 ${F.surveyYear} 年时间利用调查` },
+    { a: tabLab + 0.15, b: v('v10') + 0.3, s: '实验台 · 放一件事进去，同一个种子跑两遍' },
+    { a: v('v10') + 0.3, b: lab.end, s: '同一个人，同一天，两条世界线' },
+    { a: comm.a + 0.1, b: at('v11', '都在') - 0.1, s: `${F.communities} 种社区` },
+    { a: at('v11', '都在') - 0.1, b: B3.shrink - 0.1, s: '全部在浏览器里算，不需要服务器' },
+  ];
+  // 点击：何时、在哪个镜头、素材坐标
+  const ck = (t, shot, sel) => { const c = click(shot, sel); return { t, shot, x: c.x, y: c.y }; };
+  CLICKS = [
+    { t: v('v4') - 0.05 + (40 - 20) / 30, shot: 'why', x: click('why', '看全部候选').x, y: click('why', '看全部候选').y },
+    ck(clickPerson, 'pickup', 'person-p082'),
+    ck(dirClick, 'director', 'director'),
+    { t: tabPortrait, shot: 'director', x: 485, y: 47 },
+    ck(calib + 0.15, 'calibration', '校准'),
+    { t: tabLab, shot: 'calibration', x: 326 + 88, y: 46 },
+    ck(lab.market, 'lab', 'case-market'), ck(lab.rumor, 'lab', 'case-rumor'), ck(lab.rain, 'lab', 'case-rain'),
+    ck(lab.guess, 'lab', 'guess-pick'), ck(lab.run, 'lab', 'lab-run'), ck(lab.affected, 'lab', 'affected'),
+    ck(comm.a + 0.35, 'community', 'community-open'),
+  ];
+  const cm = FOOT.community.clicks.filter((c) => c.sel.includes('pack-'));
+  const cmT = (f) => keyed(f, [[15, comm.a + 0.35], [160, comm.b]], ease.linear);
+  cm.forEach((c) => CLICKS.push({ t: cmT(c.f), shot: 'community', x: c.x, y: c.y, pack: c.sel }));
+  CLICKS.sort((p, q) => p.t - q.t);
+  B3.packs = cm.map((c) => ({ t: cmT(c.f), id: c.sel.match(/pack-(\w+)/)[1] }));
+}
+let CUR3 = HOME;
+function cam3(t) {
+  const ks = CAM3;
+  if (t <= ks[0][0]) return ks[0][1];
+  for (let i = 0; i < ks.length - 1; i++) {
+    const [ta, A] = ks[i], [tb, B, c] = ks[i + 1];
+    if (t <= tb) {
+      const k = (c ?? ease.cubicIO)(seg(t, ta, tb));
+      return { fx: lerp(A.fx, B.fx, k), fy: lerp(A.fy, B.fy, k), s: Math.exp(lerp(Math.log(A.s), Math.log(B.s), k)), sx: lerp(A.sx, B.sx, k), sy: lerp(A.sy, B.sy, k) };
+    }
+  }
+  return ks[ks.length - 1][1];
+}
+const toScreen = (c, x, y) => [c.sx + (x - c.fx) * c.s, c.sy + (y - c.fy) * c.s];
+function shotAt(t) { return SHOTS3.find((s) => t >= s.a && t < s.b) ?? SHOTS3[SHOTS3.length - 1]; }
+function shotFrameAt(t) { const s = shotAt(t); return s.f(t); }
+function thumbRect() { return { x: 70, y: 150, w: 400, h: 225 }; }
+function drawB3(t) {
+  if (t < B3.iris || t > DUR) return;
+  let c = cam3(t);
+  // 收成缩略图（第四段从它里面长出结果卡片）
+  const ks = ease.expoIO(seg(t, B3.shrink, B3.shrinkEnd));
+  if (ks > 0) {
+    const th = thumbRect(), s1 = th.w / 1920;
+    c = { fx: lerp(c.fx, 960, ks), fy: lerp(c.fy, 540, ks), s: Math.exp(lerp(Math.log(c.s), Math.log(s1), ks)), sx: lerp(c.sx, th.x + th.w / 2, ks), sy: lerp(c.sy, th.y + th.h / 2, ks) };
+    const kg = gatherK(t, 0); // 和结果卡片一起收成一个点
+    if (kg > 0) c = { ...c, s: c.s * Math.max(0.002, 1 - kg), sx: lerp(c.sx, 960, kg), sy: lerp(c.sy, 480, kg) };
+  }
+  CUR3 = c;
+  const [x0, y0] = toScreen(c, 0, 0), [x1, y1] = toScreen(c, 1920, 1080);
+  const rect = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  track(rect.x, rect.y, rect.w, rect.h);
+  // 光圈：从第二段结尾的点里打开
+  const ki = ease.expoOut(seg(t, B3.iris + 0.12, B3.irisEnd));
+  const irisR = lerp(12, Math.hypot(rect.w, rect.h) / 2 + 10, ki);
+  const radius = lerp(16, 10, ks);
+  const fadeOut = 1 - seg(t, B4.gather + 0.3, B4.gather + 0.65);
+  if (fadeOut <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = fadeOut;
+  // 阴影
+  ctx.save(); ctx.globalAlpha = fadeOut * ki; ctx.shadowColor = 'rgba(38,36,31,0.16)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 20;
+  rrect(ctx, rect.x, rect.y, rect.w, rect.h, radius); ctx.fillStyle = C.surface; ctx.fill(); ctx.restore();
+  ctx.save();
+  rrect(ctx, rect.x, rect.y, rect.w, rect.h, radius); ctx.clip();
+  if (ki < 1) { ctx.beginPath(); ctx.arc(960, 512, irisR, 0, 6.2832); ctx.clip(); }
+  // 当前镜头与前一个镜头的交叉淡化
+  const idx = SHOTS3.indexOf(shotAt(t));
+  const cur = SHOTS3[idx], prev = SHOTS3[idx - 1];
+  const xf = cur.xf;
+  const drawShot = (sh, a) => {
+    let f = sh.f(t);
+    if (ks > 0 && sh.shot === 'factory') f = sh.f(Math.min(t, B3.shrink));
+    const im = frame(sh.shot, f);
+    if (im) { ctx.globalAlpha = a * fadeOut; ctx.drawImage(im, rect.x, rect.y, rect.w, rect.h); }
+  };
+  if (prev && xf > 0 && t < cur.a + xf) drawShot(prev, 1);
+  drawShot(cur, prev && xf > 0 && t < cur.a + xf ? ease.smooth(seg(t, cur.a, cur.a + xf)) : 1);
+  // 缩成缩略图时换成实验结果
+  if (ks > 0) { const im = frame('lab', 200); if (im) { ctx.globalAlpha = fadeOut * ease.smooth(seg(t, B3.shrink + 0.15, B3.shrinkEnd)); ctx.drawImage(im, rect.x, rect.y, rect.w, rect.h); } }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = fadeOut * ki; rrect(ctx, rect.x, rect.y, rect.w, rect.h, radius); ctx.lineWidth = 1.5; ctx.strokeStyle = C.line; ctx.stroke(); ctx.restore();
+  ctx.restore();
+  if (ki < 1) dot(960, 512, 12 * (1 - ki), C.teal, 1);
+  // 发光框
+  RINGS.forEach((g) => {
+    if (cur.shot !== g.shot) return;
+    const a = win(t, g.a, g.b, 0.2, 0.25);
+    if (a <= 0) return;
+    const [gx, gy] = toScreen(c, g.r[0], g.r[1]);
+    glow(gx, gy, g.r[2] * c.s, g.r[3] * c.s, a);
+  });
+  // 社区名单
+  const ca = win(t, B3.comm.a + 0.4, B3.shrink, 0.3, 0.3);
+  if (ca > 0) {
+    const names = { oldtown: '老城街坊', newtown: '通勤新小区', village: '城中村', factory: '工厂镇' };
+    const order = ['oldtown', 'newtown', 'village', 'factory'];
+    let lit = 'oldtown';
+    for (const p of B3.packs) if (t >= p.t) lit = p.id;
+    let tot = 0; const ws = order.map((k) => measure(names[k], 22, SANS, 500) + 58); tot = ws.reduce((a, b) => a + b, 0) + 30;
+    let x = 960 - tot / 2;
+    order.forEach((k, i) => {
+      const on = k === lit;
+      x += chip(names[k], x, 878, { alpha: ca * (on ? 1 : 0.72), color: on ? C.teal : C.mute, ink: on ? C.ink : C.ink2, size: 22 }) + 10;
+    });
+  }
+}
+function drawChips(t) {
+  if (POSTER) { // 海报：把功能标签换成片名
+    const w = text(MC.END.name, 192, 58, { size: 44, face: SERIF, weight: 500 });
+    text(`${MC.END.en} · 一个可以暂停、倒带、分叉的小社会`, 192 + w + 18, 56, { size: 26, color: C.ink2 });
+    return;
+  }
+  for (const c of CHIPS) {
+    const a = win(t, c.a, c.b, 0.22, 0.18);
+    if (a <= 0) continue;
+    const k = rise(t, c.a);
+    chip(typeof c.s === 'function' ? c.s(t) : c.s, 192, 22 + k.dy * 0.6, { alpha: a * k.op });
+  }
+}
+// 光标：在两次点击之间走过去，按下时缩一下
+function cursorAt(t) {
+  const first = CLICKS[0];
+  if (!first || t < first.t - 0.8 || t > B3.shrink) return null;
+  let j = CLICKS.findIndex((c) => c.t >= t);
+  if (j < 0) j = CLICKS.length - 1 + 1;
+  const next = CLICKS[j], prev = CLICKS[j - 1];
+  const scr = (c) => toScreen(CUR3, c.x, c.y);
+  let p;
+  if (!prev) { const [nx, ny] = scr(next); p = [nx + 160 * (1 - ease.cubicOut(seg(t, next.t - 0.8, next.t))), ny + 120 * (1 - ease.cubicOut(seg(t, next.t - 0.8, next.t)))]; }
+  else if (!next) p = scr(prev);
+  else {
+    const [ax, ay] = scr(prev), [bx, by] = scr(next);
+    const span = Math.min(0.6, next.t - prev.t - 0.1);
+    const k = ease.cubicIO(seg(t, next.t - span, next.t - 0.04));
+    p = [lerp(ax, bx, k), lerp(ay, by, k) - Math.sin(k * Math.PI) * 30];
+  }
+  let s = 1;
+  for (const c of CLICKS) { const d = t - c.t; if (d >= 0 && d < 0.14) s = 0.84; }
+  const vis = (1 - seg(t, B3.shrink - 0.4, B3.shrink)) * seg(t, first.t - 0.8, first.t - 0.5);
+  return { x: p[0], y: p[1], s, a: vis };
+}
+function drawCursor(c) {
+  if (!c || c.a <= 0) return;
+  ctx.save(); ctx.globalAlpha = c.a; ctx.translate(c.x, c.y); ctx.scale(c.s * 1.25, c.s * 1.25);
+  ctx.shadowColor = 'rgba(0,0,0,0.25)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 22); ctx.lineTo(5.5, 17); ctx.lineTo(9.5, 26); ctx.lineTo(13, 24.5); ctx.lineTo(9, 16); ctx.lineTo(16, 16); ctx.closePath();
+  ctx.fillStyle = '#1d1b18'; ctx.fill(); ctx.shadowColor = 'transparent'; ctx.lineWidth = 1.8; ctx.strokeStyle = '#fff'; ctx.stroke();
+  ctx.restore();
+}
+
+// ═══════════════════════════════ 4 · 结果与边界 ═══════════════════════════════
+const B4 = {};
+function initB4() {
+  B4.c1 = T0('r1') + 0.05; B4.c2 = T0('r2') - 0.05; B4.c3 = T0('r3') - 0.05;
+  B4.m1 = T0('r4') + 0.1; B4.m2 = at('r4', '发'); B4.m3 = T0('r5') - 0.05;
+  B4.count = [at('r1', '少了'), at('r2', '存粮'), at('r3', '少了')];
+  B4.note = T0('r3') + 0.6;
+  B4.gather = T0('r6') - 0.15;
+  B4.guess = T0('r7') - 0.1; B4.flip = at('r7', '推翻') - 0.25;
+  B4.seal = T1('r7') + 0.2;
+  B4.mark = B4.seal + 0.5;
+}
+/** 第四段的镜头：念到哪张卡，就推近哪张；说“很小的”时退回来看全部 */
+function cam4(t) {
+  if (!B4.c1 || t < B3.shrinkEnd - 0.05) return null;
+  const all = { x: 960, y: 480, z: 1 }, at1 = (i, y = 326, z = 1.2) => ({ x: SLOT(i).x + 210, y, z });
+  const K = [
+    [B3.shrinkEnd - 0.05, all], [B4.c1 + 0.2, at1(0, 330, 1.18)], [B4.c2 - 0.1, at1(0, 330, 1.18)], [B4.c2 + 0.55, at1(1, 330, 1.18)],
+    [B4.c3 - 0.1, at1(1, 330, 1.18)], [B4.c3 + 0.55, at1(2, 330, 1.18)], [B4.m1 - 0.25, at1(2, 330, 1.18)], [B4.m1 + 0.6, { x: 1190, y: 470, z: 1.06 }],
+    [B4.m3 - 0.1, { x: 1190, y: 470, z: 1.06 }], [B4.m3 + 0.6, { x: 1560, y: 600, z: 1.16 }], [B4.gather - 0.5, { x: 1560, y: 600, z: 1.16 }], [B4.gather + 0.1, all],
+  ];
+  const ks = K.map(([tt, v]) => tt);
+  const pick = (f) => keyed(t, K.map(([tt, v], i) => [tt, f(v), ease.cubicIO]));
+  return { x: pick((v) => v.x), y: pick((v) => v.y), z: Math.exp(pick((v) => Math.log(v.z))) };
+}
+const SLOT = (i) => ({ x: 520 + i * 460, y: 132, w: 420, h: 388 });
+const MSLOT = (i) => ({ x: 520 + i * 460, y: 552, w: 420, h: 212 });
+function morph(t, t0, A, B, { zeta = 0.8, omega = 12 } = {}) {
+  const k = spring(t - t0, zeta, omega);
+  return { k, x: lerp(A.x, B.x, k), y: lerp(A.y, B.y, k), w: lerp(A.w, B.w, k), h: lerp(A.h, B.h, k) };
+}
+function gatherK(t, i) { return ease.expoIO(seg(t, B4.gather + i * 0.04, B4.gather + 0.65 + i * 0.04)); }
+function toCenter(r, k) { return { x: lerp(r.x, 960, k), y: lerp(r.y, 480, k), w: r.w * (1 - k), h: r.h * (1 - k) }; }
+function fmtCount(a, b, k) {
+  const dec = (b.split('.')[1] ?? '').length;
+  return (lerp(Number(a), Number(b), k)).toFixed(dec);
+}
+function strongCard(t, i, t0, o) {
+  if (t < t0) return;
+  const th = thumbRect();
+  let r = morph(t, t0, { x: th.x + th.w / 2 - 20, y: th.y + th.h / 2 - 12, w: 40, h: 24 }, SLOT(i));
+  const kg = gatherK(t, i);
+  const rr = toCenter(r, kg);
+  if (rr.w < 2) return;
+  const a = clamp(r.k * 2) * (1 - kg);
+  card(rr.x, rr.y, rr.w, rr.h, { alpha: a, r: 16, shadow: 0.1 });
+  track(rr.x, rr.y, rr.w, rr.h);
+  const ca = clamp((r.k - 0.6) / 0.3) * (1 - clamp(kg * 3));
+  if (ca <= 0) return;
+  const x = rr.x + 30, y = rr.y;
+  ctx.save(); rrect(ctx, rr.x, rr.y, rr.w, rr.h, 16); ctx.clip();
+  chip('站得住', x - 4, y + 26, { alpha: ca, color: C.good, size: 18, fill: 'rgba(62,142,99,0.08)' });
+  text(o.title, x, y + 112, { size: o.title.length > 9 ? 29 : 33, face: SERIF, alpha: ca });
+  text(o.metric, x, y + 156, { size: 21, color: C.ink2, alpha: ca });
+  const kc = ease.expoOut(seg(t, t0 + 0.55, t0 + 1.9));
+  if (o.big) {
+    const s = `${o.before} → ${fmtCount(o.before, o.after, kc)}`;
+    const w = text(s, x, y + 238, { size: 62, face: SERIF, alpha: ca });
+    text(o.unit, x + w + 8, y + 238, { size: 22, color: C.ink2, alpha: ca });
+  } else text(o.bigText, x, y + 236, { size: 52, face: SERIF, color: o.color, alpha: ca * clamp(kc * 2) });
+  const kb = rise(t, Math.max(t0 + 1.0, B4.count[i] - 0.2));
+  if (o.badge) {
+    const bw = measure(o.badge, 24, SANS, 600) + 32;
+    ctx.globalAlpha = ca * kb.op * 0.1; ctx.fillStyle = o.color; rrect(ctx, x - 2, y + 266 + kb.dy, bw, 40, 20); ctx.fill(); ctx.globalAlpha = 1;
+    text(o.badge, x + 14, y + 294 + kb.dy, { size: 24, weight: 600, color: o.color, alpha: ca * kb.op });
+  }
+  o.sub.forEach((s, k) => text(s, x, y + 344 + k * 28, { size: 19, color: C.ink2, alpha: ca * kb.op }));
+  ctx.restore();
+}
+function mutedCard(t, i, t0, o) {
+  if (t < t0) return;
+  const th = thumbRect();
+  const r = morph(t, t0, { x: th.x + th.w / 2 - 20, y: th.y + th.h / 2 - 12, w: 40, h: 24 }, MSLOT(i));
+  const kg = gatherK(t, 3 + i);
+  const rr = toCenter(r, kg);
+  if (rr.w < 2) return;
+  const a = clamp(r.k * 2) * (1 - kg);
+  card(rr.x, rr.y, rr.w, rr.h, { alpha: a, r: 16, fill: '#f6f2ea', stroke: '#d9d0c2', dash: [6, 5], shadow: 0 });
+  track(rr.x, rr.y, rr.w, rr.h);
+  const ca = clamp((r.k - 0.6) / 0.3) * (1 - clamp(kg * 3));
+  if (ca <= 0) return;
+  const x = rr.x + 30, y = rr.y;
+  ctx.save(); rrect(ctx, rr.x, rr.y, rr.w, rr.h, 16); ctx.clip();
+  chip(o.tag, x - 4, y + 22, { alpha: ca, color: o.tagColor, size: 18, fill: 'rgba(255,255,255,0.7)' });
+  text(o.title, x, y + 104, { size: 28, face: SERIF, alpha: ca });
+  text(o.line, x, y + 146, { size: 21, color: C.ink2, alpha: ca });
+  if (o.line2) text(o.line2, x, y + 178, { size: 21, color: o.tagColor, weight: 500, alpha: ca });
+  ctx.restore();
+}
+function wrap(s, size, maxW) {
+  const out = []; let cur = '';
+  for (const ch of [...s]) { if (measure(cur + ch, size) > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; }
+  if (cur) out.push(cur);
+  return out;
+}
+function drawB4(t) {
+  if (t < B4.c1 - 0.2) return;
+  // 缩略图下面的说明
+  const th = thumbRect();
+  const ta = win(t, B3.shrinkEnd - 0.1, B4.gather + 0.2, 0.3, 0.3);
+  text('实验台', th.x, th.y + th.h + 44, { size: 24, weight: 600, alpha: ta });
+  text('每个案例跑两条世界线', th.x, th.y + th.h + 78, { size: 20, color: C.ink2, alpha: ta });
+  text('一条没有这件事，一条有', th.x, th.y + th.h + 106, { size: 20, color: C.ink2, alpha: ta });
+  const rain = R.rain, rum = R.rumor, can = R.canteen;
+  strongCard(t, 0, B4.c1, { title: rain.case, metric: `${rain.metric}（${rain.unit}）`, big: true, before: rain.before, after: rain.after, unit: '', badge: `少了${rain.spoken}`, color: C.bad, sub: [`一整天没说上话的老人 ${rain.aloneBefore} → ${rain.aloneAfter}`] });
+  strongCard(t, 1, B4.c2, { title: rum.case, metric: `${rum.metric}（${rum.unit}）`, big: true, before: rum.before, after: rum.after, unit: '', badge: `多了${rum.spoken}`, color: C.amber, sub: wrap(`${rum.starters} 个人起头，${rum.days}天传到${rum.reach}的人；菜市场生意涨了${rum.market}`, 19, 360) });
+  strongCard(t, 2, B4.c3, { title: `社区食堂（一顿 ${can.price} 元）`, metric: can.metric, big: false, bigText: `少了${can.spoken}`, color: C.bad, badge: '', sub: [can.case] });
+  mutedCard(t, 0, B4.m1, { tag: '很小', tagColor: C.ink2, title: R.rent.case, line: R.rent.effect });
+  mutedCard(t, 1, B4.m2, { tag: '很小', tagColor: C.ink2, title: R.voucher.case, line: R.voucher.effect });
+  mutedCard(t, 2, B4.m3, { tag: '模型缺的', tagColor: C.amber, title: R.layoff.case, line: R.layoff.effect, line2: `说明${R.layoff.note}` });
+  // 方法一句话
+  const M = R.method, na = win(t, B4.note, B4.gather + 0.1, 0.4, 0.3);
+  text(`每个案例 ${M.seeds} 个种子，每个种子换一批人；${M.hypotheses} 条事先写下的假设，${M.runs}次运行都成立的有 ${M.heldEveryRun} 条`, 1190, 826, { size: 21, color: C.ink2, align: 'center', alpha: na });
+  // 收成一个点 → 猜一猜 → 落进名字
+  const kd = seg(t, B4.gather + 0.55, B4.gather + 0.75);
+  const kG = spring(t - B4.guess, 0.74, 13), kGo = ease.expoIO(seg(t, B4.seal, B4.seal + 0.45));
+  const dotA = kd * (t < B4.guess + 0.05 ? 1 : 0);
+  dot(960, 480, 12 * kd, C.teal, dotA);
+  if (t >= B4.guess) {
+    const k = kG * (1 - kGo);
+    const flip = seg(t, B4.flip, B4.flip + 0.5);
+    const sy = Math.abs(Math.cos(flip * Math.PI)); // 翻过去再翻回来
+    const after = flip >= 0.5;
+    const w = lerp(24, 600, k), h = lerp(24, 236, k) * (0.06 + 0.94 * sy);
+    card(960 - w / 2, 480 - h / 2, w, h, { alpha: clamp(k * 3), r: 18, shadow: 0.12 });
+    track(960 - w / 2, 480 - h / 2, w, h);
+    const ca = clamp((k - 0.6) / 0.3) * clamp(sy * 1.4 - 0.2);
+    if (ca > 0) {
+      ctx.save(); ctx.translate(960, 480); ctx.scale(1, sy); ctx.translate(-960, -480);
+      text(after ? '结果' : '你的直觉', 960 - 260, 480 - 52, { size: 24, color: C.ink2, alpha: ca });
+      if (after) chip('这次猜错了', 960 + 260, 480 - 84, { alpha: ca, color: C.amber, size: 20, align: 'right', fill: 'rgba(227,161,58,0.1)' });
+      const opts = ['会更高', '会更低'], sel = after ? 1 : 0;
+      opts.forEach((s, i) => {
+        const bx = 960 - 260 + i * 264, by = 480 - 10, bw = 256, bh = 72;
+        rrect(ctx, bx, by, bw, bh, 14);
+        ctx.globalAlpha = ca; ctx.fillStyle = i === sel ? C.teal : '#f2ede4'; ctx.fill(); ctx.globalAlpha = 1;
+        const tw0 = text(s, bx + bw / 2, by + 47, { size: 30, weight: 600, align: 'center', color: i === sel ? '#fff' : C.ink2, alpha: ca });
+        if (after && i === 0) { ctx.globalAlpha = ca; ctx.fillStyle = C.ink2; ctx.fillRect(bx + bw / 2 - 52, by + 37, 104, 2.5); ctx.globalAlpha = 1; }
+      });
+      ctx.restore();
+    }
+  }
+  // 名字
+  if (t >= B4.seal) {
+    const name = MC.END.name, en = MC.END.en;
+    const size = 104, gapW = 70;
+    const wn = measure(name, size, SERIF, 500), we = measure(en, size * 0.82, SERIF, 500);
+    const total = wn + gapW + we, x0 = 960 - total / 2, yb = 500;
+    const dotX = x0 + wn + gapW / 2, dotY = yb - size * 0.33;
+    // 点从卡片中心落到两段文字之间
+    const kp = ease.cubicIO(seg(t, B4.seal + 0.1, B4.mark));
+    const px = lerp(960, dotX, kp), py = lerp(480, dotY, kp) - Math.sin(kp * Math.PI) * 90;
+    const land = B4.mark;
+    dot(px, py, lerp(12, 9, kp) * (t > land ? pop((t - land) * 0.9) : 1), C.teal, clamp((t - B4.seal) * 4));
+    track(px - 12, py - 12, 24, 24);
+    [...name].forEach((ch, i) => {
+      const k = spring(t - land - 0.02 - i * 0.07, 0.55, 20);
+      const wpre = measure([...name].slice(0, i).join(''), size, SERIF, 500);
+      text(ch, x0 + wpre, yb + (1 - k) * -40, { size, face: SERIF, weight: 500, alpha: clamp(k * 1.6) });
+    });
+    const ke = rise(t, land + 0.25, { dist: 26 });
+    text(en, x0 + wn + gapW, yb + ke.dy, { size: size * 0.82, face: SERIF, weight: 500, alpha: ke.op });
+    const k1 = rise(t, land + 0.6), k2 = rise(t, land + 0.8);
+    text(MC.END.site, 960, 610 + k1.dy, { size: 32, align: 'center', color: C.teal, weight: 500, alpha: k1.op });
+    text(MC.END.repo, 960, 662 + k2.dy, { size: 26, align: 'center', color: C.ink2, alpha: k2.op });
+  }
+}
+
+// ═══════════════════════════════ 字幕 ═══════════════════════════════
+const HIDE_SUBS = new Set(['o4', 'c3']); // 画面上已经有同一句大字
+const SUBS = [];
+function initSubs() {
+  TM.lines.forEach((l) => { if (!HIDE_SUBS.has(l.id)) l.subs.forEach((s, i) => SUBS.push({ ...s, last: i === l.subs.length - 1 })); });
+  // 每段字幕留到下一段开始，但句末最多多留 0.35 秒
+  SUBS.forEach((s, i) => { const n = SUBS[i + 1]; s.hold = s.last ? Math.min(s.t1 + 0.35, n ? n.t0 : s.t1 + 0.35) : n ? n.t0 : s.t1; });
+}
+function drawSubs(t) {
+  const s = SUBS.find((x) => t >= x.t0 - 0.04 && t < x.hold);
+  if (!s) return;
+  const a = Math.min(clamp((t - s.t0 + 0.04) / 0.1), clamp((s.hold - t) / 0.12));
+  const size = 38, w = measure(s.text, size, SANS, 500) + 64, h = 66, y = 1010 - h / 2;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.shadowColor = 'rgba(38,36,31,0.1)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 6;
+  rrect(ctx, 960 - w / 2, y, w, h, 14); ctx.fillStyle = 'rgba(255,255,255,0.93)'; ctx.fill();
+  ctx.restore();
+  text(s.text, 960, y + h / 2 + 2, { size, weight: 500, align: 'center', base: 'middle', alpha: a });
+}
+
+// ═══════════════════════════════ 总装 ═══════════════════════════════
+function draw(t) {
+  TRACK = [];
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ground(t);
+  drawB1(t);
+  drawB2(t);
+  const c4 = cam4(t);
+  if (c4) { ctx.save(); ctx.setTransform(c4.z, 0, 0, c4.z, 960 - c4.z * c4.x, 540 - c4.z * c4.y); track(960 - c4.z * c4.x, 540 - c4.z * c4.y, 1920 * c4.z, 1080 * c4.z); }
+  drawB3(t);
+  drawB4(t);
+  if (c4) ctx.restore();
+  drawChips(t);
+  drawCursor(cursorAt(t));
+  if (!NOSUBS) drawSubs(t);
+  if (HUD) text(`${t.toFixed(2)} s`, 20, 1066, { size: 18, color: '#c00' });
+}
+async function seek1(t) {
+  for (let pass = 0; pass < 5; pass++) {
+    PENDING = []; draw(t);
+    if (!PENDING.length) return;
+    await Promise.all(PENDING);
+  }
+}
+/** 一帧里屏幕上走得最远的那个框（像素） */
+function motionAt(t, h = 1 / 60) {
+  NOLOAD = true;
+  draw(t - h); const A = TRACK.slice(); draw(t + h); const B = TRACK.slice();
+  NOLOAD = false;
+  let m = 0;
+  for (let i = 0; i < Math.min(A.length, B.length); i++) {
+    const [ax, ay, aw, ah] = A[i], [bx, by, bw, bh] = B[i];
+    const d = Math.max(Math.abs(ax - bx), Math.abs(ay - by), Math.abs(ax + aw - bx - bw), Math.abs(ay + ah - by - bh));
+    if (d < 4000) m = Math.max(m, d);
+  }
+  return m;
+}
+const HUD = /hud/.test(location.search), NOSUBS = /nosubs|poster/.test(location.search), POSTER = /poster/.test(location.search);
+window.__meta = { dur: DUR, fps: 30 };
+const SHUTTER = 0.34; // 快门 120°：界面里字多，糊得太狠就读不出来
+window.__motion = (t) => motionAt(t);
+/** 快门：一帧里走得多就多取几次样，在画布里平均 */
+window.__seek = async (t, n) => {
+  n = n ?? clamp(Math.ceil((motionAt(t) * SHUTTER) / 6), 1, 8);
+  if (n <= 1) { await seek1(t); return 1; }
+  const ts = [...Array(n)].map((_, i) => t + (i / (n - 1) - 0.5) * (SHUTTER / 30));
+  for (const s of ts) await seek1(s);
+  actx.setTransform(1, 0, 0, 1, 0, 0); actx.globalAlpha = 1; actx.clearRect(0, 0, W, H);
+  for (let i = 0; i < n; i++) { await seek1(ts[i]); actx.globalAlpha = 1 / (i + 1); actx.drawImage(cv, 0, 0); }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.drawImage(acc, 0, 0);
+  return n;
+};
+/** 声音事件：点击与几次大的衔接 */
+window.__events = () => [
+  ...CLICKS.map((c) => ({ t: c.t, kind: 'click' })),
+  { t: B1.pick, kind: 'click' }, { t: B1.cast, kind: 'cast' }, { t: B1.grid, kind: 'swell' }, { t: B1.dive, kind: 'whoosh' },
+  { t: B2.gal, kind: 'whoosh-soft' }, { t: B3.iris, kind: 'whoosh' }, { t: B3.shrink, kind: 'whoosh' },
+  { t: B4.c1, kind: 'tick' }, { t: B4.c2, kind: 'tick' }, { t: B4.c3, kind: 'tick' }, { t: B4.m1, kind: 'tick-soft' }, { t: B4.m2, kind: 'tick-soft' }, { t: B4.m3, kind: 'tick-soft' },
+  { t: B4.gather, kind: 'whoosh-soft' }, { t: B4.flip + 0.25, kind: 'flip' }, { t: B4.mark, kind: 'land' },
+].sort((a, b) => a.t - b.t);
+window.__ready = (async () => {
+  await Promise.all([document.fonts.load(`500 80px ${SERIF}`, '微缩城社会'), document.fonts.load(`500 38px ${SANS}`, '微缩城社会')]);
+  initB1(); initB2(); initB3(); initB4(); initSubs();
+  await seek1(0);
+  return true;
+})();
+// ?t=12.3 停在某一刻；?play 实时播放
+const q = new URLSearchParams(location.search);
+window.__ready.then(async () => {
+  if (q.has('t')) await window.__seek(Number(q.get('t')));
+  if (q.has('play')) { const t0 = performance.now() - Number(q.get('from') ?? 0) * 1000; const loop = async () => { await seek1((performance.now() - t0) / 1000 % DUR); requestAnimationFrame(loop); }; loop(); }
+});
+</script>
+</body>
+</html>

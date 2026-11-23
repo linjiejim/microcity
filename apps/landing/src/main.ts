@@ -3,7 +3,7 @@ import { COPY, LINKS, type Copy, type Lang } from './content.ts';
 
 // 图片：构建时带哈希；视频：有就放，还没做好就显示一句说明
 const IMGS = import.meta.glob<string>('./img/*.webp', { eager: true, query: '?url', import: 'default' });
-const MEDIA = import.meta.glob<string>('../../../docs/assets/v5/video/microcity-intro*.{mp4,jpg}', { eager: true, query: '?url', import: 'default' });
+const MEDIA = import.meta.glob<string>(['../../../docs/assets/v5/video/microcity-intro.mp4', '../../../docs/assets/v5/video/microcity-intro-poster.jpg'], { eager: true, query: '?url', import: 'default' });
 const img = (name: string): string => IMGS[`./img/${name}.webp`] ?? '';
 const media = (suffix: string): string | undefined => Object.entries(MEDIA).find(([k]) => k.endsWith(suffix))?.[1];
 const VIDEO = media('microcity-intro.mp4');

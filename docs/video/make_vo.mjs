@@ -15,7 +15,8 @@ const ctx = {};
 vm.runInNewContext(readFileSync(resolve(HERE, 'content.js'), 'utf8'), ctx);
 const { LINES, DEFAULT_GAP, LEAD, TAIL } = ctx.MC;
 const VOICE = process.env.VOICE ?? 'Tingting';
-const RATE = Number(process.env.RATE ?? 212);
+const RATE = Number(process.env.RATE ?? 232);
+const TEMPO = Number(process.env.TEMPO ?? 1.07); // say 的语速到 230 左右就不再变快，余下的用 atempo（不变调）
 const SR = 48000;
 
 const run = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -37,12 +38,12 @@ const timeline = [];
 let t = LEAD;
 LINES.forEach((L, i) => {
   const say = L.read ?? L.text;
-  const key = createHash('sha1').update(`${VOICE}|${RATE}|${say}`).digest('hex').slice(0, 10);
+  const key = createHash('sha1').update(`${VOICE}|${RATE}|${TEMPO}|${say}`).digest('hex').slice(0, 10);
   const raw = `${WORK}/${L.id}-${key}.aiff`, wav = `${WORK}/${L.id}-${key}.wav`;
   if (!existsSync(wav)) {
     run('say', ['-v', VOICE, '-r', String(RATE), '-o', raw, say]);
     // 去掉首尾的静音，统一成 48 kHz 单声道
-    run('ffmpeg', ['-v', 'error', '-y', '-i', raw, '-af', 'silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.02,areverse,silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05,areverse', '-ar', String(SR), '-ac', '1', wav]);
+    run('ffmpeg', ['-v', 'error', '-y', '-i', raw, '-af', 'silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.02,areverse,silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05,areverse,atempo=' + TEMPO, '-ar', String(SR), '-ac', '1', wav]);
   }
   const d = dur(wav);
   const ps = pauses(wav).filter(([a, b]) => a > 0.15 && b < d - 0.1);
@@ -53,10 +54,10 @@ LINES.forEach((L, i) => {
 const total = +(t + TAIL).toFixed(3);
 
 // 字幕：按标点切成不超过 MAX 个字的小段，句中停顿对上标点就用停顿的时刻，否则按字数分
-const MAX = 21;
+const MAX = 20;
 const len = (s) => [...s].length;
 for (const L of timeline) {
-  const parts = L.text.match(/[^，；：。？、]+[，；：。？、]?/g) ?? [L.text];
+  const parts = L.text.match(/[^，；：。？]+[，；：。？]?/g) ?? [L.text];
   const groups = [];
   for (const p of parts) {
     const last = groups[groups.length - 1];
@@ -77,7 +78,7 @@ for (const L of timeline) {
       const near = L.pauses.map(([a, b]) => (a + b) / 2).sort((x, y) => Math.abs(x - guess) - Math.abs(y - guess))[0];
       s1 = near !== undefined && Math.abs(near - guess) < 0.9 ? near : guess;
     }
-    subs.push({ text: g.replace(/[，；：、]$/, ''), t0: +s0.toFixed(3), t1: +s1.toFixed(3) });
+    subs.push({ text: g.replace(/[，；、：。]$/, ''), t0: +s0.toFixed(3), t1: +s1.toFixed(3) });
     s0 = s1;
   });
   L.subs = subs;
@@ -93,6 +94,6 @@ const mix = `${filters.join(';')};${timeline.map((_, i) => `[d${i}]`).join('')}a
 run('ffmpeg', ['-v', 'error', '-y', ...inputs, '-filter_complex', mix, '-map', '[out]', '-ar', String(SR), '-ac', '1', '-t', String(total), resolve(HERE, '.work/vo.wav')]);
 
 const slim = timeline.map(({ wav, ...rest }) => rest);
-writeFileSync(resolve(HERE, 'timing.js'), `// 由 make_vo.mjs 生成，别手改\nwindow.MC_TIMING = ${JSON.stringify({ voice: VOICE, rate: RATE, total, lines: slim })};\n`);
+writeFileSync(resolve(HERE, 'timing.js'), `// 由 make_vo.mjs 生成，别手改\nwindow.MC_TIMING = ${JSON.stringify({ voice: VOICE, rate: RATE, tempo: TEMPO, total, lines: slim })};\n`);
 for (const L of timeline) console.log(L.id.padEnd(4), L.t0.toFixed(2).padStart(6), (L.t1 - L.t0).toFixed(2).padStart(5), L.subs.map((s) => s.text).join(' / '));
 console.log('total', total, 's');
